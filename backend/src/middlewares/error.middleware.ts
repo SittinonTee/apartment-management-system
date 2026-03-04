@@ -47,7 +47,7 @@ export const globalErrorHandler = (
         message: err.message,
       });
     }
-    // มาจาก err อะไรก็ไม่รู้
+    // มาจาก err อะไรก็ไม่รู้ที่เราไม่ระบุ
     else {
       console.error('ERROR', err);
       res.status(500).json({

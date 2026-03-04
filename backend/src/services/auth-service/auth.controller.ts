@@ -27,6 +27,23 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     }
 };
 
+export const logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const userId = (req as any).user?.id;
+        if (!userId) {
+            throw new AppError('ไม่พบข้อมูลผู้ใช้งานสำหรับการออกจากระบบ', 400);
+        }
+        await authService.logoutUser(String(userId));
+
+        res.status(200).json({
+            status: 'success',
+            message: 'ออกจากระบบสำเร็จ'
+        });
+    } catch (error: any) {
+        next(error);
+    }
+};
+
 export const registerUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { invite_code, email, password } = req.body as V_RegisterForm;
