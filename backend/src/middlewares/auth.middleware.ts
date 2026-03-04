@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AppError } from './error.middleware';
+import config from '../services/config';
 
 
 
@@ -39,7 +40,7 @@ export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction)
         // ถ้าเกิด Error (เช่น หมดอายุ, โดนแอบแก้) ฟังก์ชัน jwt.verify จะ Throw Error อัตโนมัติ
         const decoded = jwt.verify(
             token,
-            process.env.JWT_SECRET as string
+            config.jwt.secret
         ) as TokenPayload;
         console.log(decoded);
         // 6. ถอดรหัสผ่าน! เอาข้อมูลพนักงาน (Payload) ยัดเก็บไว้ใน `req.user` 
