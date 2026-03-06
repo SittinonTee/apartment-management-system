@@ -44,7 +44,9 @@ CREATE TABLE Users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- วันและเวลาที่อัปเดตข้อมูลล่าสุด
     id_keycard VARCHAR(50), -- รหัสบัตรคีย์การ์ดเข้าหอพัก
     emergency_contact VARCHAR(100), -- ข้อมูลบุคคลติดต่อฉุกเฉิน (ชื่อและเบอร์)
-    invite_code VARCHAR(50) -- โค้ดสำหรับเชิญให้มาสมัครสมาชิกเข้าหอพัก
+    invite_code VARCHAR(50), -- โค้ดสำหรับเชิญให้มาสมัครสมาชิกเข้าหอพัก
+    reset_token VARCHAR(255), -- เก็บ Token ไว้รีเซ็ตรหัสผ่าน (ที่ถูก Hash แล้ว)
+    reset_token_expires DATETIME -- วันเวลาหมดอายุของ Token ลืมรหัสผ่าน
 );
 
 -- 3. สร้างตาราง Contracts

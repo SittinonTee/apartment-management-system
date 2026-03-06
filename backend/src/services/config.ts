@@ -18,6 +18,10 @@ const config = {
         secret: process.env.JWT_SECRET || 'fallback-secret-key-please-change-in-env',
         expiresIn: process.env.JWT_EXPIRES_IN || '1d',
     },
+    email: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
+    }
 }
 
 // ตรวจสอบว่ามีตัวแปรสำคัญครบไหมก่อนเปิดเซิร์ฟเวอร์
