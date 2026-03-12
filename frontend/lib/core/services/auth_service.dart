@@ -74,11 +74,13 @@ class AuthService extends ChangeNotifier {
     } on DioException catch (e) {
       if (e.response == null) {
         _lastError =
-            'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ตหรือตั้งค่า IP';
+            'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ ในการเข้าสู่ระบบ กรุณาตรวจสอบอินเทอร์เน็ตหรือตั้งค่า IP';
       } else {
         _lastError = e.response?.data['message'] ?? 'เข้าสู่ระบบล้มเหลว';
       }
-      debugPrint('Login DioError: ${e.message}');
+      debugPrint(
+        'Login DioError: ${e.response?.data['message'] ?? e.message ?? e.error}',
+      );
       notifyListeners();
       return false;
     } catch (e) {
@@ -110,7 +112,7 @@ class AuthService extends ChangeNotifier {
     } on DioException catch (e) {
       if (e.response == null) {
         _lastError =
-            'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ตหรือตั้งค่า IP';
+            'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ ในการสมัครสมาชิก กรุณาตรวจสอบอินเทอร์เน็ตหรือตั้งค่า IP';
       } else {
         _lastError =
             e.response?.data['message'] ?? 'การสมัครสมาชิกบัญชีล้มเหลว';
@@ -146,14 +148,14 @@ class AuthService extends ChangeNotifier {
     } on DioException catch (e) {
       if (e.response == null) {
         _lastError =
-            'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ตหรือตั้งค่า IP';
+            'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ ในการลืมรหัสผ่าน กรุณาตรวจสอบอินเทอร์เน็ตหรือตั้งค่า IP';
       } else {
         _lastError = e.response?.data['message'] ?? 'ส่งคำขอรีเซ็ตรหัสล้มเหลว';
       }
       debugPrint('Forgot Password DioError: ${e.message}');
       return false;
     } catch (e) {
-      _lastError = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+      _lastError = 'เกิดข้อผิดพลาดในการลืมรหัสผ่าน กรุณาลองใหม่อีกครั้ง';
       debugPrint('Forgot Password Error: $e');
       return false;
     }
@@ -179,14 +181,14 @@ class AuthService extends ChangeNotifier {
     } on DioException catch (e) {
       if (e.response == null) {
         _lastError =
-            'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ตหรือตั้งค่า IP';
+            'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ ในการรีเซ็ตรหัสผ่าน กรุณาตรวจสอบอินเทอร์เน็ตหรือตั้งค่า IP';
       } else {
         _lastError = e.response?.data['message'] ?? 'รีเซ็ตรหัสผ่านล้มเหลว';
       }
       debugPrint('Reset Password DioError: ${e.message}');
       return false;
     } catch (e) {
-      _lastError = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+      _lastError = 'เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน กรุณาลองใหม่อีกครั้ง';
       debugPrint('Reset Password Error: $e');
       return false;
     }

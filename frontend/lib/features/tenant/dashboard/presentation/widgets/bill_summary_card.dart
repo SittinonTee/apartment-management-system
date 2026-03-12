@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../../core/constants/app_colors.dart';
+
 import '../../../../../core/widgets/section_card.dart';
 import '../../../../../core/widgets/status_badge.dart';
 
@@ -48,11 +50,12 @@ class BillSummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                amount.toStringAsFixed(2),
+                NumberFormat.decimalPattern().format(amount),
                 style: Theme.of(
                   context,
                 ).textTheme.displayMedium?.copyWith(color: AppColors.primary),
               ),
+
               const SizedBox(width: 8),
               Padding(
                 padding: const EdgeInsets.only(bottom: 6),
