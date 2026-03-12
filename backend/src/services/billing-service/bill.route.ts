@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { verifyToken } from "../../middlewares/auth.middleware";
-import * as contractController from "./contract.controller";
+import * as billController from "./bill.controller";
 
 const router = Router();
 
-router.get("/my-contract", verifyToken, contractController.getMyContract);
+router.get("/my-bills", verifyToken, billController.getMyBills);
 
 export default router;

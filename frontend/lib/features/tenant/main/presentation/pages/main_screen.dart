@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:frontend/core/services/auth_service.dart';
 
 import '../../../bills/presentation/pages/bills_page.dart';
 import '../../../contracts/presentation/pages/contract_page.dart';
@@ -18,14 +16,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = const [
-    DashboardPage(),
-    ContractPage(),
-    BillsPage(),
-    PackagesPage(),
-    RepairsPage(),
-  ];
-
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -34,8 +24,16 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> pages = [
+      DashboardPage(onTabSelected: _onTabTapped),
+      const ContractPage(),
+      const BillsPage(),
+      const PackagesPage(),
+      const RepairsPage(),
+    ];
+
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      body: IndexedStack(index: _currentIndex, children: pages),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
