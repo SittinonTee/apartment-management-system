@@ -4,16 +4,16 @@ import '../../../../../core/constants/app_colors.dart';
 
 class ContractProgressCard extends StatelessWidget {
   final double progressPercent; // ความคืบหน้าของสัญญาเช่า
-  final String roomNumber;
-  final String buildingInfo;
-  final String endDate;
+  final String roomNumber; // หมายเลขห้อง
+  final String buildingInfo; // ข้อมูลอาคาร
+  final String endDate; // วันที่สิ้นสุดสัญญาเช่า
 
   const ContractProgressCard({
     super.key,
     required this.progressPercent,
-    this.roomNumber = 'ห้อง A329',
-    this.buildingInfo = 'อาคาร A ชั้น 3 ฝั่งซ้าย',
-    this.endDate = '25 ธ.ค. 2569',
+    this.roomNumber = 'ไม่มีข้อมูลห้อง',
+    this.buildingInfo = 'ไม่มีข้อมูลอาคาร',
+    this.endDate = 'ไม่มีข้อมูลสิ้นสุดสัญญา',
   });
 
   @override

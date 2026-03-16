@@ -1,32 +1,31 @@
-
-const mysql = require('mysql2/promise');
+const mysql = require("mysql2/promise");
 
 async function checkDb() {
-    const dbUrl = 'mysql://2P3po7N97K2Miyv.root:3YgYfmnJtcODm8Q6@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/apm-system?ssl={"rejectUnauthorized":true}';
-    const connection = await mysql.createConnection(dbUrl);
-    try {
-        const [users] = await connection.execute('SELECT user_id, email, firstname FROM Users');
-        console.log('--- Users ---');
-        console.table(users);
+	const dbUrl =
+		'mysql://2P3po7N97K2Miyv.root:3YgYfmnJtcODm8Q6@gateway01.ap-southeast-1.prod.aws.tidbcloud.com:4000/apm-system?ssl={"rejectUnauthorized":true}';
+	const connection = await mysql.createConnection(dbUrl);
+	try {
+		const [users] = await connection.execute(
+			"SELECT user_id, email, firstname FROM Users",
+		);
+		console.log("--- Users ---");
+		console.table(users);
 
-        const [contracts] = await connection.execute('SELECT * FROM Contracts');
-        console.log('\n--- Contracts ---');
-        console.table(contracts);
+		const [contracts] = await connection.execute("SELECT * FROM Contracts");
+		console.log("\n--- Contracts ---");
+		console.table(contracts);
 
-        const [rooms] = await connection.execute('SELECT * FROM Room');
-        console.log('\n--- Rooms ---');
-        console.table(rooms);
-    } catch (err) {
-        console.error(err);
-    } finally {
-        await connection.end();
-    }
+		const [rooms] = await connection.execute("SELECT * FROM Room");
+		console.log("\n--- Rooms ---");
+		console.table(rooms);
+	} catch (err) {
+		console.error(err);
+	} finally {
+		await connection.end();
+	}
 }
 
 checkDb();
-
-
-
 
 // {
 //     "status": "success",

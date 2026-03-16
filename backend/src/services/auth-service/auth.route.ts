@@ -1,9 +1,14 @@
-import { Router } from 'express';
-import { verifyToken } from '../../middlewares/auth.middleware';
-import * as authController from './auth.controller';
-import { validate } from '../../middlewares/validate.middleware';
-import { loginSchema, registerSchema, forgotPasswordSchema, resetPasswordSchema } from './config/auth.schema';
-import rateLimit from 'express-rate-limit';
+import { Router } from "express";
+import rateLimit from "express-rate-limit";
+import { verifyToken } from "../../middlewares/auth.middleware";
+import { validate } from "../../middlewares/validate.middleware";
+import * as authController from "./auth.controller";
+import {
+	forgotPasswordSchema,
+	loginSchema,
+	registerSchema,
+	resetPasswordSchema,
+} from "./config/auth.schema";
 
 const router = Router();
 
@@ -21,11 +26,23 @@ router.post("/register", validate(registerSchema), authController.registerUser);
 
 // router.post('/login', loginLimiter, validate(loginSchema), authController.login);
 
-router.post('/login', validate(loginSchema), authController.login);
-router.post('/logout', verifyToken, authController.logout);
+router.post(
+	"/login",
+	loginLimiter,
+	validate(loginSchema),
+	authController.login,
+);
+router.post("/logout", verifyToken, authController.logout);
 
-
-router.post('/forgot-password', validate(forgotPasswordSchema), authController.forgotPassword);
-router.post('/reset-password', validate(resetPasswordSchema), authController.resetPassword);
+router.post(
+	"/forgot-password",
+	validate(forgotPasswordSchema),
+	authController.forgotPassword,
+);
+router.post(
+	"/reset-password",
+	validate(resetPasswordSchema),
+	authController.resetPassword,
+);
 
 export default router;

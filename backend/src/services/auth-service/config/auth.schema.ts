@@ -40,31 +40,31 @@ export const registerSchema = z.object({
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z
-    .string()
-    .email("รูปแบบอีเมลไม่ถูกต้อง")
-    .min(5, "อีเมลต้องมีความยาวอย่างน้อย 5 ตัวอักษร")
-    .max(100, "อีเมลต้องมีความยาวไม่เกิน 100 ตัวอักษร")
-    .regex(noEmoji, "อีเมลห้ามมี emoji"),
+	email: z
+		.string()
+		.email("รูปแบบอีเมลไม่ถูกต้อง")
+		.min(5, "อีเมลต้องมีความยาวอย่างน้อย 5 ตัวอักษร")
+		.max(100, "อีเมลต้องมีความยาวไม่เกิน 100 ตัวอักษร")
+		.regex(noEmoji, "อีเมลห้ามมี emoji"),
 });
 
 export const resetPasswordSchema = z.object({
-  email: z
-    .string()
-    .email("รูปแบบอีเมลไม่ถูกต้อง")
-    .min(5, "อีเมลต้องมีความยาวอย่างน้อย 5 ตัวอักษร")
-    .max(100, "อีเมลต้องมีความยาวไม่เกิน 100 ตัวอักษร")
-    .regex(noEmoji, "อีเมลห้ามมี emoji"),
-  otp: z
-    .string()
-    .length(6, "รหัส OTP ต้องมี 6 หลัก")
-    .regex(/^[0-9]+$/, "รหัส OTP ต้องเป็นตัวเลขเท่านั้น"),
-  new_password: z
-    .string()
-    .min(8, "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร")
-    .max(32, "รหัสผ่านต้องมีความยาวไม่เกิน 32 ตัวอักษร")
-    .regex(noEmoji, "รหัสผ่านห้ามมี emoji")
-    .regex(englishOnly, "รหัสผ่านต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น"),
+	email: z
+		.string()
+		.email("รูปแบบอีเมลไม่ถูกต้อง")
+		.min(5, "อีเมลต้องมีความยาวอย่างน้อย 5 ตัวอักษร")
+		.max(100, "อีเมลต้องมีความยาวไม่เกิน 100 ตัวอักษร")
+		.regex(noEmoji, "อีเมลห้ามมี emoji"),
+	otp: z
+		.string()
+		.length(6, "รหัส OTP ต้องมี 6 หลัก")
+		.regex(/^[0-9]+$/, "รหัส OTP ต้องเป็นตัวเลขเท่านั้น"),
+	new_password: z
+		.string()
+		.min(8, "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร")
+		.max(32, "รหัสผ่านต้องมีความยาวไม่เกิน 32 ตัวอักษร")
+		.regex(noEmoji, "รหัสผ่านห้ามมี emoji")
+		.regex(englishOnly, "รหัสผ่านต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น"),
 });
 
 export type V_LoginForm = z.infer<typeof loginSchema>;
