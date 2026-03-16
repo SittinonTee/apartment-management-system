@@ -42,6 +42,7 @@ class AuthService extends ChangeNotifier {
     notifyListeners(); // แจ้งให้ UI ทราบว่า auth service ถูกโหลดแล้ว
   }
 
+  //-----------------------------------------------------------เข้าสู่ระบบ-------------------------------------------------------------
   Future<bool> login(String email, String password) async {
     try {
       _lastError = null;
@@ -71,8 +72,13 @@ class AuthService extends ChangeNotifier {
       }
       return false;
     } on DioException catch (e) {
-      _lastError = e.response?.data['message'] ?? 'เข้าสู่ระบบล้มเหลว';
-      debugPrint('Login DioError: ${e.response?.data}');
+      if (e.response == null) {
+        _lastError =
+            'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ตหรือตั้งค่า IP';
+      } else {
+        _lastError = e.response?.data['message'] ?? 'เข้าสู่ระบบล้มเหลว';
+      }
+      debugPrint('Login DioError: ${e.message}');
       notifyListeners();
       return false;
     } catch (e) {
@@ -83,6 +89,7 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  //-----------------------------------------------------------สมัครสมาชิกบัญชี-------------------------------------------------------------
   Future<bool> register(
     String inviteCode,
     String email,
@@ -101,8 +108,14 @@ class AuthService extends ChangeNotifier {
       }
       return false;
     } on DioException catch (e) {
-      _lastError = e.response?.data['message'] ?? 'การสมัครสมาชิกบัญชีล้มเหลว';
-      debugPrint('Register DioError: ${e.response?.data}');
+      if (e.response == null) {
+        _lastError =
+            'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ตหรือตั้งค่า IP';
+      } else {
+        _lastError =
+            e.response?.data['message'] ?? 'การสมัครสมาชิกบัญชีล้มเหลว';
+      }
+      debugPrint('Register DioError: ${e.message}');
       notifyListeners();
       return false;
     } catch (e) {
@@ -113,6 +126,73 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  //-----------------------------------------------------------ลืมรหัสผ่าน-------------------------------------------------------------
+  Future<bool> forgotPassword(String email) async {
+    try {
+      _lastError = null;
+      final response = await _dio.post(
+        '/auth/forgot-password',
+        data: {'email': email},
+      );
+      if (response.data['status'] == 'success') {
+        // เพิ่มบรรทัดนี้ลงไปชั่วคราวครับ
+        debugPrint('forgotPassword response.data: ${response.data}');
+        debugPrint(
+          '====== รหัส OTP ของคุณคือ: ${response.data['data']['mock_otp']} ======',
+        );
+        return true;
+      }
+      return false;
+    } on DioException catch (e) {
+      if (e.response == null) {
+        _lastError =
+            'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ตหรือตั้งค่า IP';
+      } else {
+        _lastError = e.response?.data['message'] ?? 'ส่งคำขอรีเซ็ตรหัสล้มเหลว';
+      }
+      debugPrint('Forgot Password DioError: ${e.message}');
+      return false;
+    } catch (e) {
+      _lastError = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+      debugPrint('Forgot Password Error: $e');
+      return false;
+    }
+  }
+
+  //-----------------------------------------------------------รีเซ็ตรหัสผ่าน-------------------------------------------------------------
+  Future<bool> resetPassword(
+    String email,
+    String otp,
+    String newPassword,
+  ) async {
+    try {
+      _lastError = null;
+      final response = await _dio.post(
+        '/auth/reset-password',
+        data: {'email': email, 'otp': otp, 'new_password': newPassword},
+      );
+
+      if (response.data['status'] == 'success') {
+        return true;
+      }
+      return false;
+    } on DioException catch (e) {
+      if (e.response == null) {
+        _lastError =
+            'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบอินเทอร์เน็ตหรือตั้งค่า IP';
+      } else {
+        _lastError = e.response?.data['message'] ?? 'รีเซ็ตรหัสผ่านล้มเหลว';
+      }
+      debugPrint('Reset Password DioError: ${e.message}');
+      return false;
+    } catch (e) {
+      _lastError = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+      debugPrint('Reset Password Error: $e');
+      return false;
+    }
+  }
+
+  //-----------------------------------------------------------ออกจากระบบ-------------------------------------------------------------
   Future<void> logout() async {
     try {
       final token = await getToken();
