@@ -78,7 +78,9 @@ class AuthService extends ChangeNotifier {
       } else {
         _lastError = e.response?.data['message'] ?? 'เข้าสู่ระบบล้มเหลว';
       }
-      debugPrint('Login DioError: ${e.message}');
+      debugPrint(
+        'Login DioError: ${e.response?.data['message'] ?? e.message ?? e.error}',
+      );
       notifyListeners();
       return false;
     } catch (e) {
