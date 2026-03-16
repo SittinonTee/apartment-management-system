@@ -12,6 +12,7 @@ const isEthereal = config.email.user?.endsWith("@ethereal.email");
 
 const transporter = isEthereal
 	? nodemailer.createTransport({
+<<<<<<< HEAD
 		host: "smtp.ethereal.email",
 		port: 587,
 		auth: {
@@ -26,6 +27,22 @@ const transporter = isEthereal
 			pass: config.email.pass,
 		},
 	});
+=======
+			host: "smtp.ethereal.email",
+			port: 587,
+			auth: {
+				user: config.email.user,
+				pass: config.email.pass,
+			},
+		})
+	: nodemailer.createTransport({
+			service: "gmail",
+			auth: {
+				user: config.email.user,
+				pass: config.email.pass,
+			},
+		});
+>>>>>>> f4ea4d33d21718aa1a2642967a6bbb156512910c
 
 //-----------------------------------------------------------สมัครสมาชิกบัญชี-------------------------------------------------------------
 export const registerUser = async (

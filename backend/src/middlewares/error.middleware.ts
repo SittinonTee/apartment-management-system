@@ -6,15 +6,19 @@ export class AppError extends Error {
 	public statusCode: number;
 	public status: string;
 	public isOperational: boolean;
+<<<<<<< HEAD
 	public statusCode: number;
 	public status: string;
 	public isOperational: boolean;
+=======
+>>>>>>> f4ea4d33d21718aa1a2642967a6bbb156512910c
 
 	constructor(message: string, statusCode: number) {
 		super(message);
 		this.statusCode = statusCode;
 		this.status = `${statusCode}`.startsWith("4") ? "fail" : "error"; // 4xx = fail (ฝั่ง User ส่งมาผิด), 5xx = error (Server พังเอง)
 		this.isOperational = true;
+<<<<<<< HEAD
 		constructor(message: string, statusCode: number) {
 			super(message);
 			this.statusCode = statusCode;
@@ -23,6 +27,9 @@ export class AppError extends Error {
 
 			Error.captureStackTrace(this, this.constructor);
 		}
+=======
+
+>>>>>>> f4ea4d33d21718aa1a2642967a6bbb156512910c
 		Error.captureStackTrace(this, this.constructor);
 	}
 }
