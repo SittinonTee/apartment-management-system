@@ -29,7 +29,6 @@ app.get("/", (req, res) => {
 app.use("/api", indexRoute);
 
 // --- โค้ดสำหรับทดสอบ Error ---
-<<<<<<< HEAD
 // app.get("/test-error", (req, res, next) => {
 // 	try {
 // 		// @ts-expect-error
@@ -39,17 +38,6 @@ app.use("/api", indexRoute);
 // 		next(error);
 // 	}
 // });
-=======
-app.get("/test-error", (req, res, next) => {
-	try {
-		// @ts-expect-error
-		const a = undefinedVariable;
-		res.send("รอดตาย");
-	} catch (error) {
-		next(error);
-	}
-});
->>>>>>> origin/setup
 // ----------------------------
 
 // ตรวจสอบเส้นทางที่ไม่มีอยู่จริง (404 Not Found)

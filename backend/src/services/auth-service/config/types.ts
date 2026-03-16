@@ -12,9 +12,6 @@ export interface USERACCOUNT {
 	id_keycard?: string;
 	emergency_contact?: string;
 	invite_code: string;
-<<<<<<< HEAD
 	reset_token?: string | null;
 	reset_token_expires?: Date | string | null;
-=======
->>>>>>> origin/setup
 }

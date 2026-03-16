@@ -3,16 +3,13 @@ import rateLimit from "express-rate-limit";
 import { verifyToken } from "../../middlewares/auth.middleware";
 import { validate } from "../../middlewares/validate.middleware";
 import * as authController from "./auth.controller";
-<<<<<<< HEAD
+
 import {
 	forgotPasswordSchema,
 	loginSchema,
 	registerSchema,
 	resetPasswordSchema,
 } from "./config/auth.schema";
-=======
-import { loginSchema, registerSchema } from "./config/auth.schema";
->>>>>>> origin/setup
 
 const router = Router();
 
@@ -30,7 +27,6 @@ router.post("/register", validate(registerSchema), authController.registerUser);
 
 // router.post('/login', loginLimiter, validate(loginSchema), authController.login);
 
-<<<<<<< HEAD
 router.post(
 	"/login",
 	loginLimiter,
@@ -49,9 +45,5 @@ router.post(
 	validate(resetPasswordSchema),
 	authController.resetPassword,
 );
-=======
-router.post("/login", validate(loginSchema), authController.login);
-router.post("/logout", verifyToken, authController.logout);
->>>>>>> origin/setup
 
 export default router;
