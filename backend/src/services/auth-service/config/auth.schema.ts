@@ -37,6 +37,7 @@ export const registerSchema = z.object({
 		.max(32, "รหัสผ่านต้องมีความยาวไม่เกิน 32 ตัวอักษร")
 		.regex(noEmoji, "รหัสผ่านห้ามมี emoji")
 		.regex(englishOnly, "รหัสผ่านต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น"),
+<<<<<<< HEAD
 });
 
 export const forgotPasswordSchema = z.object({
@@ -65,6 +66,8 @@ export const resetPasswordSchema = z.object({
 		.max(32, "รหัสผ่านต้องมีความยาวไม่เกิน 32 ตัวอักษร")
 		.regex(noEmoji, "รหัสผ่านห้ามมี emoji")
 		.regex(englishOnly, "รหัสผ่านต้องเป็นภาษาอังกฤษหรือตัวเลขเท่านั้น"),
+=======
+>>>>>>> origin/setup
 });
 
 export type V_LoginForm = z.infer<typeof loginSchema>;

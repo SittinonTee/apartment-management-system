@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+<<<<<<< HEAD
 import type { AuthRequest } from "../../middlewares/auth.middleware";
 import { AppError } from "../../middlewares/error.middleware";
 import * as authService from "./auth.service";
@@ -10,6 +11,12 @@ import type {
 } from "./config/auth.schema";
 
 //-----------------------------------------------------------เข้าสู่ระบบ-------------------------------------------------------------
+=======
+import { AppError } from "../../middlewares/error.middleware";
+import * as authService from "./auth.service";
+import type { V_LoginForm, V_RegisterForm } from "./config/auth.schema";
+
+>>>>>>> origin/setup
 export const login = async (
 	req: Request,
 	res: Response,
@@ -24,6 +31,7 @@ export const login = async (
 			message: "เข้าสู่ระบบสำเร็จ",
 			data: result,
 		});
+<<<<<<< HEAD
 	} catch (error) {
 		const err = error as Error;
 		console.error("Login Error:", err);
@@ -33,6 +41,16 @@ export const login = async (
 			err.message === "บัญชีนี้ถูกระงับหรือยังไม่เปิดใช้งาน"
 		) {
 			next(new AppError(err.message, 401));
+=======
+	} catch (error: any) {
+		console.error("Login Error:", error);
+		if (
+			error.message === "ไม่พบอีเมลผู้ใช้งานในระบบ" ||
+			error.message === "รหัสผ่านไม่ถูกต้อง" ||
+			error.message === "บัญชีนี้ถูกระงับหรือยังไม่เปิดใช้งาน"
+		) {
+			next(new AppError(error.message, 401));
+>>>>>>> origin/setup
 		} else {
 			next(error);
 		}
@@ -51,11 +69,30 @@ export const logout = async (
 		}
 		await authService.logoutUser(String(userId));
 
+<<<<<<< HEAD
+=======
+export const logout = async (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+): Promise<void> => {
+	try {
+		const userId = (req as any).user?.id;
+		if (!userId) {
+			throw new AppError("ไม่พบข้อมูลผู้ใช้งานสำหรับการออกจากระบบ", 400);
+		}
+		await authService.logoutUser(String(userId));
+
+>>>>>>> origin/setup
 		res.status(200).json({
 			status: "success",
 			message: "ออกจากระบบสำเร็จ",
 		});
+<<<<<<< HEAD
 	} catch (error) {
+=======
+	} catch (error: any) {
+>>>>>>> origin/setup
 		next(error);
 	}
 };
@@ -69,6 +106,7 @@ export const registerUser = async (
 		const { invite_code, email, password } = req.body as V_RegisterForm;
 		const result = await authService.registerUser(invite_code, email, password);
 
+<<<<<<< HEAD
 		res.status(200).json({
 			status: "success",
 			message: "สมัครสมาชิกสำเร็จ",
@@ -85,11 +123,15 @@ export const registerUser = async (
 };
 //-----------------------------------------------------------ลืมรหัสผ่าน-------------------------------------------------------------
 export const forgotPassword = async (
+=======
+export const registerUser = async (
+>>>>>>> origin/setup
 	req: Request,
 	res: Response,
 	next: NextFunction,
 ): Promise<void> => {
 	try {
+<<<<<<< HEAD
 		const { email } = req.body as V_ForgotPasswordForm;
 		const result = await authService.forgotPassword(email);
 
@@ -132,6 +174,20 @@ export const resetPassword = async (
 			err.message === "รหัส OTP ไม่ถูกต้อง"
 		) {
 			next(new AppError(err.message, 400));
+=======
+		const { invite_code, email, password } = req.body as V_RegisterForm;
+		const result = await authService.registerUser(invite_code, email, password);
+
+		res.status(200).json({
+			status: "success",
+			message: "สมัครสมาชิกสำเร็จ",
+			data: result,
+		});
+	} catch (error: any) {
+		console.error("Register Error:", error);
+		if (error.message === "ไม่มีโค้ดเชิญนี้ในระบบ หรือ โค้ดไม่ถูกต้อง") {
+			next(new AppError(error.message, 401));
+>>>>>>> origin/setup
 		} else {
 			next(error);
 		}

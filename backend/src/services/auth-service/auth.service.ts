@@ -1,10 +1,16 @@
+<<<<<<< HEAD
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 import * as nodemailer from "nodemailer";
+=======
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+>>>>>>> origin/setup
 import config from "../config";
 import pool from "../database";
 import type { USERACCOUNT } from "./config/types";
 
+<<<<<<< HEAD
 // สร้าง Transporter สำหรับส่งอีเมล
 // ถ้าใช้อีเมลของ @ethereal.email จะใช้การตั้งค่าแบบทดสอบ
 // ถ้าใช้อีเมลทั่วไปจะพยายามใช้ service 'gmail'
@@ -47,6 +53,27 @@ export const registerUser = async (
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(password, salt);
 
+=======
+export const registerUser = async (
+	invite_code: string,
+	email: string,
+	password: string,
+) => {
+	const [rows]: any = await pool.query(
+		"SELECT * FROM users WHERE invite_code = ?",
+		[invite_code],
+	);
+
+	if (rows.length === 0) {
+		throw new Error("ไม่มีโค้ดเชิญนี้ในระบบ หรือ โค้ดไม่ถูกต้อง");
+	}
+
+	const useraccount = rows[0] as USERACCOUNT;
+
+	const salt = await bcrypt.genSalt(10);
+	const hashedPassword = await bcrypt.hash(password!, salt);
+
+>>>>>>> origin/setup
 	await pool.query(
 		"UPDATE users SET email = ?, password = ?, status = ? WHERE invite_code = ?",
 		[email, hashedPassword, "ACTIVE", invite_code],
@@ -63,11 +90,18 @@ export const registerUser = async (
 	};
 };
 
+<<<<<<< HEAD
 //-----------------------------------------------------------เข้าสู่ระบบ-------------------------------------------------------------
 export const loginUser = async (email: string, password: string) => {
 	const [rows] = (await pool.query("SELECT * FROM users WHERE email = ?", [
 		email,
 	])) as [USERACCOUNT[], unknown];
+=======
+export const loginUser = async (email: string, password: string) => {
+	const [rows]: any = await pool.query("SELECT * FROM users WHERE email = ?", [
+		email,
+	]);
+>>>>>>> origin/setup
 	if (rows.length === 0) {
 		throw new Error("ไม่พบอีเมลผู้ใช้งานในระบบ");
 	}
@@ -84,8 +118,13 @@ export const loginUser = async (email: string, password: string) => {
 
 	const token = jwt.sign(
 		{ id: user.user_id, email: user.email, role: user.roles },
+<<<<<<< HEAD
 		config.jwt.secret as string,
 		{ expiresIn: config.jwt.expiresIn as jwt.SignOptions["expiresIn"] }, // Token หมดอายุใน 1 วัน
+=======
+		config.jwt.secret,
+		{ expiresIn: config.jwt.expiresIn as any }, // Token หมดอายุใน 1 วัน
+>>>>>>> origin/setup
 	);
 
 	return {
@@ -115,6 +154,7 @@ export const logoutUser = async (userId: string) => {
 		token: null,
 	};
 };
+<<<<<<< HEAD
 //-----------------------------------------------------------ลืมรหัสผ่าน-------------------------------------------------------------
 export const forgotPassword = async (email: string) => {
 	const [rows] = (await pool.query("SELECT * FROM users WHERE email = ?", [
@@ -219,3 +259,5 @@ export const resetPassword = async (
 		message: "รีเซ็ตรหัสผ่านสำเร็จ คุณสามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้ทันที",
 	};
 };
+=======
+>>>>>>> origin/setup
