@@ -13,15 +13,21 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _inviteCodeController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
+  final _formKey =
+      GlobalKey<FormState>(); // ใช้สำหรับตรวจสอบความถูกต้องของข้อมูลในฟอร์ม
+  final _inviteCodeController =
+      TextEditingController(); // ใช้สำหรับเก็บข้อมูล invite code
+  final _emailController = TextEditingController(); // ใช้สำหรับเก็บข้อมูลอีเมล
+  final _passwordController =
+      TextEditingController(); // ใช้สำหรับเก็บข้อมูลรหัสผ่าน
+  final _confirmPasswordController =
+      TextEditingController(); // ใช้สำหรับเก็บข้อมูลรหัสผ่าน
+  bool _isLoading = false; // ใช้สำหรับตรวจสอบสถานะการโหลด
+  String? _errorMessage; // ใช้สำหรับเก็บข้อความแสดงข้อผิดพลาด
+  bool _obscurePassword = true; // ใช้สำหรับซ่อน/แสดงรหัสผ่าน
+  bool _obscureConfirmPassword = true; // ใช้สำหรับซ่อน/แสดงรหัสผ่าน
 
-  final AuthService _authService = AuthService();
+  final AuthService _authService = AuthService(); // ใช้สำหรับเรียกใช้บริการ
 
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) {
@@ -95,7 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -154,10 +160,22 @@ class _RegisterPageState extends State<RegisterPage> {
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _passwordController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
+                          obscureText: _obscurePassword,
+                          decoration: InputDecoration(
                             hintText: 'รหัสผ่านใหม่',
-                            prefixIcon: Icon(Icons.lock_outline),
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -172,10 +190,23 @@ class _RegisterPageState extends State<RegisterPage> {
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _confirmPasswordController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
+                          obscureText: _obscureConfirmPassword,
+                          decoration: InputDecoration(
                             hintText: 'ยืนยันรหัสผ่าน',
-                            prefixIcon: Icon(Icons.lock_reset_outlined),
+                            prefixIcon: const Icon(Icons.lock_reset_outlined),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureConfirmPassword
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureConfirmPassword =
+                                      !_obscureConfirmPassword;
+                                });
+                              },
+                            ),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {

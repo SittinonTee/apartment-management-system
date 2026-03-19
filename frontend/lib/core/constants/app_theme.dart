@@ -16,9 +16,8 @@ class AppTheme {
         error: AppColors.error,
         surface: AppColors.surface,
         onSurface: AppColors.textPrimary,
-        background: AppColors.background,
-        onBackground: AppColors.textPrimary,
       ),
+
       textTheme: AppTypography.textTheme,
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surface,
@@ -64,7 +63,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.05),
+        shadowColor: Colors.black.withValues(alpha: 0.05),
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         margin: EdgeInsets.zero,
