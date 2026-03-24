@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as adminService from './admin.service';
-
-
+import { AuthRequest } from '../../middlewares/auth.middleware';
 
 export const getUserData = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -16,4 +15,44 @@ export const getUserData = async (req: Request, res: Response, next: NextFunctio
         next(error);
     }
 };
- 
+
+export const getAvailableRooms = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const result = await adminService.getAvailableRooms();
+        res.status(200).json({
+            status: 'success',
+            message: 'ดึงข้อมูลห้องว่างสำเร็จ',
+            data: result
+        });
+    } catch (error: any) {
+        next(error);
+    }
+};
+
+export const getRates = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const result = await adminService.getRates();
+        res.status(200).json({
+            status: 'success',
+            message: 'ดึงข้อมูลเรทราคาสำเร็จ',
+            data: result
+        });
+    } catch (error: any) {
+        next(error);
+    }
+};
+
+export const addTenant = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const adminId = req.user?.id;
+        const result = await adminService.addTenant(req.body, adminId);
+
+        res.status(200).json({
+            status: 'success',
+            message: 'เพิ่มผู้เช่าใหม่สำเร็จ',
+            data: result
+        });
+    } catch (error: any) {
+        next(error);
+    }
+};

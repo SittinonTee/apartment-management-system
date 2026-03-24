@@ -1,4 +1,4 @@
-import pool from '../database';
+import { pool } from '../database';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { USERACCOUNT } from './config/types';

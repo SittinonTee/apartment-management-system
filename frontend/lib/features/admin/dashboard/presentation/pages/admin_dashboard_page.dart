@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
-import 'package:frontend/core/widgets/choicechip_filter.dart';
-import 'package:frontend/features/admin/dashboard/presentation/admin_widgets/card.dart';
-import 'package:frontend/features/admin/dashboard/presentation/admin_widgets/searchbar.dart';
+// import 'package:frontend/core/widgets/choicechip_filter.dart';
+import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/users_info_card.dart';
+import 'package:frontend/core/widgets/searchbar.dart';
 import 'package:frontend/core/widgets/custom_button.dart';
 import 'package:frontend/features/admin/dashboard/presentation/data/get_users.dart';
+import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/dashboard_summary.dart';
+import 'package:frontend/features/admin/dashboard/presentation/data/get_vailable_room.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:frontend/core/services/auth_service.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -18,42 +21,48 @@ class AdminDashboardPage extends StatefulWidget {
 class _AdminDashboardPageState extends State<AdminDashboardPage> {
   // ---------------- data จาก api ----------------
   late Future<List<UserTemplate>> _usersFuture;
+  late Future<List<RoomTemplate>> _vacantRoomsFuture;
+  late Future<List<dynamic>> _dashboardSummaryFuture;
 
   @override
   void initState() {
     super.initState();
+    _loadData();
+  }
+
+  void _loadData() {
     _usersFuture = Provider.of<AdminService>(
       context,
       listen: false,
     ).getUserData();
+    _vacantRoomsFuture = GetAvailableRoom().getAvailableRooms();
+    _dashboardSummaryFuture = Future.wait([_usersFuture, _vacantRoomsFuture]);
   }
 
   // ---------------- filter & search ----------------
-  int selectedFilterIndex = 0;
-  final List<String> fillterList = ['ทั้งหมด', 'ADMIN', 'TENANT', 'TECHNICIAN'];
+  // int selectedFilterIndex = 0;
+  // final List<String> fillterList = ['ทั้งหมด', 'ADMIN', 'TENANT', 'TECHNICIAN'];
 
   String searchQuery = '';
-  TextEditingController searchController = TextEditingController();
 
   List<UserTemplate> filteredUsers(List<UserTemplate> users) {
     var result = users;
-    if (selectedFilterIndex != 0) {
-      final role = fillterList[selectedFilterIndex];
-      result = result.where((user) => user.role == role).toList();
-    }
+    // if (selectedFilterIndex != 0) {
+    //   final role = fillterList[selectedFilterIndex];
+    //   result = result.where((user) => user.role == role).toList();
+    // }
     if (searchQuery.isNotEmpty) {
       result = result
-          .where((user) => user.firstname.contains(searchQuery))
+          .where(
+            (user) =>
+                user.firstname.contains(searchQuery) ||
+                user.lastname.contains(searchQuery) ||
+                (user.roomNumber != null &&
+                    user.roomNumber!.contains(searchQuery)),
+          )
           .toList();
     }
     return result;
-  }
-
-  // คืน memory เมื่อไม่ใช้งาน TextEditingController
-  @override
-  void dispose() {
-    searchController.dispose();
-    super.dispose();
   }
 
   @override
@@ -61,7 +70,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     final textTheme = Theme.of(context).textTheme;
 
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -74,57 +83,114 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              CustomButton(
-                text: 'ผู้เช่าใหม่',
-                textStyle: textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textInverse,
-                ),
-                onPressed: () => context.push('/admin/newTenant'),
-                icon: const Icon(Icons.person_add),
-                width: 100,
-                borderRadius: BorderRadius.circular(30),
+              Row(
+                children: [
+                  CustomButton(
+                    text: 'ผู้เช่าใหม่',
+                    textStyle: textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textInverse,
+                    ),
+                    onPressed: () async {
+                      await context.push('/admin/newTenant');
+                      setState(() {
+                        _loadData();
+                      });
+                    },
+                    icon: const Icon(Icons.person_add),
+                    width: 100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  const SizedBox(width: 12),
+                  CustomButton(
+                    isPrimary: false,
+                    isOutlined: true,
+                    onPressed: () {
+                      context.read<AuthService>().logout();
+                    },
+                    icon: const Icon(
+                      Icons.logout,
+                      size: 18,
+                      color: AppColors.textSecondary,
+                    ),
+                    width: 34,
+                    height: 34,
+                    padding: const EdgeInsets.only(left: 6),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ],
               ),
             ],
           ),
           Text(
-            "สรุปข้อมูลหอพักและสถานะปัจจุบัน",
+            "หน้าจัดการของผู้ดูแล",
             style: textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 16),
-          SearchWidget(
-            controller: searchController,
-            onSearch: () {
-              setState(() {
-                searchQuery = searchController.text.trim();
-              });
+          FutureBuilder(
+            future: _dashboardSummaryFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox(
+                  height: 72,
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              } else if (snapshot.hasError) {
+                return const SizedBox(height: 72);
+              }
+
+              final users = snapshot.data![0] as List<UserTemplate>;
+              final vacantRooms = snapshot.data![1] as List<RoomTemplate>;
+
+              final totalTenants = users
+                  .where((u) => u.role == 'TENANT')
+                  .length;
+              final totalAdmins = users.where((u) => u.role == 'ADMIN').length;
+
+              return DashboardSummary(
+                totalTenants: totalTenants,
+                vacantRooms: vacantRooms.length,
+                totalAdmins: totalAdmins,
+              );
             },
           ),
+          const SizedBox(height: 16),
+          SearchWidget(
+            onSearch: (value) => setState(() => searchQuery = value),
+          ),
+          // const SizedBox(height: 20),
+          // SizedBox(
+          //   height: 40,
+          //   child: ListView.builder(
+          //     physics: const BouncingScrollPhysics(),
+          //     scrollDirection: Axis.horizontal,
+          //     itemCount: fillterList.length,
+          //     itemBuilder: (context, i) {
+          //       return Padding(
+          //         padding: const EdgeInsets.only(right: 8),
+          //         child: ChoiceChipFilter(
+          //           label: fillterList[i],
+          //           selected: selectedFilterIndex == i,
+          //           onSelected: (_) => setState(() => selectedFilterIndex = i),
+          //         ),
+          //       );
+          //     },
+          //   ),
+          // ),
           const SizedBox(height: 20),
-          SizedBox(
-            height: 40,
-            child: ListView.builder(
-              physics: const BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              itemCount: fillterList.length,
-              itemBuilder: (context, i) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChipFilter(
-                    label: fillterList[i],
-                    selected: selectedFilterIndex == i,
-                    onSelected: (_) => setState(() => selectedFilterIndex = i),
-                  ),
-                );
-              },
+          Text(
+            "ผู้ใช้งานทั้งหมดในระบบ",
+            style: textTheme.titleLarge?.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Expanded(
             child: FutureBuilder<List<UserTemplate>>(
-              future: _usersFuture,
+              future: _usersFuture, // งานที่กำลังรอผล
               builder: (context, snapshot) {
+                // UI ระหว่างรอ snapshot(ข้อมูลที่ได้)
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
@@ -132,7 +198,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(child: Text('ไม่พบข้อมูลผู้ใช้งาน'));
                 }
-
+                // ใส่ไว้ใน users
                 final users = filteredUsers(snapshot.data!);
 
                 return ScrollConfiguration(
@@ -140,65 +206,23 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                     context,
                   ).copyWith(scrollbars: false),
                   child: ListView.separated(
+                    padding: const EdgeInsets.only(bottom: 18),
                     itemCount: users.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
                     physics: const BouncingScrollPhysics(),
                     itemBuilder: (context, i) {
                       final user = users[i];
-                      return CustomCard(
-                        height: 100,
-                        shadow: false,
-                        borderColor: AppColors.border,
-                        padding: EdgeInsets.zero,
-                        child: Material(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                          child: InkWell(
-                            onTap: () => Navigator.pushNamed(context, '/'),
-                            borderRadius: BorderRadius.circular(12),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    user.firstname,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14,
-                                      color: Color(0xFF1A1A1A),
-                                    ),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        user.email,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFF9AAFAF),
-                                        ),
-                                      ),
-                                      const Icon(
-                                        Icons.chevron_right,
-                                        color: Color(0xFFC8D8D8),
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    "เป็น  ${user.role}",
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFFB0B0B0),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                      return UsersInfoCard(
+                        user: user,
+                        onTap: () async {
+                          await context.push(
+                            '/admin/userInfomation',
+                            extra: user,
+                          );
+                          setState(() {
+                            _loadData();
+                          });
+                        },
                       );
                     },
                   ),

@@ -4,43 +4,72 @@ import '../../../../../core/constants/api_constants.dart';
 
 // ----------------------------- template -----------------------------
 class UserTemplate {
-  final int id;
+  final int userId;
   final String firstname;
   final String lastname;
+  final String phone;
+  final String? emergencyPhone;
   final String email;
   final String role;
-  final String status;
+  final String? roomNumber;
+  final int? floor;
+  final int? rateRoom;
+  final int? rateWater;
+  final int? rateElectric;
+  final String? contractNo;
+  final String? startDate;
+  final String? endDate;
+  final int? deposit;
+  final int? billsId;
+  final String userStatus;
+  final String contractStatus;
+  
 
   UserTemplate({
-    required this.id,
+    required this.userId,
     required this.firstname,
     required this.lastname,
+    required this.phone,
+    this.emergencyPhone,
     required this.email,
     required this.role,
-    required this.status,
+    this.roomNumber,
+    this.floor,
+    this.rateRoom,
+    this.rateWater,
+    this.rateElectric,
+    this.contractNo,
+    this.startDate,
+    this.endDate,
+    this.deposit,
+    this.billsId,
+    required this.userStatus,
+    required this.contractStatus,
+    
   });
+
   factory UserTemplate.fromJson(Map<String, dynamic> json) {
     return UserTemplate(
-      // แปลง id เป็น int ตลอด
-      id: json['id'] is int
-          ? json['id']
-          : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
-      firstname: json['firstname']?.toString() ?? '',
-      lastname: json['lastname']?.toString() ?? '',
-      email: json['email']?.toString() ?? '',
-      role: json['role']?.toString() ?? '',
-      status: json['status']?.toString() ?? '',
+      userId: json['id'],
+      firstname: json['firstname'],
+      lastname: json['lastname'],
+      phone: json['phone'].toString(), // กัน error
+      emergencyPhone: json['emergency_phone'].toString(), // กัน error
+      email: json['email']?.toString() ?? 'ยังไม่ได้เข้าสู่ระบบ', // กัน error ไม่มีค่า
+      role: json['role'],
+      roomNumber: json['room_number'],
+      floor: json['floor'],
+      rateRoom: json['rate_room'],
+      rateWater: json['rate_water'],
+      rateElectric: json['rate_electric'],
+      contractNo: json['contract_no']?.toString(),
+      startDate: json['start_date'],
+      endDate: json['end_date'],
+      deposit: json['deposit'],
+      billsId: json['bills_no'],
+      userStatus: json['user_status'] ?? '',
+      contractStatus: json['contract_status'] ?? '',
     );
-  }
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'firstname': firstname,
-      'lastname': lastname,
-      'email': email,
-      'role': role,
-      'status': status,
-    };
   }
 }
 

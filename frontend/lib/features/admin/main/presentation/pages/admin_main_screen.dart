@@ -5,6 +5,7 @@ import 'package:frontend/features/admin/dashboard/presentation/pages/admin_dashb
 import 'package:frontend/features/admin/bills/presentation/pages/admin_bills_page.dart';
 import 'package:frontend/features/admin/packages/presentation/page/admin_packages_page.dart';
 import 'package:frontend/features/admin/repairs/presentation/pages/admin_repairs_page.dart';
+import 'package:frontend/features/admin/manage/presentation/page/manage_page.dart';
 
 class AdminMainScreen extends StatefulWidget {
   const AdminMainScreen({super.key});
@@ -22,6 +23,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     const AdminBillsPage(),
     const AdminPackagesPage(),
     const AdminRepairsPage(),
+    const ManagePage(),
   ];
 
   final List<String> _titles = [
@@ -40,15 +42,15 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_titles[_currentIndex]),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => context.read<AuthService>().logout(),
-          ),
-        ],
-      ),
+      // appBar: AppBar(
+      //   title: Text(_titles[_currentIndex]),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.logout),
+      //       onPressed: () => context.read<AuthService>().logout(),
+      //     ),
+      //   ],
+      // ),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -74,6 +76,11 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
             icon: Icon(Icons.build_outlined),
             activeIcon: Icon(Icons.build),
             label: 'ยื่นเรื่องซ่อม',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.meeting_room),
+            activeIcon: Icon(Icons.meeting_room),
+            label: 'ราคาห้อง',
           ),
         ],
       ),
