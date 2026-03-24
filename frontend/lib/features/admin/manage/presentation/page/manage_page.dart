@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/core/widgets/custom_button.dart';
+import 'package:frontend/core/utils/formatter.dart';
 import 'package:frontend/core/widgets/custom_text_field.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/custom_dropdown_menu.dart';
 import 'package:frontend/features/admin/dashboard/presentation/data/get_rate.dart';
@@ -26,7 +27,7 @@ class _ManagePageState extends State<ManagePage>
   final TextEditingController _rateRoomController = TextEditingController();
   final TextEditingController _rateWaterController = TextEditingController();
   final TextEditingController _rateElectricController = TextEditingController();
-  RateTemplate? _selectedRate;
+  // RateTemplate? _selectedRate;
 
   // -------- Room Management State --------
   String _roomSearchQuery = '';
@@ -131,10 +132,13 @@ class _ManagePageState extends State<ManagePage>
   void _onRateSelected(RateTemplate? rate) {
     if (rate != null) {
       setState(() {
-        _selectedRate = rate;
-        _rateRoomController.text = rate.rateRoom.toString();
-        _rateWaterController.text = rate.rateWater.toString();
-        _rateElectricController.text = rate.rateElectric.toString();
+        _rateRoomController.text = Formatter.formatStringNumber(rate.rateRoom);
+        _rateWaterController.text = Formatter.formatStringNumber(
+          rate.rateWater,
+        );
+        _rateElectricController.text = Formatter.formatStringNumber(
+          rate.rateElectric,
+        );
       });
     }
   }
@@ -522,7 +526,7 @@ class _ManagePageState extends State<ManagePage>
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.only(bottom: 18),
               itemCount: filteredRooms.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final room = filteredRooms[index];
                 final isVacant = room['status'] == 'ว่าง';

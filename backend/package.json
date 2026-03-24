@@ -1,36 +1,44 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "local": "nodemon -L --watch src -e ts,js --exec \"tsx --env-file=.env.local\" src/services/app.ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.26.1",
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "express-rate-limit": "^8.2.1",
-    "helmet": "^8.1.0",
-    "jsonwebtoken": "^9.0.3",
-    "morgan": "^1.10.1",
-    "mysql2": "^3.18.2",
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/morgan": "^1.9.10",
-    "@types/node": "^25.3.3",
-    "nodemon": "^3.1.14",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
-  }
+	"name": "backend",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node index.js",
+		"local": "nodemon -L --watch src -e ts,js --exec \"tsx --env-file=.env.local\" src/services/app.ts",
+		"type-check": "tsc --noEmit",
+		"format": "biome format . --write",
+		"lint": "biome lint .",
+		"check": "biome check --write .",
+		"build": "tsc"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.26.1",
+	"dependencies": {
+		"bcryptjs": "^3.0.3",
+		"cors": "^2.8.6",
+		"express": "^5.2.1",
+		"express-rate-limit": "^8.2.1",
+		"helmet": "^8.1.0",
+		"jsonwebtoken": "^9.0.3",
+		"morgan": "^1.10.1",
+		"mysql2": "^3.18.2",
+		"nodemailer": "^8.0.1",
+		"zod": "^4.3.6"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.6",
+		"@types/cors": "^2.8.19",
+		"@types/express": "^5.0.6",
+		"@types/jsonwebtoken": "^9.0.10",
+		"@types/morgan": "^1.9.10",
+		"@types/node": "^25.3.3",
+		"@types/nodemailer": "^7.0.11",
+		"nodemon": "^3.1.14",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3"
+	}
 }

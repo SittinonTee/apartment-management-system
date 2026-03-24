@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
+import 'package:frontend/core/utils/formatter.dart';
 import 'package:frontend/core/widgets/custom_button.dart';
 import 'package:intl/intl.dart';
 
@@ -132,7 +133,8 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
       'ห้องพัก': widget.contractInfo['room_name'],
       'วันที่เริ่มสัญญา': _displayStartDate,
       'วันที่สิ้นสุด': _displayEndDate,
-      'เงินประกัน': '${widget.contractInfo['deposit'] ?? 0} บาท',
+      'เงินประกัน':
+          '${Formatter.formatNumber(widget.contractInfo['deposit'])} บาท',
     };
 
     return Dialog(

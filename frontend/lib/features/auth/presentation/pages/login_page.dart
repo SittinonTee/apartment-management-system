@@ -13,13 +13,16 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _isLoading = false;
-  String? _errorMessage;
+  final _formKey =
+      GlobalKey<FormState>(); // ใช้สำหรับตรวจสอบความถูกต้องของข้อมูลในฟอร์ม
+  final _emailController = TextEditingController(); // ใช้สำหรับเก็บข้อมูลอีเมล
+  final _passwordController =
+      TextEditingController(); // ใช้สำหรับเก็บข้อมูลรหัสผ่าน
+  bool _isLoading = false; // ใช้สำหรับตรวจสอบสถานะการโหลด
+  String? _errorMessage; // ใช้สำหรับเก็บข้อความแสดงข้อผิดพลาด
+  bool _obscurePassword = true; // ใช้สำหรับซ่อน/แสดงรหัสผ่าน
 
-  final AuthService _authService = AuthService();
+  final AuthService _authService = AuthService(); // ใช้สำหรับเรียกใช้บริการ
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) {
@@ -100,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -140,10 +143,22 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _passwordController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
+                          obscureText: _obscurePassword,
+                          decoration: InputDecoration(
                             hintText: 'รหัสผ่าน',
-                            prefixIcon: Icon(Icons.lock_outline),
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -151,6 +166,25 @@ class _LoginPageState extends State<LoginPage> {
                             }
                             return null;
                           },
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => context.go('/forgot-password'),
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                            child: Text(
+                              'ลืมรหัสผ่าน?',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 16),
                         if (_errorMessage != null)

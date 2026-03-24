@@ -3,6 +3,7 @@ import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/core/widgets/section_card.dart';
 import 'package:frontend/core/widgets/status_badge.dart';
 import 'package:frontend/features/admin/dashboard/presentation/data/get_users.dart';
+import 'package:frontend/core/utils/formatter.dart';
 import 'package:go_router/go_router.dart';
 
 class UserInfomationPage extends StatelessWidget {
@@ -204,9 +205,21 @@ class UserInfomationPage extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildRateItem('ค่าเช่า/เดือน', user.rateRoom, Icons.home_work_outlined),
-            _buildRateItem('ค่าน้ำ/หน่วย', user.rateWater, Icons.water_drop_outlined),
-            _buildRateItem('ค่าไฟ/หน่วย', user.rateElectric, Icons.bolt_rounded),
+            _buildRateItem(
+              'ค่าเช่า/เดือน',
+              user.rateRoom,
+              Icons.home_work_outlined,
+            ),
+            _buildRateItem(
+              'ค่าน้ำ/หน่วย',
+              user.rateWater,
+              Icons.water_drop_outlined,
+            ),
+            _buildRateItem(
+              'ค่าไฟ/หน่วย',
+              user.rateElectric,
+              Icons.bolt_rounded,
+            ),
           ],
         ),
         const SizedBox(height: 20),
@@ -242,7 +255,7 @@ class UserInfomationPage extends StatelessWidget {
                 ),
               ),
               Text(
-                '${user.deposit?.toStringAsFixed(0)} บาท',
+                '${Formatter.formatNumber(user.deposit)} บาท',
                 style: const TextStyle(
                   color: AppColors.primaryDark,
                   fontSize: 18,
@@ -293,7 +306,7 @@ class UserInfomationPage extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          '${rate?.toStringAsFixed(0)}',
+          Formatter.formatNumber(rate),
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,

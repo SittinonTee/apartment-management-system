@@ -4,6 +4,7 @@ import 'package:frontend/core/widgets/custom_text_field.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/users_info_card.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/custom_dropdown_menu.dart';
 import 'package:frontend/features/admin/dashboard/presentation/data/get_rate.dart';
+import 'package:frontend/core/utils/formatter.dart';
 import 'package:frontend/features/admin/dashboard/presentation/data/get_vailable_room.dart';
 
 class ContractForm extends StatefulWidget {
@@ -86,9 +87,9 @@ class ContractFormState extends State<ContractForm> {
       'room_id': _selectedRoomId,
       'room_name': _roomController.text,
       'rate_id': _selectedRate?.id,
-      'rate_room': _ratelPriceController.text,
-      'rate_water': _waterPriceController.text,
-      'rate_electric': _electricPriceController.text,
+      'rate_room': Formatter.unformat(_ratelPriceController.text),
+      'rate_water': Formatter.unformat(_waterPriceController.text),
+      'rate_electric': Formatter.unformat(_electricPriceController.text),
       // format กลับเป็น ค.ศ. รูปแบบ String (yyyy-MM-dd) ก่อนลง base
       'start_date': _startDate != null
           ? '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}'
@@ -96,7 +97,7 @@ class ContractFormState extends State<ContractForm> {
       'end_date': _endDate != null
           ? '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}'
           : null,
-      'deposit': double.tryParse(_depositController.text),
+      'deposit': Formatter.parseDouble(_depositController.text),
     };
   }
 
@@ -107,10 +108,14 @@ class ContractFormState extends State<ContractForm> {
       'ระยะเวลาเช่า': '${_rentalDurationController.text} เดือน',
       'วันเริ่มเข้าพัก': _formatDate(_startDate),
       'วันสิ้นสุดสัญญา': _formatDate(_endDate),
-      'ค่าเช่ารายเดือน': '${_ratelPriceController.text} บาท',
-      'ค่าน้ำประปา': '${_waterPriceController.text} บาท/หน่วย',
-      'ค่าไฟฟ้า': '${_electricPriceController.text} บาท/หน่วย',
-      'เงินประกัน': '${_depositController.text} บาท',
+      'ค่าเช่ารายเดือน':
+          '${Formatter.formatStringNumber(_ratelPriceController.text)} บาท',
+      'ค่าน้ำประปา':
+          '${Formatter.formatStringNumber(_waterPriceController.text)} บาท/หน่วย',
+      'ค่าไฟฟ้า':
+          '${Formatter.formatStringNumber(_electricPriceController.text)} บาท/หน่วย',
+      'เงินประกัน':
+          '${Formatter.formatStringNumber(_depositController.text)} บาท',
     };
   }
 
@@ -219,9 +224,13 @@ class ContractFormState extends State<ContractForm> {
       final int deposit = price * 2;
       // ขึ้นข้อความ
       setState(() {
-        _depositController.text = deposit.toString();
-        _waterPriceController.text = rate.rateWater;
-        _electricPriceController.text = rate.rateElectric;
+        _depositController.text = Formatter.formatNumber(deposit);
+        _waterPriceController.text = Formatter.formatStringNumber(
+          rate.rateWater,
+        );
+        _electricPriceController.text = Formatter.formatStringNumber(
+          rate.rateElectric,
+        );
       });
     }
   }
@@ -345,9 +354,9 @@ class ContractFormState extends State<ContractForm> {
               dropdownMenuEntries: _availableRates.map((rate) {
                 return DropdownMenuEntry<RateTemplate>(
                   value: rate,
-                  label: '${rate.rateRoom} บาท',
+                  label: '${Formatter.formatStringNumber(rate.rateRoom)} บาท',
                   labelWidget: Text(
-                    '${rate.rateRoom} บาท',
+                    '${Formatter.formatStringNumber(rate.rateRoom)} บาท',
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 );

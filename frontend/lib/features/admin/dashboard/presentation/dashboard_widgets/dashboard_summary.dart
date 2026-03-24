@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
+import 'package:frontend/core/utils/formatter.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/users_info_card.dart';
 
 class DashboardSummary extends StatelessWidget {
@@ -69,7 +70,7 @@ class DashboardSummary extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${item.value}',
+                      Formatter.formatNumber(item.value),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.bold,

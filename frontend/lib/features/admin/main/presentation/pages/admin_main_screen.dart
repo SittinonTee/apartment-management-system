@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/features/admin/dashboard/presentation/pages/admin_dashboard_page.dart';
 import 'package:frontend/features/admin/bills/presentation/pages/admin_bills_page.dart';
 import 'package:frontend/features/admin/packages/presentation/page/admin_packages_page.dart';
@@ -26,12 +24,12 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     const ManagePage(),
   ];
 
-  final List<String> _titles = [
-    'หน้าหลักผู้ดูแล',
-    'บิลค่าเช่า',
-    'รับพัสดุ',
-    'ยื่นเรื่องซ่อม',
-  ];
+  // final List<String> _titles = [
+  //   'หน้าหลักผู้ดูแล',
+  //   'บิลค่าเช่า',
+  //   'รับพัสดุ',
+  //   'ยื่นเรื่องซ่อม',
+  // ];
 
   void _onTabTapped(int index) {
     setState(() {
