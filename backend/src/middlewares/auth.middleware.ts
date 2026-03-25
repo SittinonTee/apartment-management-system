@@ -12,6 +12,7 @@ export type TokenPayload = {
 
 export interface AuthRequest extends Request {
 	user?: TokenPayload;
+	contractStatus?: string;
 }
 
 export const verifyToken = (

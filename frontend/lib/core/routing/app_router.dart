@@ -7,6 +7,9 @@ import 'package:frontend/features/auth/presentation/pages/login_page.dart';
 import 'package:frontend/features/auth/presentation/pages/register_page.dart';
 import 'package:frontend/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:frontend/features/tenant/main/presentation/pages/main_screen.dart';
+import 'package:frontend/features/admin/dashboard/presentation/pages/new_tenant_page.dart';
+import 'package:frontend/features/admin/dashboard/presentation/pages/user_infomation_page.dart';
+import 'package:frontend/features/admin/dashboard/presentation/data/get_users.dart';
 
 class AppRouter {
   static final AuthService _authService = AuthService();
@@ -68,6 +71,17 @@ class AppRouter {
       GoRoute(
         path: '/admin',
         builder: (context, state) => const AdminMainScreen(),
+      ),
+      GoRoute(
+        path: '/admin/userInfomation',
+        builder: (context, state) {
+          final user = state.extra as UserTemplate;
+          return UserInfomationPage(user: user);
+        },
+      ),
+      GoRoute(
+        path: '/admin/newTenant',
+        builder: (context, state) => const NewTenantPage(),
       ),
     ],
   );
