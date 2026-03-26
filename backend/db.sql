@@ -1,11 +1,11 @@
 -- CREATE TABLE roles (
---     roles_id INT PRIMARY KEY, -- รหัสบทบาท (เช่น 1=Admin, 2=User)
+--     roles_id INT PRIMARY KEY AUTO_INCREMENT, -- รหัสบทบาท (เช่น 1=Admin, 2=User)
 --     roles_name VARCHAR(100) -- ชื่อบทบาท (เช่น 'ผู้ดูแลระบบ', 'ผู้เช่า')
 -- );
 
 
 CREATE TABLE Room (
-    room_id VARCHAR(50) PRIMARY KEY, -- รหัสอ้างอิงห้องแบบ Unique (บางทีอาจแยกจากเลขห้อง)
+    room_id INT PRIMARY KEY AUTO_INCREMENT, -- รหัสอ้างอิงห้องแบบ Unique (บางทีอาจแยกจากเลขห้อง)
     room_number VARCHAR(10), -- หมายเลขห้องพัก (เช่น '101', 'A-205')
     floor INT, -- ชั้นของห้องพัก
     room_type VARCHAR(50), -- ประเภทห้อง (เช่น 'Standard', 'VIP')
@@ -16,7 +16,7 @@ CREATE TABLE Room (
 );
 
 CREATE TABLE Rate (
-    rate_id INT PRIMARY KEY, -- รหัสเรทราคา
+    rate_id INT PRIMARY KEY AUTO_INCREMENT, -- รหัสเรทราคา
     rate_room VARCHAR(50), -- ราคาค่าเช่าห้องต่อเดือน
     rate_water VARCHAR(50), -- อัตราค่าน้ำ (เช่น หน่วยละ 18 บาท)
     rate_electric VARCHAR(50) -- อัตราค่าไฟ (เช่น หน่วยละ 8 บาท)
@@ -25,7 +25,7 @@ CREATE TABLE Rate (
 -- 2. สร้างตาราง Users
 
 CREATE TABLE Users (
-    user_id INT PRIMARY KEY, -- รหัสผู้ใช้งานที่ไม่ซ้ำกัน
+    user_id INT PRIMARY KEY AUTO_INCREMENT, -- รหัสผู้ใช้งานที่ไม่ซ้ำกัน
     username VARCHAR(100), -- ชื่อบัญชีผู้ใช้สำหรับใช้เข้าระบบ (อาจใช้อีเมลแทนได้)
     password VARCHAR(255), -- รหัสผ่าน (ต้องถูก Hash เข้ารหัสก่อนบันทึก)
     firstname VARCHAR(100), -- ชื่อจริง
@@ -44,16 +44,18 @@ CREATE TABLE Users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- วันและเวลาที่อัปเดตข้อมูลล่าสุด
     id_keycard VARCHAR(50), -- รหัสบัตรคีย์การ์ดเข้าหอพัก
     emergency_contact VARCHAR(100), -- ข้อมูลบุคคลติดต่อฉุกเฉิน (ชื่อและเบอร์)
-    invite_code VARCHAR(50) -- โค้ดสำหรับเชิญให้มาสมัครสมาชิกเข้าหอพัก
+    invite_code VARCHAR(50), -- โค้ดสำหรับเชิญให้มาสมัครสมาชิกเข้าหอพัก
+    reset_token VARCHAR(255), -- เก็บ Token ไว้รีเซ็ตรหัสผ่าน (ที่ถูก Hash แล้ว)
+    reset_token_expires DATETIME -- วันเวลาหมดอายุของ Token ลืมรหัสผ่าน
 );
 
 -- 3. สร้างตาราง Contracts
 CREATE TABLE Contracts (
-    contracts_id INT PRIMARY KEY, -- รหัสอ้างอิงของใบสัญญาเช่า
+    contracts_id INT PRIMARY KEY AUTO_INCREMENT, -- รหัสอ้างอิงของใบสัญญาเช่า
     contract_no VARCHAR(100), -- เลขที่เอกสารสัญญา (ที่ใช้พิมพ์ออกกระดาษ)
     identification_card VARCHAR(20), -- เลขบัตรประจำตัวประชาชนของผู้เช่าตอนทำสัญญา
     address TEXT, -- ที่อยู่ตามทะเบียบบ้านของผู้เช่าตอนมาทำสัญญา
-    room_id VARCHAR(50), -- ห้องพักที่ผูกพันตามสัญญานี้
+    room_id INT, -- ห้องพักที่ผูกพันตามสัญญานี้
     user_id INT, -- ผู้เช่า (เชื่อมกับตาราง users)
     rate_id INT, -- เรทราคาที่ตกลงกันไว้ (เชื่อมตาราง rate) เผื่ออนาคตเรทขึ้น สัญญานี้จะได้ยึดเรทเดิม
     start_date DATE, -- วันที่เริ่มต้นย้ายเข้าตามสัญญา
@@ -72,7 +74,7 @@ CREATE TABLE Contracts (
 
 -- 4. สร้างตาราง Bills
 CREATE TABLE Bills (
-    bills_id INT PRIMARY KEY, -- รหัสใบแจ้งหนี้
+    bills_id INT PRIMARY KEY AUTO_INCREMENT, -- รหัสใบแจ้งหนี้
     contract_id INT, -- อ้างอิงสัญญาเช่าเพื่อรู้ว่าชาร์จห้องไหน ใครจ่าย
     bill_month VARCHAR(20), -- รอบบิลประจำเดือน (เช่น '2024-10')
     rate_id INT, -- เรทราคาที่ใช้คำนวณบิลรอบนี้
@@ -98,7 +100,7 @@ CREATE TABLE Bills (
 
 -- -------  พัสดุ  ---------
 CREATE TABLE Parcels (
-    parcels_id INT PRIMARY KEY, -- รหัสกล่องพัสดุรับเข้า
+    parcels_id INT PRIMARY KEY AUTO_INCREMENT, -- รหัสกล่องพัสดุรับเข้า
     user_id INT, -- รหัสลูกบ้านที่จะต้องมารับ (เจ้าของพัสดุ)
     name VARCHAR(100), -- ชื่อผู้รับพัสดุ
     room_number VARCHAR(10), -- เลขห้อง
@@ -114,7 +116,7 @@ CREATE TABLE Parcels (
 
 -- 5. สร้างตาราง Repairs & Parcels
 CREATE TABLE Repairs_user (
-    repairsuser_id INT PRIMARY KEY, -- ใบแจ้งซ่อมไอดี
+    repairsuser_id INT PRIMARY KEY AUTO_INCREMENT, -- ใบแจ้งซ่อมไอดี
     user_id INT, -- รหัสลูกบ้านที่กดแจ้งซ่อม
     category_id INT, -- หมวดหมู่ปัญหาที่แจ้ง (น้ำ ไฟ แอร์)
     head_repairs VARCHAR(100), -- หัวข้อปัญหาที่แจ้ง
@@ -133,7 +135,7 @@ CREATE TABLE Repairs_user (
 
 -- แจ้งซ่อม Technicians
 CREATE TABLE Repairs_technicians (
-    repairstn_id INT PRIMARY KEY, -- ไอดีใบงานฝั่งช่าง
+    repairstn_id INT PRIMARY KEY AUTO_INCREMENT, -- ไอดีใบงานฝั่งช่าง
     repairsuser_id INT, -- อ้างอิงไอดีใบแจ้งซ่อมที่ลูกบ้านส่งมา (ลิงก์หากัน)
     technician_by INT, -- รหัสเข้าสู่ระบบ (user_id) ของช่างซ่อมบำรุงที่รับผิดชอบงานนี้
     scheduled_at DATETIME, -- วันที่ช่างสะดวกเข้ารับงาน
@@ -143,6 +145,6 @@ CREATE TABLE Repairs_technicians (
 );
 
 CREATE TABLE Repair_categories (
-    category_id INT PRIMARY KEY, -- รหัสหมวดหมู่การแจ้งซ่อม
+    category_id INT PRIMARY KEY AUTO_INCREMENT, -- รหัสหมวดหมู่การแจ้งซ่อม
     name_category VARCHAR(100) -- ชื่อหมวดหมู่ (เช่น 'ประปา', 'แอร์', 'ไฟฟ้า')
 );

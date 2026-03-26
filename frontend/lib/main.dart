@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/features/tenant/main/presentation/pages/main_screen.dart';
-
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:provider/provider.dart';
 import 'core/routing/app_router.dart';
 import 'core/constants/app_theme.dart';
 import 'core/services/auth_service.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
+import 'features/admin/dashboard/presentation/data/get_users.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('th', null);
   runApp(const MyApp());
 }
 
@@ -42,7 +45,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => AuthService())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => AdminService()),
+      ],
       child: MaterialApp.router(
         title: 'Tenant Portal',
         theme: AppTheme.lightTheme,
