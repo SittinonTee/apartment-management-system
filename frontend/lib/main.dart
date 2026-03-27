@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'core/routing/app_router.dart';
 import 'core/constants/app_theme.dart';
 import 'core/services/auth_service.dart';
+// import 'package:provider/provider.dart';
+import 'features/admin/dashboard/presentation/data/get_users.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +45,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => AuthService())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => AdminService()),
+      ],
       child: MaterialApp.router(
         title: 'Tenant Portal',
         theme: AppTheme.lightTheme,
