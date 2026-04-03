@@ -5,5 +5,6 @@ import * as billController from "./bill.controller";
 const router = Router();
 
 router.get("/my-bills", verifyToken, billController.getMyBills);
+router.get("/all-bills", verifyToken, billController.getAllBills);
 
 export default router;
