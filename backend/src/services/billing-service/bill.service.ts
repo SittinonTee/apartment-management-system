@@ -18,3 +18,9 @@ export const getBillsByUserId = async (userId: number): Promise<Bill[]> => {
 	const [rows] = (await pool.query(query, [userId])) as [Bill[], unknown];
 	return rows;
 };
+
+export async function getAllBills() {
+	const query = `SELECT * FROM vw_bill_details`;
+	const [rows] = (await pool.query(query)) as [Bill[], unknown];
+	return rows;
+}

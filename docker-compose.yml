@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------
+  # Backend Service (Node.js + Express)
+  # ----------------------------------------
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: apartment_backend
+    ports:
+      - "3000:3000"
+    # ดึงตัวแปรสภาพแวดล้อมจากไฟล์ .env.local ในโฟลเดอร์ backend มาใช้
+    env_file:
+      - ./backend/.env.local
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  # ----------------------------------------
+  # Frontend Service (Flutter Web on Nginx)
+  # ----------------------------------------
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: apartment_frontend
+    ports:
+      - "8080:80"
+    # ตั้งค่าให้ Frontend รอ Backend สตาร์ทเสร็จก่อนเสมอ
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
+# สร้าง Network ให้ 2 Container นี้สามารถรู้จักและคุยกันได้
+networks:
+  app-network:
+    driver: bridge

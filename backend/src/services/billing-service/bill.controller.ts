@@ -24,3 +24,20 @@ export const getMyBills = async (
 		next(error);
 	}
 };
+
+export const getAllBills = async (
+	req: AuthRequest,
+	res: Response,
+	next: NextFunction,
+) => {
+	try {
+		const bills = await billService.getAllBills();
+
+		res.status(200).json({
+			status: "success",
+			data: bills,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
