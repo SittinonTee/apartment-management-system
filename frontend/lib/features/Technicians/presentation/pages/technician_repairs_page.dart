@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/choicechip_filter.dart';
+import '../../../../core/widgets/custom_button.dart';
 import '../../data/repair_model.dart';
 import '../../data/repair_service.dart';
 import '../widgets/technician_repair_card.dart';
@@ -112,20 +113,17 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
               ),
             ],
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF5AB6A9),
-              borderRadius: BorderRadius.circular(100),
+          CustomButton(
+            text: 'ประวัติการซ่อม',
+            width: 120,
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            textStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
             ),
-            child: const Text(
-              'ประวัติการซ่อม',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            borderRadius: BorderRadius.circular(100),
+            onPressed: () {}, // TODO: ไปหน้าประวัติ
           ),
         ],
       ),
