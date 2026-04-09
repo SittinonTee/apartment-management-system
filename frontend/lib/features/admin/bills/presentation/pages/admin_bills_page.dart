@@ -36,6 +36,21 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
     'ธ.ค.',
   ];
 
+  final List<String> monthfull = [
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
+  ];
+
   late Future<List<BillModel>> _billsFuture;
 
   @override
@@ -83,7 +98,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
 
   // ฟังก์ชันจัดรูปแบบวันที่แบบย่อไทย
   String _formatDate(DateTime date) {
-    return '${date.day} ${monthList[date.month]} ${date.year + 543}';
+    return '${date.day} ${monthfull[date.month - 1]} ${date.year + 543}';
   }
 
   @override
@@ -263,7 +278,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                monthList[currentMonth],
+                                monthfull[currentMonth - 1],
                                 style: textTheme.titleLarge?.copyWith(
                                   color: AppColors.textSecondary,
                                   fontWeight: FontWeight.bold,
