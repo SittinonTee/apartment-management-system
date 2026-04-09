@@ -149,3 +149,4 @@ CREATE TABLE Repair_categories (
     category_id INT PRIMARY KEY AUTO_INCREMENT, -- รหัสหมวดหมู่การแจ้งซ่อม
     name_category VARCHAR(100) -- ชื่อหมวดหมู่ (เช่น 'ประปา', 'แอร์', 'ไฟฟ้า')
 );
+
