@@ -10,6 +10,7 @@ import 'package:frontend/features/tenant/main/presentation/pages/main_screen.dar
 import 'package:frontend/features/admin/dashboard/presentation/pages/new_tenant_page.dart';
 import 'package:frontend/features/admin/dashboard/presentation/pages/user_infomation_page.dart';
 import 'package:frontend/features/admin/dashboard/presentation/data/get_users.dart';
+import 'package:frontend/features/admin/repairs/presentation/pages/admin_technicians_page.dart';
 
 class AppRouter {
   static final AuthService _authService = AuthService();
@@ -82,6 +83,10 @@ class AppRouter {
       GoRoute(
         path: '/admin/newTenant',
         builder: (context, state) => const NewTenantPage(),
+      ),
+      GoRoute(
+        path: '/admin/technicians',
+        builder: (context, state) => const AdminTechniciansPage(),
       ),
     ],
   );
