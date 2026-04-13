@@ -106,9 +106,10 @@ CREATE TABLE Parcels (
     room_number VARCHAR(10), -- เลขห้อง
     received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- เวลาที่พัสดุมาถึงนิติบุคคล
     parcelsimage_url VARCHAR(255), -- รูปรวมกล่องหรือรูปชื่อหน้ากล่อง
-    status ENUM('RECEIVED', 'PICKED_UP'), -- สถานะพัสดุ
+    status ENUM('RECEIVED', 'PICKED_UP', 'PENDING'), -- สถานะพัสดุ
     -- received = รับแล้ว
     -- picked_up = รับแล้ว (ผู้เช่ามารับไปแล้ว)
+    -- Pending = รอรับ/ตกค้าง
     confirmed_at TIMESTAMP, 
     -- ตราประทับเวลาอัตโนมัติเมื่อผู้เช่ามาเซ็นรับของออกไป
     received_by VARCHAR(100) -- ชื่อพนักงานนิติฯ ที่เป็นคนกดรับกล่องเข้าระบบ
@@ -148,3 +149,4 @@ CREATE TABLE Repair_categories (
     category_id INT PRIMARY KEY AUTO_INCREMENT, -- รหัสหมวดหมู่การแจ้งซ่อม
     name_category VARCHAR(100) -- ชื่อหมวดหมู่ (เช่น 'ประปา', 'แอร์', 'ไฟฟ้า')
 );
+
