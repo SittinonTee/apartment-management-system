@@ -151,25 +151,6 @@ class _AdminTechniciansPageState extends State<AdminTechniciansPage> {
                                   ],
                                 ),
                               ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.success.withValues(
-                                    alpha: 0.1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  "พร้อมทำงาน",
-                                  style: textTheme.labelSmall?.copyWith(
-                                    color: AppColors.success,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                         );
