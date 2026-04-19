@@ -45,9 +45,17 @@ export const processPayment = async (
 
 		// รับ billId จาก params เพื่อให้ตรงกับ Flutter
 		const { billId } = req.params;
+		const { slipUrl } = req.body;
+
+		if (!slipUrl) {
+			throw new AppError("กรุณาอัพโหลดสลิปใบเสร็จ (Missing slipUrl)", 400);
+		}
 
 		// บันทึกการจ่ายเงิน
-		const success = await tenantBillingService.processPayment(Number(billId));
+		const success = await tenantBillingService.processPayment(
+			Number(billId),
+			slipUrl,
+		);
 
 		if (!success) {
 			throw new AppError("ไม่พบข้อมูลบิล หรือดำเนินการไม่สำเร็จ", 404);

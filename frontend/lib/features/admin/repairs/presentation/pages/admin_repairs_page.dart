@@ -346,6 +346,7 @@ class _AdminRepairsPageState extends State<AdminRepairsPage> {
                           : repair.mechanicfirstname,
                       mechaniclastname: repair.mechaniclastname,
                       mechanicPhone: repair.mechanicPhone,
+                      imageUrl: repair.imageUrl,
                     );
                   },
                 ),

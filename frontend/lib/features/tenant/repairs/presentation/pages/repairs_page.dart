@@ -398,6 +398,7 @@ class _RepairsPageState extends State<RepairsPage> {
                           : repair.mechanicfirstname,
                       mechaniclastname: repair.mechaniclastname,
                       mechanicPhone: repair.mechanicPhone,
+                      imageUrl: repair.imageUrl,
                     );
                   },
                 ),
