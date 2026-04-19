@@ -11,12 +11,14 @@ export const TechniciansService = {
 				u.phone,
 				rm.room_number,
 				rm.floor as room_floor,
-				rc.name_category as category_name
+				rc.name_category as category_name,
+				rt.technician_by
 			FROM Repairs_user r
 			LEFT JOIN Users u ON r.user_id = u.user_id
 			LEFT JOIN Contracts c ON u.user_id = c.user_id
 			LEFT JOIN Room rm ON c.room_id = rm.room_id
 			LEFT JOIN Repair_categories rc ON r.category_id = rc.category_id
+			LEFT JOIN Repairs_technicians rt ON r.repairsuser_id = rt.repairsuser_id
 			ORDER BY r.created_at DESC
 		`);
 		return rows;
@@ -46,6 +48,39 @@ export const TechniciansService = {
 
 			await connection.commit();
 			return { success: true, message: "รับงานเรียบร้อยแล้ว" };
+		} catch (error) {
+			await connection.rollback();
+			throw error;
+		} finally {
+			connection.release();
+		}
+	},
+
+	// อัปเดตสถานะงานซ่อม (เช่น เป็น PENDING)
+	async updateStatus(
+		repairId: number,
+		status: string,
+		remark?: string, // เพิ่ม remark
+	) {
+		const connection = await pool.getConnection();
+		try {
+			await connection.beginTransaction();
+
+			await connection.query(
+				"UPDATE Repairs_user SET status = ? WHERE repairsuser_id = ?",
+				[status, repairId],
+			);
+
+			// ถ้ามีการส่งหมายเหตุเข้ามาพร้อมกัน ให้บันทึกด้วย
+			if (remark !== undefined && remark !== "") {
+				await connection.query(
+					"UPDATE Repairs_technicians SET remark = ? WHERE repairsuser_id = ?",
+					[remark, repairId],
+				);
+			}
+
+			await connection.commit();
+			return { success: true, message: `อัปเดตสถานะเป็น ${status} แล้ว` };
 		} catch (error) {
 			await connection.rollback();
 			throw error;
