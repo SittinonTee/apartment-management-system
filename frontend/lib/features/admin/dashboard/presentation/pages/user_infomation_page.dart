@@ -4,52 +4,253 @@ import 'package:frontend/core/widgets/section_card.dart';
 import 'package:frontend/core/widgets/status_badge.dart';
 import 'package:frontend/features/admin/dashboard/presentation/data/get_users.dart';
 import 'package:frontend/core/utils/formatter.dart';
+import 'package:frontend/features/admin/dashboard/presentation/data/admin_service_api.dart';
 import 'package:go_router/go_router.dart';
+import 'package:file_picker/file_picker.dart';
 
-class UserInfomationPage extends StatelessWidget {
+class UserInfomationPage extends StatefulWidget {
   final UserTemplate user;
 
   const UserInfomationPage({super.key, required this.user});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: _buildAppBar(context),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 16.0,
-              ),
-              child: Column(
-                children: [
-                  _buildSectionCard(
-                    context,
-                    title: 'ข้อมูลพื้นฐานและช่องทางติดต่อ',
-                    icon: Icons.person_outline_rounded,
-                    child: _buildContactInfo(context),
-                  ),
-                  if (user.role == 'TENANT') ...[
-                    const SizedBox(height: 20),
-                    _buildSectionCard(
-                      context,
-                      title: 'รายละเอียดสัญญาเช่า',
-                      icon: Icons.description_outlined,
-                      child: _buildContractInfo(context),
-                    ),
-                  ],
-                  const SizedBox(height: 32),
-                ],
-              ),
+  State<UserInfomationPage> createState() => _UserInfomationPageState();
+}
+
+class _UserInfomationPageState extends State<UserInfomationPage> {
+  bool _isTerminating = false;
+
+  Future<void> _showTerminateContractDialog() async {
+    PlatformFile? selectedFile;
+    String? fileError;
+
+    await showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text(
+              'ยืนยันการยกเลิกสัญญา',
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-          ],
-        ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('โปรดอัพโหลดเอกสารการยกเลิกสัญญา (PDF)'),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: () async {
+                    FilePickerResult? result = await FilePicker.platform
+                        .pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['pdf'],
+                          withData: true,
+                        );
+
+                    if (result != null) {
+                      final file = result.files.first;
+                      if (file.extension?.toLowerCase() != 'pdf') {
+                        setDialogState(() {
+                          fileError = 'กรุณาเลือกไฟล์ PDF เท่านั้น';
+                          selectedFile = null;
+                        });
+                      } else if (file.size > 5 * 1024 * 1024) {
+                        setDialogState(() {
+                          fileError = 'ขนาดไฟล์ต้องไม่เกิน 5MB';
+                          selectedFile = null;
+                        });
+                      } else {
+                        setDialogState(() {
+                          selectedFile = file;
+                          fileError = null;
+                        });
+                      }
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: selectedFile != null
+                            ? AppColors.primary
+                            : (fileError != null
+                                  ? Colors.red
+                                  : AppColors.border),
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      color: selectedFile != null
+                          ? AppColors.primary.withValues(alpha: 0.05)
+                          : null,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          selectedFile != null
+                              ? Icons.description
+                              : Icons.upload_file,
+                          color: selectedFile != null
+                              ? AppColors.primary
+                              : AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            selectedFile?.name ?? 'คลิกเพื่อเลือกไฟล์ PDF',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: selectedFile != null
+                                  ? AppColors.textPrimary
+                                  : AppColors.textSecondary,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        if (selectedFile != null)
+                          IconButton(
+                            onPressed: () {
+                              setDialogState(() {
+                                selectedFile = null;
+                              });
+                            },
+                            icon: const Icon(Icons.close, color: Colors.red),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (fileError != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8, left: 4),
+                    child: Text(
+                      fileError!,
+                      style: const TextStyle(color: Colors.red, fontSize: 12),
+                    ),
+                  ),
+                const SizedBox(height: 12),
+                const Text(
+                  '* เมื่อยืนยันแล้ว สถานะห้องจะเปลี่ยนเป็นว่าง และบัญชีผู้เช่าจะถูกระงับทันที',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'ยกเลิก',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: selectedFile == null
+                    ? null
+                    : () async {
+                        Navigator.pop(context); // ปิด dialog
+                        await _processTermination(selectedFile!);
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.grey.shade300,
+                ),
+                child: const Text('ยืนยันยกเลิกสัญญา'),
+              ),
+            ],
+          );
+        },
       ),
+    );
+  }
+
+  Future<void> _processTermination(PlatformFile file) async {
+    if (widget.user.contractId == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('ไม่พบเลขที่สัญญา')));
+      return;
+    }
+
+    setState(() => _isTerminating = true);
+
+    final response = await AdminServiceApi().terminateContract(
+      widget.user.contractId!,
+      file,
+    );
+
+    if (!mounted) return;
+    setState(() => _isTerminating = false);
+
+    if (response['status'] == 'success') {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('ยกเลิกสัญญาสำเร็จ')));
+      context.pop(true);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response['message'] ?? 'เกิดข้อผิดพลาด')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = widget.user;
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: _buildAppBar(context),
+          body: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0,
+                    vertical: 16.0,
+                  ),
+                  child: Column(
+                    children: [
+                      _buildSectionCard(
+                        context,
+                        title: 'ข้อมูลพื้นฐานและช่องทางติดต่อ',
+                        icon: Icons.person_outline_rounded,
+                        child: _buildContactInfo(context),
+                      ),
+                      if (user.role == 'TENANT') ...[
+                        const SizedBox(height: 20),
+                        _buildSectionCard(
+                          context,
+                          title: 'รายละเอียดสัญญาเช่า',
+                          icon: Icons.description_outlined,
+                          child: _buildContractInfo(context),
+                        ),
+                      ],
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (_isTerminating)
+          Container(
+            color: Colors.black.withValues(alpha: 0.3),
+            child: const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          ),
+      ],
     );
   }
 
@@ -118,7 +319,7 @@ class UserInfomationPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${user.firstname} ${user.lastname}',
+          '${widget.user.firstname} ${widget.user.lastname}',
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
@@ -128,7 +329,7 @@ class UserInfomationPage extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          user.role == 'TENANT' ? 'ผู้เช่าพักอาศัย' : 'ผู้ดูแลระบบ',
+          widget.user.role == 'TENANT' ? 'ผู้เช่าพักอาศัย' : 'ผู้ดูแลระบบ',
           style: const TextStyle(
             fontSize: 13,
             color: AppColors.textSecondary,
@@ -139,10 +340,10 @@ class UserInfomationPage extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: 20),
           child: Divider(color: AppColors.divider, height: 1),
         ),
-        if (user.roomNumber != null) ...[
+        if (widget.user.roomNumber != null) ...[
           _buildInfoRow(
             'หมายเลขห้อง - ชั้น',
-            'ห้อง ${user.roomNumber} - ชั้น ${user.floor ?? "-"}',
+            'ห้อง ${widget.user.roomNumber} - ชั้น ${widget.user.floor ?? "-"}',
             Icons.meeting_room_outlined,
           ),
           const SizedBox(height: 16),
@@ -167,26 +368,31 @@ class UserInfomationPage extends StatelessWidget {
                 ),
               ],
             ),
-            _buildStatusBadge(user.userStatus, true),
+            _buildStatusBadge(widget.user.userStatus, true),
           ],
         ),
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 16),
           child: Divider(color: AppColors.divider, height: 1),
         ),
-        _buildInfoRow('เบอร์โทรศัพท์', user.phone, Icons.phone_android_rounded),
+        _buildInfoRow(
+          'เบอร์โทรศัพท์',
+          widget.user.phone,
+          Icons.phone_android_rounded,
+        ),
         const SizedBox(height: 16),
         _buildInfoRow(
           'อีเมล',
-          user.email.isEmpty ? '-' : user.email,
+          widget.user.email.isEmpty ? '-' : widget.user.email,
           Icons.email_outlined,
         ),
         const SizedBox(height: 16),
         _buildInfoRow(
           'ติดต่อฉุกเฉิน',
-          (user.emergencyPhone == null || user.emergencyPhone!.isEmpty)
+          (widget.user.emergencyPhone == null ||
+                  widget.user.emergencyPhone!.isEmpty)
               ? '-'
-              : user.emergencyPhone!,
+              : widget.user.emergencyPhone!,
           Icons.emergency_outlined,
         ),
       ],
@@ -198,7 +404,7 @@ class UserInfomationPage extends StatelessWidget {
       children: [
         _buildInfoRow(
           'เลขที่สัญญา',
-          '#${user.contractNo ?? "-"}',
+          '#${widget.user.contractNo ?? "-"}',
           Icons.description_outlined,
         ),
         const SizedBox(height: 20),
@@ -207,17 +413,17 @@ class UserInfomationPage extends StatelessWidget {
           children: [
             _buildRateItem(
               'ค่าเช่า/เดือน',
-              user.rateRoom,
+              widget.user.rateRoom,
               Icons.home_work_outlined,
             ),
             _buildRateItem(
               'ค่าน้ำ/หน่วย',
-              user.rateWater,
+              widget.user.rateWater,
               Icons.water_drop_outlined,
             ),
             _buildRateItem(
               'ค่าไฟ/หน่วย',
-              user.rateElectric,
+              widget.user.rateElectric,
               Icons.bolt_rounded,
             ),
           ],
@@ -227,13 +433,13 @@ class UserInfomationPage extends StatelessWidget {
         const SizedBox(height: 20),
         _buildInfoRow(
           'วันที่เริ่มสัญญา',
-          _formatThaiDate(user.startDate),
+          _formatThaiDate(widget.user.startDate),
           Icons.calendar_today_rounded,
         ),
         const SizedBox(height: 12),
         _buildInfoRow(
           'วันที่สิ้นสุดสัญญา',
-          _formatThaiDate(user.endDate),
+          _formatThaiDate(widget.user.endDate),
           Icons.event_busy_rounded,
         ),
         const SizedBox(height: 20),
@@ -255,7 +461,7 @@ class UserInfomationPage extends StatelessWidget {
                 ),
               ),
               Text(
-                '${Formatter.formatNumber(user.deposit)} บาท',
+                '${Formatter.formatNumber(widget.user.deposit)} บาท',
                 style: const TextStyle(
                   color: AppColors.primaryDark,
                   fontSize: 18,
@@ -265,6 +471,30 @@ class UserInfomationPage extends StatelessWidget {
             ],
           ),
         ),
+        if (widget.user.contractStatus.toUpperCase() == 'ACTIVE') ...[
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _showTerminateContractDialog,
+              icon: const Icon(Icons.cancel_outlined),
+              label: const Text(
+                'ยกเลิกสัญญาเช่า',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade50,
+                foregroundColor: Colors.red.shade700,
+                elevation: 0,
+                side: BorderSide(color: Colors.red.shade100),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
