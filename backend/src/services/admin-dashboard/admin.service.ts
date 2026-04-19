@@ -104,7 +104,7 @@ export const addTenant = async (
 
 		const userId = userResult.insertId;
 
-		const [contractResult] = await connection.query<ResultSetHeader>(
+		await connection.query<ResultSetHeader>(
 			`
       INSERT INTO Contracts (
         contract_no, identification_card, address, room_id, 
@@ -128,8 +128,6 @@ export const addTenant = async (
 			],
 		);
 
-		const contractId = contractResult.insertId;
-
 		// 3. Update Room Status
 		await connection.query(
 			'UPDATE Room SET room_status = "OCCUPIED" WHERE room_id = ?',
@@ -146,7 +144,6 @@ export const addTenant = async (
 		console.log(rate_water);
 		console.log(rate_electric);
 		console.log(rent_snapshot);
-
 
 		await connection.commit();
 		return { user_id: userId, contract_no };

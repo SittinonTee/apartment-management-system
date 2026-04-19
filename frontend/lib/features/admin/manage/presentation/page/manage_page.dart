@@ -70,6 +70,12 @@ class _ManagePageState extends State<ManagePage>
     if (!mounted) return;
     setState(() {
       _rooms = rooms;
+      _rooms.sort(
+        (a, b) => naturalCompare(
+          a['room_number'].toString().toUpperCase(),
+          b['room_number'].toString().toUpperCase(),
+        ),
+      );
       _isLoadingRooms = false;
     });
   }
@@ -85,9 +91,6 @@ class _ManagePageState extends State<ManagePage>
     }
   }
 
-  // ==========================================
-  // ======== DIALOGS: Rate Management ========
-  // ==========================================
   void _showAddRateDialog() {
     final TextEditingController newRateRoomController = TextEditingController();
     final TextEditingController newRateWaterController =
@@ -214,86 +217,129 @@ class _ManagePageState extends State<ManagePage>
   void _showAddRoomDialog() {
     final TextEditingController roomNoController = TextEditingController();
     final TextEditingController floorController = TextEditingController();
+    String? roomNoError;
 
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            'เพิ่มห้องพักใหม่',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: AppColors.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CustomTextField(
-                labelText: 'หมายเลขห้อง',
-                controller: roomNoController,
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text(
+                'เพิ่มห้องพักใหม่',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
-              CustomTextField(
-                labelText: 'ชั้น (Floor)',
-                controller: floorController,
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              backgroundColor: AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-            ],
-          ),
-          actionsPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'ยกเลิก',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-            ),
-            CustomButton(
-              text: 'บันทึก',
-              width: 100,
-              height: 40,
-              padding: EdgeInsets.zero,
-              onPressed: () async {
-                final roomNo = roomNoController.text.trim();
-                final floor = int.tryParse(floorController.text.trim()) ?? 0;
-
-                if (roomNo.isEmpty || floor == 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบถ้วน')),
-                  );
-                  return;
-                }
-
-                final result = await RoomManageApi().addRoom({
-                  'room_number': roomNo,
-                  'floor': floor,
-                });
-
-                if (context.mounted) {
-                  if (result['status'] == 'success') {
-                    Navigator.pop(context);
-                    _fetchRoomData(); // Refresh list
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('เพิ่มห้องพักสำเร็จ')),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(result['message'] ?? 'เกิดข้อผิดพลาด'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomTextField(
+                    labelText: 'หมายเลขห้อง',
+                    controller: roomNoController,
+                    onChanged: (value) {
+                      if (roomNoError != null) {
+                        setStateDialog(() => roomNoError = null);
+                      }
+                    },
+                  ),
+                  if (roomNoError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 4),
+                      child: Text(
+                        roomNoError!,
+                        style: const TextStyle(
+                          color: AppColors.error,
+                          fontSize: 12,
+                        ),
                       ),
+                    ),
+                  const SizedBox(height: 16),
+                  CustomTextField(
+                    labelText: 'ชั้น (Floor)',
+                    controller: floorController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
+                ],
+              ),
+              actionsPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'ยกเลิก',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+                CustomButton(
+                  text: 'บันทึก',
+                  width: 100,
+                  height: 40,
+                  padding: EdgeInsets.zero,
+                  onPressed: () async {
+                    final roomNo = roomNoController.text.trim();
+                    final floor =
+                        int.tryParse(floorController.text.trim()) ?? 0;
+
+                    setStateDialog(() => roomNoError = null);
+
+                    if (roomNo.isEmpty || floor == 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('กรุณากรอกข้อมูลให้ครบถ้วน'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    // Check for duplicate room
+                    final isDuplicate = _rooms.any(
+                      (room) =>
+                          room['room_number'].toString().toLowerCase() ==
+                          roomNo.toLowerCase(),
                     );
-                  }
-                }
-              },
-            ),
-          ],
+
+                    if (isDuplicate) {
+                      setStateDialog(() {
+                        roomNoError = 'หมายเลขห้องนี้มีอยู่ในระบบแล้ว';
+                      });
+                      return;
+                    }
+
+                    final result = await RoomManageApi().addRoom({
+                      'room_number': roomNo,
+                      'floor': floor,
+                    });
+
+                    if (context.mounted) {
+                      if (result['status'] == 'success') {
+                        Navigator.pop(context);
+                        _fetchRoomData(); // Refresh list
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('เพิ่มห้องพักสำเร็จ')),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              result['message'] ?? 'เกิดข้อผิดพลาด',
+                            ),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -728,4 +774,30 @@ class _ManagePageState extends State<ManagePage>
       ),
     );
   }
+}
+
+int naturalCompare(String a, String b) {
+  final regExp = RegExp(r'(\d+|\D+)');
+  final aMatches = regExp.allMatches(a).map((m) => m.group(0)!).toList();
+  final bMatches = regExp.allMatches(b).map((m) => m.group(0)!).toList();
+
+  final length = aMatches.length < bMatches.length
+      ? aMatches.length
+      : bMatches.length;
+
+  for (int i = 0; i < length; i++) {
+    final aPart = aMatches[i];
+    final bPart = bMatches[i];
+    final aInt = int.tryParse(aPart);
+    final bInt = int.tryParse(bPart);
+
+    if (aInt != null && bInt != null) {
+      final compare = aInt.compareTo(bInt);
+      if (compare != 0) return compare;
+    } else {
+      final compare = aPart.compareTo(bPart);
+      if (compare != 0) return compare;
+    }
+  }
+  return aMatches.length.compareTo(bMatches.length);
 }
