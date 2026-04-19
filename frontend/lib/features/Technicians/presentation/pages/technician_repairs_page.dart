@@ -6,6 +6,7 @@ import '../../data/repair_model.dart';
 import '../../data/repair_service.dart';
 import '../widgets/technician_repair_card.dart';
 import 'technician_repair_detail_page.dart';
+import 'technician_repair_history.dart';
 
 class TechnicianRepairsPage extends StatefulWidget {
   const TechnicianRepairsPage({super.key});
@@ -123,7 +124,14 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
               fontWeight: FontWeight.bold,
             ),
             borderRadius: BorderRadius.circular(100),
-            onPressed: () {}, // TODO: ไปหน้าประวัติ
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TechnicianRepairHistoryPage(),
+                ),
+              );
+            },
           ),
         ],
       ),

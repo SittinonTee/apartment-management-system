@@ -9,4 +9,7 @@ router.get("/repairs", TechniciansController.getRepairs);
 // ช่างรับงาน (กดยืนยันจากหน้าแอป)
 router.post("/accept", TechniciansController.acceptRepair);
 
+// เปลี่ยนสถานะการซ่อม (เช่น เป็น PENDING)
+router.post("/status", TechniciansController.updateStatus);
+
 export default router;

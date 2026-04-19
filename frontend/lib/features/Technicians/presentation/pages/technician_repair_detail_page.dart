@@ -4,6 +4,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/widgets/section_card.dart';
 import '../../../../core/widgets/custom_button.dart';
+import '../../../../core/services/auth_service.dart';
+import 'package:provider/provider.dart';
 import '../../data/repair_model.dart';
 import '../widgets/repair_detail_row.dart';
 import '../widgets/accept_job_dialog.dart';
@@ -33,7 +35,10 @@ class _TechnicianRepairDetailPageState
             _buildHeader(context),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 8,
+                ),
                 child: Column(
                   children: [
                     _buildInfoSection(),
@@ -46,7 +51,7 @@ class _TechnicianRepairDetailPageState
                 ),
               ),
             ),
-            _buildBottomAction(context),
+            if (widget.repair.status == 'REPORTED') _buildBottomAction(context),
           ],
         ),
       ),
@@ -55,6 +60,7 @@ class _TechnicianRepairDetailPageState
 
   // ฟังก์ชันส่งข้อมูลรับงานไปหลังบ้าน
   Future<void> _handleAcceptJob(DateTime scheduledDate) async {
+    final technicianId = context.read<AuthService>().userId ?? 1;
     setState(() => _isLoading = true);
 
     try {
@@ -62,7 +68,7 @@ class _TechnicianRepairDetailPageState
         '${ApiConstants.baseUrl}/technicians/accept',
         data: {
           'repairId': widget.repair.id,
-          'technicianId': 1, // Mock technician ID สำหรับทดสอบ
+          'technicianId': technicianId,
           'scheduledAt': scheduledDate.toIso8601String(),
         },
       );
@@ -106,11 +112,14 @@ class _TechnicianRepairDetailPageState
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildCircleButton(Icons.close, () => Navigator.pop(context)),
-          const Text('รายละเอียดการแจ้งซ่อม',
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary)),
+          const Text(
+            'รายละเอียดการแจ้งซ่อม',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
           const SizedBox(width: 48),
         ],
       ),
@@ -141,11 +150,18 @@ class _TechnicianRepairDetailPageState
             label: 'สถานะ :',
             value: Row(
               children: [
-                Icon(Icons.radio_button_checked, size: 14, color: widget.repair.statusTextColor),
+                Icon(
+                  Icons.radio_button_checked,
+                  size: 14,
+                  color: widget.repair.statusTextColor,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   widget.repair.statusText,
-                  style: TextStyle(color: widget.repair.statusTextColor, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: widget.repair.statusTextColor,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -160,7 +176,9 @@ class _TechnicianRepairDetailPageState
           RepairDetailRow(
             label: 'รายละเอียด :',
             value: Text(
-              widget.repair.description.isEmpty ? '-' : widget.repair.description,
+              widget.repair.description.isEmpty
+                  ? '-'
+                  : widget.repair.description,
               style: const TextStyle(color: AppColors.textSecondary),
             ),
           ),
@@ -179,23 +197,37 @@ class _TechnicianRepairDetailPageState
 
   // --- กล่องรูปภาพประกอบ ---
   Widget _buildImageSection() {
-    final hasImage = widget.repair.repairsImageUrl != null && widget.repair.repairsImageUrl!.isNotEmpty;
+    final hasImage =
+        widget.repair.repairsImageUrl != null &&
+        widget.repair.repairsImageUrl!.isNotEmpty;
 
     return SectionCard(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('รูปภาพประกอบ :', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+          const Text(
+            'รูปภาพประกอบ :',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
           const SizedBox(height: 16),
           if (hasImage)
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Image.network(widget.repair.repairsImageUrl!, width: 120, height: 120, fit: BoxFit.cover),
+              child: Image.network(
+                widget.repair.repairsImageUrl!,
+                width: 120,
+                height: 120,
+                fit: BoxFit.cover,
+              ),
             )
           else
             Container(
-              width: double.infinity, height: 120,
+              width: double.infinity,
+              height: 120,
               decoration: BoxDecoration(
                 color: const Color(0xFFF5F5F5),
                 borderRadius: BorderRadius.circular(16),
@@ -204,9 +236,16 @@ class _TechnicianRepairDetailPageState
               child: const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.image_not_supported_outlined, color: Colors.grey, size: 32),
+                  Icon(
+                    Icons.image_not_supported_outlined,
+                    color: Colors.grey,
+                    size: 32,
+                  ),
                   SizedBox(height: 8),
-                  Text('ไม่มีรูปภาพประกอบ', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                  Text(
+                    'ไม่มีรูปภาพประกอบ',
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
                 ],
               ),
             ),
@@ -232,7 +271,10 @@ class _TechnicianRepairDetailPageState
             label: 'วันที่สะดวก :',
             value: Text(
               widget.repair.preferredTime ?? 'ไม่ระบุ',
-              style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             showDivider: false,
           ),
