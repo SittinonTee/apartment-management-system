@@ -263,19 +263,6 @@ class _RepairsPageState extends State<RepairsPage> {
                       padding: EdgeInsets.zero,
                       borderRadius: BorderRadius.circular(20),
                     ),
-
-                    const SizedBox(width: 12),
-
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.logout),
-                        onPressed: () => context.read<AuthService>().logout(),
-                      ),
-                    ),
                   ],
                 ),
               ],

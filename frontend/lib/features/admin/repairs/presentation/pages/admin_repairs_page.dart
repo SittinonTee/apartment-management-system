@@ -206,18 +206,6 @@ class _AdminRepairsPageState extends State<AdminRepairsPage> {
                       onPressed: () => context.push('/admin/technicians'),
                       icon: const Icon(Icons.engineering, size: 18),
                     ),
-                    const SizedBox(width: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.logout, size: 20),
-                        onPressed: () => context.read<AuthService>().logout(),
-                      ),
-                    ),
                   ],
                 ),
               ],
@@ -346,7 +334,7 @@ class _AdminRepairsPageState extends State<AdminRepairsPage> {
                           : repair.mechanicfirstname,
                       mechaniclastname: repair.mechaniclastname,
                       mechanicPhone: repair.mechanicPhone,
-                      imageUrl: repair.imageUrl,
+                      imageUrls: repair.imageUrls,
                     );
                   },
                 ),
