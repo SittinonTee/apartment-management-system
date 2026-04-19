@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class AdminRepairModel {
   // Centralized Category Mapping
   final int id;
@@ -7,7 +9,7 @@ class AdminRepairModel {
   final String title; // head_repairs
   final String description;
   final String preferredTime;
-  final String? imageUrl;
+  final List<String> imageUrls;
   final String status;
   final DateTime createdAt;
   final DateTime? completedAt;
@@ -27,7 +29,7 @@ class AdminRepairModel {
     required this.title,
     required this.description,
     required this.preferredTime,
-    this.imageUrl,
+    this.imageUrls = const [],
     required this.status,
     required this.createdAt,
     this.completedAt,
@@ -49,7 +51,7 @@ class AdminRepairModel {
       title: json['head_repairs'] ?? '',
       description: json['description'] ?? '',
       preferredTime: json['preferred_time'] ?? '',
-      imageUrl: json['repairsimage_url'],
+      imageUrls: _parseImageUrls(json['repairsimage_url']),
       status: json['status'] ?? 'REPORTED',
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at']).toLocal()
@@ -65,5 +67,35 @@ class AdminRepairModel {
       mechaniclastname: json['mechanic_lastname'] ?? '',
       mechanicPhone: json['mechanic_phone'] ?? '',
     );
+  }
+
+  static List<String> _parseImageUrls(dynamic data) {
+    if (data == null) return [];
+    final String raw = data.toString().trim();
+    if (raw.isEmpty) return [];
+
+    // Try parsing as JSON array
+    try {
+      if (raw.startsWith('[') && raw.endsWith(']')) {
+        final decoded = jsonDecode(raw);
+        if (decoded is List) {
+          return decoded.map((e) => e.toString()).toList();
+        }
+      }
+    } catch (_) {
+      // Fallback to comma-separated
+    }
+
+    // Fallback to comma-separated if not JSON or if JSON parse failed
+    if (raw.contains(',')) {
+      return raw
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+    }
+
+    // Default: return single string in list
+    return [raw];
   }
 }

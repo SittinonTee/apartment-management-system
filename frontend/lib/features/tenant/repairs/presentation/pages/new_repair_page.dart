@@ -3,6 +3,7 @@ import 'package:frontend/features/tenant/repairs/data/get_repairs.dart';
 import 'package:frontend/features/tenant/repairs/data/repair_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
@@ -572,6 +573,16 @@ class _NewRepairPageState extends State<NewRepairPage> {
                     hintText: 'พิมพ์เบอร์โทรศัพท์',
                     isRequired: true,
                     keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                    ],
+                    validator: (value) {
+                      if (value != null && value.length != 10) {
+                        return 'กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
 
