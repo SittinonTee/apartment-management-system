@@ -1,4 +1,5 @@
 export interface USERCONTRACT {
+	contracts_id: number;
 	user_id: number;
 	firstname: string;
 	lastname: string;

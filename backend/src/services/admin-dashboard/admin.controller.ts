@@ -61,11 +61,32 @@ export const addTenant = async (
 ): Promise<void> => {
 	try {
 		const adminId = req.user?.id;
-		const result = await adminService.addTenant(req.body, adminId);
+		const result = await adminService.addTenant(req.body, adminId, req.file);
 
 		res.status(200).json({
 			status: "success",
 			message: "เพิ่มผู้เช่าใหม่สำเร็จ",
+			data: result,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+export const terminateContract = async (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+): Promise<void> => {
+	try {
+		const { contract_id } = req.body;
+		const result = await adminService.terminateContract(
+			Number(contract_id),
+			req.file,
+		);
+
+		res.status(200).json({
+			status: "success",
+			message: "ยกเลิกสัญญาเช่าสำเร็จ",
 			data: result,
 		});
 	} catch (error) {

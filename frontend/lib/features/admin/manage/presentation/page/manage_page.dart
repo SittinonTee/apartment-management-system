@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/core/widgets/custom_button.dart';
-import 'package:frontend/core/utils/formatter.dart';
 import 'package:frontend/core/widgets/custom_text_field.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/custom_dropdown_menu.dart';
 import 'package:frontend/features/admin/dashboard/presentation/data/get_rate.dart';
+import 'package:frontend/features/admin/dashboard/presentation/data/rate_manage_api.dart';
+import 'package:frontend/features/admin/dashboard/presentation/data/room_manage_api.dart';
 import 'package:frontend/core/widgets/searchbar.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/users_info_card.dart'; // From users_info_card.dart
 
@@ -21,94 +22,26 @@ class _ManagePageState extends State<ManagePage>
   late TabController _tabController;
 
   // -------- Rate Management State --------
-  List<RateTemplate> _dummyRates = [];
+  List<RateTemplate> _rates = [];
   final TextEditingController _rateSelectionController =
       TextEditingController();
   final TextEditingController _rateRoomController = TextEditingController();
   final TextEditingController _rateWaterController = TextEditingController();
   final TextEditingController _rateElectricController = TextEditingController();
-  // RateTemplate? _selectedRate;
+  RateTemplate? _selectedRate;
+  bool _isLoadingRates = false;
 
   // -------- Room Management State --------
   String _roomSearchQuery = '';
-  final List<Map<String, dynamic>> _dummyRooms = [
-    {
-      'id': '1',
-      'room_number': 'A329',
-      'floor': 3,
-      'status': 'ว่าง',
-      'room_type': 'Standard',
-    },
-    {
-      'id': '2',
-      'room_number': 'B329',
-      'floor': 2,
-      'status': 'มีผู้เช่า',
-      'room_type': 'Standard',
-    },
-    {
-      'id': '3',
-      'room_number': 'C126',
-      'floor': 4,
-      'status': 'มีผู้เช่า',
-      'room_type': 'Standard',
-    },
-    {
-      'id': '4',
-      'room_number': 'C786',
-      'floor': 4,
-      'status': 'ว่าง',
-      'room_type': 'VIP',
-    },
-    {
-      'id': '5',
-      'room_number': 'C786',
-      'floor': 4,
-      'status': 'ว่าง',
-      'room_type': 'VIP',
-    },
-    {
-      'id': '6',
-      'room_number': 'C786',
-      'floor': 4,
-      'status': 'ว่าง',
-      'room_type': 'VIP',
-    },
-    {
-      'id': '7',
-      'room_number': 'C786',
-      'floor': 4,
-      'status': 'ว่าง',
-      'room_type': 'VIP',
-    },
-    {
-      'id': '8',
-      'room_number': 'C786',
-      'floor': 4,
-      'status': 'ว่าง',
-      'room_type': 'VIP',
-    },
-    {
-      'id': '9',
-      'room_number': 'C786',
-      'floor': 4,
-      'status': 'ว่าง',
-      'room_type': 'VIP',
-    },
-    {
-      'id': '10',
-      'room_number': 'C786',
-      'floor': 4,
-      'status': 'ว่าง',
-      'room_type': 'VIP',
-    },
-  ];
+  List<Map<String, dynamic>> _rooms = [];
+  bool _isLoadingRooms = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _fetchRateData();
+    _fetchRoomData();
   }
 
   @override
@@ -122,23 +55,32 @@ class _ManagePageState extends State<ManagePage>
   }
 
   Future<void> _fetchRateData() async {
-    final rates = await GetRate().getRates();
+    setState(() => _isLoadingRates = true);
+    final ratesData = await RateManageApi().getAllRates();
     if (!mounted) return;
     setState(() {
-      _dummyRates = rates;
+      _rates = ratesData.map((x) => RateTemplate.fromJson(x)).toList();
+      _isLoadingRates = false;
+    });
+  }
+
+  Future<void> _fetchRoomData() async {
+    setState(() => _isLoadingRooms = true);
+    final rooms = await RoomManageApi().getAllRooms();
+    if (!mounted) return;
+    setState(() {
+      _rooms = rooms;
+      _isLoadingRooms = false;
     });
   }
 
   void _onRateSelected(RateTemplate? rate) {
     if (rate != null) {
       setState(() {
-        _rateRoomController.text = Formatter.formatStringNumber(rate.rateRoom);
-        _rateWaterController.text = Formatter.formatStringNumber(
-          rate.rateWater,
-        );
-        _rateElectricController.text = Formatter.formatStringNumber(
-          rate.rateElectric,
-        );
+        _selectedRate = rate;
+        _rateRoomController.text = rate.rateRoom;
+        _rateWaterController.text = rate.rateWater;
+        _rateElectricController.text = rate.rateElectric;
       });
     }
   }
@@ -211,9 +153,41 @@ class _ManagePageState extends State<ManagePage>
               width: 100,
               height: 40,
               padding: const EdgeInsets.all(0),
-              onPressed: () {
-                // TODO: บันทึกข้อมูลเรทราคา
-                Navigator.pop(context);
+              onPressed: () async {
+                final rateRoom = newRateRoomController.text.trim();
+                final rateWater = newRateWaterController.text.trim();
+                final rateElectric = newRateElectricController.text.trim();
+
+                if (rateRoom.isEmpty ||
+                    rateWater.isEmpty ||
+                    rateElectric.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบถ้วน')),
+                  );
+                  return;
+                }
+
+                final result = await RateManageApi().addRate({
+                  'rate_room': rateRoom,
+                  'rate_water': rateWater,
+                  'rate_electric': rateElectric,
+                });
+
+                if (context.mounted) {
+                  if (result['status'] == 'success') {
+                    Navigator.pop(context);
+                    _fetchRateData();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('เพิ่มเรทราคาสำเร็จ')),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(result['message'] ?? 'เกิดข้อผิดพลาด'),
+                      ),
+                    );
+                  }
+                }
               },
             ),
           ],
@@ -237,14 +211,9 @@ class _ManagePageState extends State<ManagePage>
     );
   }
 
-  // ==========================================
-  // ======== DIALOGS: Room Management ========
-  // ==========================================
-
   void _showAddRoomDialog() {
     final TextEditingController roomNoController = TextEditingController();
     final TextEditingController floorController = TextEditingController();
-    String selectedType = 'Standard';
 
     showDialog(
       context: context,
@@ -272,19 +241,6 @@ class _ManagePageState extends State<ManagePage>
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
-              const SizedBox(height: 16),
-              CustomDropdownMenu<String>(
-                hintText: 'เลือกประเภทห้อง',
-                label: 'ประเภทห้อง',
-                initialSelection: selectedType,
-                dropdownMenuEntries: const [
-                  DropdownMenuEntry(value: 'Standard', label: 'Standard'),
-                  DropdownMenuEntry(value: 'VIP', label: 'VIP'),
-                ],
-                onSelected: (val) {
-                  if (val != null) selectedType = val;
-                },
-              ),
             ],
           ),
           actionsPadding: const EdgeInsets.symmetric(
@@ -304,9 +260,37 @@ class _ManagePageState extends State<ManagePage>
               width: 100,
               height: 40,
               padding: EdgeInsets.zero,
-              onPressed: () {
-                // TODO: API สร้างห้องใหม่
-                Navigator.pop(context);
+              onPressed: () async {
+                final roomNo = roomNoController.text.trim();
+                final floor = int.tryParse(floorController.text.trim()) ?? 0;
+
+                if (roomNo.isEmpty || floor == 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบถ้วน')),
+                  );
+                  return;
+                }
+
+                final result = await RoomManageApi().addRoom({
+                  'room_number': roomNo,
+                  'floor': floor,
+                });
+
+                if (context.mounted) {
+                  if (result['status'] == 'success') {
+                    Navigator.pop(context);
+                    _fetchRoomData(); // Refresh list
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('เพิ่มห้องพักสำเร็จ')),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(result['message'] ?? 'เกิดข้อผิดพลาด'),
+                      ),
+                    );
+                  }
+                }
               },
             ),
           ],
@@ -348,9 +332,29 @@ class _ManagePageState extends State<ManagePage>
               width: 100,
               height: 40,
               padding: EdgeInsets.zero,
-              onPressed: () {
-                // TODO: API ลบห้อง
-                Navigator.pop(context);
+              onPressed: () async {
+                final roomId = int.tryParse(
+                  room['room_id']?.toString() ?? room['id']?.toString() ?? '',
+                );
+                if (roomId == null) return;
+
+                final result = await RoomManageApi().deleteRoom(roomId);
+
+                if (context.mounted) {
+                  if (result['status'] == 'success') {
+                    Navigator.pop(context);
+                    _fetchRoomData(); // Refresh list
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('ลบห้องพักสำเร็จ')),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('เกิดข้อผิดพลาดในการลบห้อง'),
+                      ),
+                    );
+                  }
+                }
               },
             ),
           ],
@@ -364,6 +368,10 @@ class _ManagePageState extends State<ManagePage>
   // ==========================================
 
   Widget _buildRateTab(TextTheme textTheme) {
+    if (_isLoadingRates) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 24.0),
@@ -411,10 +419,10 @@ class _ManagePageState extends State<ManagePage>
                   label: 'เลือกเรทที่ต้องการแก้ไข',
                   hintText: 'เลือกเรทราคาที่ใช้งานอยู่',
                   controller: _rateSelectionController,
-                  dropdownMenuEntries: _dummyRates.map((rate) {
+                  dropdownMenuEntries: _rates.map((rate) {
                     return DropdownMenuEntry<RateTemplate>(
                       value: rate,
-                      label: 'เรทราคา ID: ${rate.id}',
+                      label: 'เรทราคา ${rate.rateRoom} บาท',
                     );
                   }).toList(),
                   onSelected: _onRateSelected,
@@ -468,8 +476,41 @@ class _ManagePageState extends State<ManagePage>
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
-                    onPressed: () {
-                      // TODO: Save Updated Rate
+                    onPressed: () async {
+                      if (_selectedRate == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('กรุณาเลือกเรทที่ต้องการแก้ไข'),
+                          ),
+                        );
+                        return;
+                      }
+
+                      final result = await RateManageApi().updateRate(
+                        _selectedRate!.id,
+                        {
+                          'rate_room': _rateRoomController.text.trim(),
+                          'rate_water': _rateWaterController.text.trim(),
+                          'rate_electric': _rateElectricController.text.trim(),
+                        },
+                      );
+
+                      if (!mounted) return;
+
+                      if (result['status'] == 'success') {
+                        _fetchRateData();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('อัปเดตเรทราคาสำเร็จ')),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              result['message'] ?? 'เกิดข้อผิดพลาด',
+                            ),
+                          ),
+                        );
+                      }
                     },
                   ),
                 ),
@@ -482,9 +523,13 @@ class _ManagePageState extends State<ManagePage>
   }
 
   Widget _buildRoomTab(TextTheme textTheme) {
-    List<Map<String, dynamic>> filteredRooms = _dummyRooms;
+    if (_isLoadingRooms) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    List<Map<String, dynamic>> filteredRooms = _rooms;
     if (_roomSearchQuery.isNotEmpty) {
-      filteredRooms = _dummyRooms
+      filteredRooms = _rooms
           .where((r) => r['room_number'].toString().contains(_roomSearchQuery))
           .toList();
     }
@@ -529,7 +574,11 @@ class _ManagePageState extends State<ManagePage>
               separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final room = filteredRooms[index];
-                final isVacant = room['status'] == 'ว่าง';
+                final status = room['room_status'] ?? 'AVAILABLE';
+                final isVacant = status == 'AVAILABLE';
+                final statusLabel = status == 'AVAILABLE'
+                    ? 'ว่าง'
+                    : 'มีผู้เช่า';
 
                 return CustomCard(
                   height: 80,
@@ -565,7 +614,7 @@ class _ManagePageState extends State<ManagePage>
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    '(${room['status']})',
+                                    '($statusLabel)',
                                     style: TextStyle(
                                       color: isVacant
                                           ? AppColors.success
@@ -577,7 +626,7 @@ class _ManagePageState extends State<ManagePage>
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'ชั้น ${room['floor']} - ${room['room_type']}',
+                                'ชั้น ${room['floor']}',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: Color(0xFFB0B0B0),
