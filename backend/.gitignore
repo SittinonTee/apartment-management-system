@@ -101,3 +101,6 @@ dist
 # OS metadata
 .DS_Store
 Thumbs.db
+
+# Firebase credentials
+firebase-service-account.json

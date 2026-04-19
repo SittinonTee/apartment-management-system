@@ -243,6 +243,7 @@ class _PackagesPageState extends State<PackagesPage> {
                                   receivedBy:
                                       item["received_by"]?.toString() ??
                                       "ไม่ทราบชื่อ",
+                                  imageUrl: item["parcelsimage_url"]?.toString() ?? "",
                                 ),
                               ),
                             );

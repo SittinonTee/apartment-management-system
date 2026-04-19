@@ -24,6 +24,7 @@ class RepairTicketCard extends StatefulWidget {
   final String mechanicfirstname;
   final String mechaniclastname;
   final String mechanicPhone;
+  final String? imageUrl;
 
   final int repairId;
   final VoidCallback? onRefresh;
@@ -48,6 +49,7 @@ class RepairTicketCard extends StatefulWidget {
     required this.mechanicfirstname,
     required this.mechaniclastname,
     required this.mechanicPhone,
+    this.imageUrl,
     this.onRefresh,
   });
 
@@ -348,6 +350,26 @@ class _RepairTicketCardState extends State<RepairTicketCard> {
                     ),
                   ),
                   const SizedBox(height: 12),
+
+                  if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) ...[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        widget.imageUrl!,
+                        width: double.infinity,
+                        height: 150,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Container(
+                              height: 150,
+                              color: Colors.grey.shade100,
+                              child: const Icon(Icons.broken_image,
+                                  color: Colors.grey, size: 50),
+                            ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
                   // วันที่รับงาน - วันที่จบงาน
                   Row(

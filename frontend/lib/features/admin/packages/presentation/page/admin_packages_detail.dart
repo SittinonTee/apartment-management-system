@@ -10,6 +10,7 @@ class AdminPackagesDetail extends StatelessWidget {
   final String room;
   final String status;
   final String receivedBy;
+  final String imageUrl;
 
   const AdminPackagesDetail({
     super.key,
@@ -19,6 +20,7 @@ class AdminPackagesDetail extends StatelessWidget {
     required this.room,
     required this.status,
     required this.receivedBy,
+    required this.imageUrl,
   });
 
   @override
@@ -60,10 +62,22 @@ class AdminPackagesDetail extends StatelessWidget {
                   color: Colors.blueGrey.shade50,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Image.asset(
-                  "assets/images/box.png", // ใส่รูปของคุณ
-                  height: 150,
-                ),
+                child: imageUrl.isNotEmpty
+                    ? Image.network(
+                        imageUrl,
+                        height: 150,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => const Icon(
+                          Icons.inventory_2_outlined,
+                          size: 100,
+                          color: Colors.grey,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.inventory_2_outlined,
+                        size: 100,
+                        color: Colors.grey,
+                      ),
               ),
 
               const SizedBox(height: 20),
