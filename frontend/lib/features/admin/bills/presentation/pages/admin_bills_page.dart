@@ -158,7 +158,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
@@ -166,26 +166,6 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
                 style: textTheme.displayLarge?.copyWith(
                   color: AppColors.textPrimary,
                 ),
-              ),
-              Row(
-                children: [
-                  CustomButton(
-                    isPrimary: false,
-                    isOutlined: true,
-                    onPressed: () {
-                      context.read<AuthService>().logout();
-                    },
-                    icon: const Icon(
-                      Icons.logout,
-                      size: 18,
-                      color: AppColors.textSecondary,
-                    ),
-                    width: 34,
-                    height: 34,
-                    padding: const EdgeInsets.only(left: 6),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ],
               ),
             ],
           ),
