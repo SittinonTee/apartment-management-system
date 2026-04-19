@@ -209,14 +209,19 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
       itemBuilder: (context, index) {
         return TechnicianRepairCard(
           repair: tasks[index],
-          onTap: () {
-            Navigator.push(
+          onTap: () async {
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) =>
                     TechnicianRepairDetailPage(repair: tasks[index]),
               ),
             );
+            
+            // ถ้ารับงานสำเร็จ (result == true) ให้โหลดข้อมูลใหม่ทันที
+            if (result == true) {
+              _fetchRepairs();
+            }
           },
         );
       },
