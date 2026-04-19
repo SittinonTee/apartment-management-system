@@ -20,7 +20,6 @@ export interface Contract {
 	room_number: string; // เลขที่ห้อง
 	building: string; // อาคาร
 	floor: number; // ชั้น
-	room_type: string; // ประเภทห้อง
 
 	// Joined fields from Rate
 	rate_room: string; // อัตราค่าห้อง

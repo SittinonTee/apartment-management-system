@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/users_info_card.dart';
 import 'package:frontend/core/widgets/custom_text_field.dart';
+import 'package:file_picker/file_picker.dart';
 
 class UserForm extends StatefulWidget {
   const UserForm({super.key});
@@ -22,10 +23,21 @@ class UserFormState extends State<UserForm> {
   final _addressController = TextEditingController();
 
   String? _selectedFileName;
+  PlatformFile? _selectedFile;
+  String? _fileError;
 
   // ---------------- validate ก่อนส่งข้อมูล ----------------
   bool validate() {
-    return _formKey.currentState?.validate() ?? false;
+    bool isFormValid = _formKey.currentState?.validate() ?? false;
+
+    if (_selectedFile == null) {
+      setState(() {
+        _fileError = 'กรุณาอัพโหลดเอกสารสัญญาฉบับกระดาษ (PDF)';
+      });
+      return false;
+    }
+
+    return isFormValid;
   }
 
   @override
@@ -48,6 +60,7 @@ class UserFormState extends State<UserForm> {
       'phone': _phoneController.text.trim(),
       'emergency_phone': _emergencyPhoneController.text.trim(),
       'address': _addressController.text.trim(),
+      'contract_file': _selectedFile, // ส่ง PlatformFile ไปให้ API จัดการ
     };
   }
 
@@ -167,18 +180,54 @@ class UserFormState extends State<UserForm> {
               maxLines: 3,
             ),
             const SizedBox(height: 16),
-            Text(
-              'ไฟล์ข้อมูลเพิ่มเติม (*ไม่บังคับ)',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.secondary,
-              ),
+            Row(
+              children: [
+                Text(
+                  'เอกสารสัญญาฉบับกระดาษ',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                ),
+                const Text(' *', style: TextStyle(color: Colors.red)),
+              ],
             ),
             const SizedBox(height: 8),
             InkWell(
-              onTap: () {
-                // TODO: เพิ่ม package 'file_picker' เพื่อใช้งานการอัพโหลดไฟล์จริง
-                // setState(() { _selectedFileName = 'test_document.pdf'; });
+              onTap: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['pdf'],
+                  withData: true,
+                );
+
+                if (result != null) {
+                  final file = result.files.first;
+                  const int maxFileSize = 5 * 1024 * 1024; // 5MB
+
+                  // ตรวจสอบนามสกุลไฟล์
+                  if (file.extension?.toLowerCase() != 'pdf') {
+                    setState(() {
+                      _fileError = 'อนุญาตเฉพาะไฟล์ PDF เท่านั้น';
+                      _selectedFile = null;
+                      _selectedFileName = null;
+                    });
+                  }
+                  // ตรวจสอบขนาดไฟล์
+                  else if (file.size > maxFileSize) {
+                    setState(() {
+                      _fileError = 'ขนาดไฟล์ต้องไม่เกิน 5MB';
+                      _selectedFile = null;
+                      _selectedFileName = null;
+                    });
+                  } else {
+                    setState(() {
+                      _selectedFile = file;
+                      _selectedFileName = file.name;
+                      _fileError = null;
+                    });
+                  }
+                }
               },
               borderRadius: BorderRadius.circular(8),
               child: Container(
@@ -189,32 +238,60 @@ class UserFormState extends State<UserForm> {
                 ),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade50,
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(
+                    color: _fileError != null
+                        ? Colors.red
+                        : Colors.grey.shade300,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.upload_file,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: _fileError != null
+                          ? Colors.red
+                          : Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        _selectedFileName ?? 'อัพโหลดไฟล์ (PDF, JPG, PNG)',
+                        _selectedFileName ??
+                            'อัพโหลดไฟล์สัญญา (PDF ไม่เกิน 5MB)',
                         style: TextStyle(
                           color: _selectedFileName != null
                               ? Theme.of(context).colorScheme.onSurface
-                              : Colors.grey.shade600,
+                              : (_fileError != null
+                                    ? Colors.red
+                                    : Colors.grey.shade600),
                         ),
                       ),
                     ),
                     if (_selectedFileName != null)
-                      const Icon(Icons.check_circle, color: Colors.green),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedFile = null;
+                            _selectedFileName = null;
+                            _fileError = null;
+                          });
+                        },
+                        icon: const Icon(Icons.close, color: Colors.red),
+                        constraints: const BoxConstraints(),
+                        padding: EdgeInsets.zero,
+                      ),
                   ],
                 ),
               ),
             ),
+            if (_fileError != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, left: 4.0),
+                child: Text(
+                  _fileError!,
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ),
           ],
         ),
       ),

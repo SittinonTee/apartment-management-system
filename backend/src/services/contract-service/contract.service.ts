@@ -7,7 +7,6 @@ export const getContractByUserId = async (userId: number) => {
             c.*, 
             r.room_number, 
             r.floor, 
-            r.room_type,
             rt.rate_room, 
             rt.rate_water, 
             rt.rate_electric,

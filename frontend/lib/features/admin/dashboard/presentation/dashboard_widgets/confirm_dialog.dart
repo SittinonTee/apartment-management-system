@@ -24,18 +24,18 @@ class ConfirmDialog extends StatefulWidget {
 }
 
 class _ConfirmDialogState extends State<ConfirmDialog> {
-  // ประกาศ late ไว้ รอ initState() เรียกเจนค่า
-  late String _inviteCode;
-  late String _contractNo;
-  late String _idKeycard;
+  // ใช้ค่าเริ่มต้นแทน late เพื่อกัน LateInitializationError
+  String _inviteCode = '';
+  String _contractNo = '';
+  String _idKeycard = '';
 
   // ตัวส่ง backend (yyyy-MM-dd)
-  late String _formattedStartDate;
-  late String _formattedEndDate;
+  String _formattedStartDate = '';
+  String _formattedEndDate = '';
 
   // ตัวโชว์ (dd/MM/yyyy)
-  late String _displayStartDate;
-  late String _displayEndDate;
+  String _displayStartDate = '-';
+  String _displayEndDate = '-';
 
   @override
   void initState() {

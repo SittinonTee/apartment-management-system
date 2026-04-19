@@ -1,4 +1,5 @@
 import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
+import { uploadToFirebase } from "../../utils/firebase_upload";
 import { pool } from "../database";
 import type { V_AddTenantForm } from "./config/addUser.schema";
 import type { USERCONTRACT } from "./config/userContractType";
@@ -9,6 +10,7 @@ export const getUserData = async () => {
   `);
 
 	return (rows as USERCONTRACT[]).map((u: USERCONTRACT) => ({
+		contract_id: u.contracts_id,
 		id: u.user_id,
 		firstname: u.firstname,
 		lastname: u.lastname,
@@ -33,7 +35,7 @@ export const getUserData = async () => {
 
 export const getAvailableRooms = async () => {
 	const [rows] = await pool.query<RowDataPacket[]>(`
-    SELECT room_id, room_number, floor, room_type
+    SELECT room_id, room_number, floor
     FROM Room
     WHERE room_status = 'AVAILABLE'
   `);
@@ -51,7 +53,12 @@ export const getRates = async () => {
 export const addTenant = async (
 	userData: V_AddTenantForm,
 	adminId?: number,
+	file?: Express.Multer.File,
 ) => {
+	if (!file) {
+		throw new Error("กรุณาอัพโหลดเอกสารสัญญาฉบับกระดาษ (PDF)");
+	}
+
 	const {
 		firstname,
 		lastname,
@@ -76,6 +83,9 @@ export const addTenant = async (
 	try {
 		await connection.beginTransaction();
 
+		// 0. อัพโหลดไฟล์สัญญาไปที่ Firebase
+		const contractfile_url = await uploadToFirebase(file, "contracts");
+
 		// 1. Create User
 		const [userResult] = await connection.query<ResultSetHeader>(
 			`
@@ -99,9 +109,9 @@ export const addTenant = async (
       INSERT INTO Contracts (
         contract_no, identification_card, address, room_id, 
         user_id, rate_id, start_date, end_date, deposit, 
-        status, created_by
+        contractfile_url, status, created_by
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?)
     `,
 			[
 				contract_no,
@@ -113,6 +123,7 @@ export const addTenant = async (
 				start_date,
 				end_date,
 				deposit,
+				contractfile_url,
 				adminId,
 			],
 		);
@@ -152,7 +163,61 @@ export const addTenant = async (
 		return { user_id: userId, contract_no };
 	} catch (error) {
 		await connection.rollback();
-		console.error("Error in addTenant service:", error);
+		console.error("เกิดข้อผิดพลาดในบริการเพิ่มผู้เช่า:", error);
+		throw error;
+	} finally {
+		connection.release();
+	}
+};
+
+export const terminateContract = async (
+	contractId: number,
+	file: Express.Multer.File | undefined,
+) => {
+	const connection = await pool.getConnection();
+	try {
+		await connection.beginTransaction();
+
+		if (!file) throw new Error("กรุณาอัพโหลดไฟล์เอกสารการยกเลิกสัญญา");
+
+		// 1. อัปโหลดไฟล์ไปยัง Firebase
+		const cancelFileUrl = await uploadToFirebase(file, "cancel_contracts");
+
+		// 2. ดึงข้อมูลสัญญาเพื่อหา user_id และ room_id
+		const [contractInfo] = await connection.query<RowDataPacket[]>(
+			"SELECT user_id, room_id FROM Contracts WHERE contracts_id = ?",
+			[contractId],
+		);
+
+		if (contractInfo.length === 0) throw new Error("ไม่พบสัญญาเช่าที่ระบุ");
+
+		const { user_id, room_id } = contractInfo[0];
+
+		// 3. อัปเดตตาราง Contracts
+		await connection.query(
+			`UPDATE Contracts 
+       SET status = 'TERMINATED', cancel_at = NOW(), cancelcontactfile_url = ? 
+       WHERE contracts_id = ?`,
+			[cancelFileUrl, contractId],
+		);
+
+		// 4. อัปเดตตาราง Room เป็นว่าง
+		await connection.query(
+			"UPDATE Room SET room_status = 'AVAILABLE' WHERE room_id = ?",
+			[room_id],
+		);
+
+		// 5. อัปเดตตาราง Users เป็น INACTIVE (หรือจะเก็บไว้เป็นประวัติแต่เข้าใช้ระบบไม่ได้แบบ Tenant ปกติ)
+		await connection.query(
+			"UPDATE Users SET status = 'INACTIVE' WHERE user_id = ?",
+			[user_id],
+		);
+
+		await connection.commit();
+		return { status: "success" };
+	} catch (error) {
+		await connection.rollback();
+		console.error("เกิดข้อผิดพลาดในบริการยกเลิกสัญญา:", error);
 		throw error;
 	} finally {
 		connection.release();
