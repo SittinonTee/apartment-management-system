@@ -24,6 +24,7 @@ class RepairRequest {
   final String? repairsImageUrl;
   final String? preferredTime;
   final int? technicianId;
+  final String? mechanicName;
 
   RepairRequest({
     required this.id,
@@ -40,6 +41,7 @@ class RepairRequest {
     this.repairsImageUrl,
     this.preferredTime,
     this.technicianId,
+    this.mechanicName,
   });
 
   // แปลงจาก JSON สู่ Model
@@ -61,6 +63,9 @@ class RepairRequest {
       repairsImageUrl: json['repairsimage_url'],
       preferredTime: json['preferred_time'],
       technicianId: json['technician_by'],
+      mechanicName: json['mechanic_firstname'] != null
+          ? '${json['mechanic_firstname']} ${json['mechanic_lastname'] ?? ''}'.trim()
+          : null,
     );
   }
 
