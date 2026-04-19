@@ -101,6 +101,54 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
     return '${date.day} ${monthfull[date.month - 1]} ${date.year + 543}';
   }
 
+  Future<void> _confirmBill(int billId) async {
+    // แสดง Dialog ยืนยันก่อนดำเนินการ
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('ยืนยันการชำระเงิน'),
+          content: const Text('คุณแน่ใจหรือไม่ว่าต้องการยืนยันการชำระเงินสำหรับบิลนี้?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('ยกเลิก', style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('ยืนยัน', style: TextStyle(color: AppColors.success, fontWeight: FontWeight.bold)),
+            ),
+          ],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    final success = await BillsService().confirmBill(billId);
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('ยืนยันการชำระเงินสำเร็จ'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      setState(() {
+        _loadBills();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('เกิดข้อผิดพลาดในการยืนยันการชำระเงิน'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -293,6 +341,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: AdminBillCard(
+                              billId: bill.billId,
                               roomNumber: bill.roomNumber,
                               tenantName: bill.tenantName,
                               amount: bill.amount.toString(),
@@ -303,6 +352,8 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
                                   ? _formatDate(bill.payDate!)
                                   : null,
                               payMethod: bill.payMethod,
+                              slipImageUrl: bill.slipImageUrl,
+                              onConfirm: () => _confirmBill(bill.billId),
                             ),
                           );
                         }),

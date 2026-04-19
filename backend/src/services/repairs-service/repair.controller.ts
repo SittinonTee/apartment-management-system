@@ -54,7 +54,13 @@ export const createRepair = async (
 			throw new AppError("ไม่พบข้อมูลผู้ใช้งาน", 401);
 		}
 
-		const { category_id, head_repairs, description, preferred_time } = req.body;
+		const {
+			category_id,
+			head_repairs,
+			description,
+			preferred_time,
+			repairsimage_url,
+		} = req.body;
 
 		if (!category_id || !head_repairs || !description || !preferred_time) {
 			throw new AppError("ข้อมูลไม่ครบถ้วน กรุณากรอกข้อมูลให้ครบ", 400);
@@ -65,6 +71,7 @@ export const createRepair = async (
 			head_repairs,
 			description,
 			preferred_time,
+			repairsimage_url,
 		};
 
 		const insertId = await repairService.createRepairRequest(userId, data);

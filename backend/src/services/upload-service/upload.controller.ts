@@ -1,8 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { getFirebaseBucket } from "../config/firebase.config";
 
-export const 
-uploadFile = async (
+export const uploadFile = async (
 	req: Request,
 	res: Response,
 	next: NextFunction,

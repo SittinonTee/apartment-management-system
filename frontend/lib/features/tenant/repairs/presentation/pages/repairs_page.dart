@@ -250,13 +250,7 @@ class _RepairsPageState extends State<RepairsPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder:
-                                (context) => NewRepairPage(
-                                  roomNumber:
-                                      _repairs.isNotEmpty
-                                          ? _repairs.first.roomNumber
-                                          : null,
-                                ),
+                            builder: (context) => const NewRepairPage(),
                           ),
                         ).then((value) {
                           if (value == true) {
@@ -294,17 +288,16 @@ class _RepairsPageState extends State<RepairsPage> {
             // --------------------------------------------------- ส่วนที่ 2 + 3 Body Area ที่รอดึงข้อมูลหลังบ้าน
             // ส่วนตารางโชว์รายการทีละตัว
             Expanded(
-              child:
-                  _isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : _error != null
-                      ? Center(
-                        child: Text(
-                          'โหลดข้อมูลไม่สำเร็จ: $_error',
-                          style: TextStyle(color: AppColors.error),
-                        ),
-                      )
-                      : _buildContent(),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error != null
+                  ? Center(
+                      child: Text(
+                        'โหลดข้อมูลไม่สำเร็จ: $_error',
+                        style: TextStyle(color: AppColors.error),
+                      ),
+                    )
+                  : _buildContent(),
             ),
           ],
         ),
@@ -390,7 +383,6 @@ class _RepairsPageState extends State<RepairsPage> {
                       // ข้อมูลสมมติ (Mock) ไว้ชั่วคราวก่อน Backend มีข้อมูลจริงดึงมาให้ประสม
                       tenantfirstname: repair.tenantfirstname,
                       tenantlastname: repair.tenantlastname,
-                      roomNumber: repair.roomNumber,
                       tenantPhone: repair.tenantPhone,
                       mechanicfirstname:
                           repair.status.toUpperCase() == 'REPORTED'
@@ -398,7 +390,7 @@ class _RepairsPageState extends State<RepairsPage> {
                           : repair.mechanicfirstname,
                       mechaniclastname: repair.mechaniclastname,
                       mechanicPhone: repair.mechanicPhone,
-                      imageUrl: repair.imageUrl,
+                      imageUrls: repair.imageUrls,
                     );
                   },
                 ),

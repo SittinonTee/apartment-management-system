@@ -41,3 +41,25 @@ export const getAllBills = async (
 		next(error);
 	}
 };
+
+export const approveBill = async (
+	req: AuthRequest,
+	res: Response,
+	next: NextFunction,
+) => {
+	try {
+		const { billId } = req.params;
+		const success = await billService.approveBill(Number(billId));
+
+		if (!success) {
+			throw new AppError("ไม่พบข้อมูลบิล หรือดำเนินการไม่สำเร็จ", 404);
+		}
+
+		res.status(200).json({
+			status: "success",
+			message: "ยืนยันการชำระเงินสำเร็จ",
+		});
+	} catch (error) {
+		next(error);
+	}
+};
