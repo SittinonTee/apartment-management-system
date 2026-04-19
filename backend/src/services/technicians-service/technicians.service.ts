@@ -69,7 +69,7 @@ export const TechniciansService = {
 		try {
 			await connection.beginTransaction();
 
-			if (status === 'COMPLETED') {
+			if (status === "COMPLETED") {
 				await connection.query(
 					"UPDATE Repairs_user SET status = ?, completed_at = DATE_ADD(NOW(), INTERVAL 7 HOUR) WHERE repairsuser_id = ?",
 					[status, repairId],

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
-import 'package:frontend/core/widgets/custom_button.dart';
-import 'package:provider/provider.dart';
-import 'package:frontend/core/services/auth_service.dart';
 import 'package:frontend/core/widgets/searchbar.dart';
 import 'package:frontend/core/widgets/choicechip_filter.dart';
 import 'package:frontend/core/widgets/status_badge.dart';
@@ -108,18 +105,31 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('ยืนยันการชำระเงิน'),
-          content: const Text('คุณแน่ใจหรือไม่ว่าต้องการยืนยันการชำระเงินสำหรับบิลนี้?'),
+          content: const Text(
+            'คุณแน่ใจหรือไม่ว่าต้องการยืนยันการชำระเงินสำหรับบิลนี้?',
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('ยกเลิก', style: TextStyle(color: AppColors.textSecondary)),
+              child: const Text(
+                'ยกเลิก',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('ยืนยัน', style: TextStyle(color: AppColors.success, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'ยืนยัน',
+                style: TextStyle(
+                  color: AppColors.success,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         );
       },
     );
@@ -158,7 +168,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-           Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
