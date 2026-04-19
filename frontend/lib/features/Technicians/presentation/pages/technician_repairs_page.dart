@@ -7,6 +7,8 @@ import '../../data/repair_service.dart';
 import '../widgets/technician_repair_card.dart';
 import 'technician_repair_detail_page.dart';
 import 'technician_repair_history.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/services/auth_service.dart';
 
 class TechnicianRepairsPage extends StatefulWidget {
   const TechnicianRepairsPage({super.key});
@@ -114,24 +116,45 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
               ),
             ],
           ),
-          CustomButton(
-            text: 'ประวัติการซ่อม',
-            width: 120,
-            height: 36,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            textStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-            borderRadius: BorderRadius.circular(100),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const TechnicianRepairHistoryPage(),
+          Row(
+            children: [
+              CustomButton(
+                text: 'ประวัติการซ่อม',
+                width: 120,
+                height: 36,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                textStyle: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
                 ),
-              );
-            },
+                borderRadius: BorderRadius.circular(100),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TechnicianRepairHistoryPage(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+              CustomButton(
+                isPrimary: false,
+                isOutlined: true,
+                onPressed: () {
+                  context.read<AuthService>().logout();
+                },
+                icon: const Icon(
+                  Icons.logout,
+                  size: 18,
+                  color: AppColors.textSecondary,
+                ),
+                width: 34,
+                height: 34,
+                padding: const EdgeInsets.only(left: 6),
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ],
           ),
         ],
       ),
