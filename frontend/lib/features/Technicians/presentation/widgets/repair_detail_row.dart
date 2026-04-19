@@ -23,7 +23,7 @@ class RepairDetailRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                width: 90,
+                width: 110,
                 child: Text(
                   label,
                   style: const TextStyle(

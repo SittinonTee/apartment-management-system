@@ -173,6 +173,14 @@ class _TechnicianRepairDetailPageState
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
+          if (widget.repair.status != 'REPORTED' && widget.repair.mechanicName != null)
+            RepairDetailRow(
+              label: 'ช่างรับผิดชอบ :',
+              value: Text(
+                widget.repair.mechanicName!,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
           RepairDetailRow(
             label: 'รายละเอียด :',
             value: Text(
