@@ -8,6 +8,7 @@ import 'package:frontend/core/widgets/status_badge.dart';
 // รองรับการกดเพื่อกางออก (Expand) และยุบ (Collapse) ดูรายละเอียดบิล
 // ---------------------------------------------------------------------------
 class AdminBillCard extends StatefulWidget {
+  final int billId;
   final String roomNumber; // หมายเลขห้อง เช่น "A329"
   final String tenantName; // ชื่อผู้เช่า
   final BadgeStatus
@@ -18,11 +19,14 @@ class AdminBillCard extends StatefulWidget {
   final String?
   payDate; // วันที่ฝั่งผู้เช่าชำระเงินเข้ามา (อาจเป็น null ได้ถ้ายังไม่จ่าย)
   final String? payMethod; // วิธีการชำระเงิน (เช่น "บัตรเครดิต")
+  final String? slipImageUrl;
+  final VoidCallback? onConfirm;
   final bool
   initialExpanded; // กำหนดว่าตอนโหลดมาครั้งแรก จะกางการ์ดนี้ไว้เลยหรือไม่
 
   const AdminBillCard({
     super.key,
+    required this.billId,
     required this.roomNumber,
     required this.tenantName,
     required this.status,
@@ -31,6 +35,8 @@ class AdminBillCard extends StatefulWidget {
     required this.dueDate,
     this.payDate,
     this.payMethod,
+    this.slipImageUrl,
+    this.onConfirm,
     this.initialExpanded = false,
   });
 
@@ -224,6 +230,95 @@ class _AdminBillCardState extends State<AdminBillCard> {
                 textTheme,
                 isMethod: true,
               ),
+
+              // ส่วนที่เพิ่ม: แสดงรูปภาพใบเสร็จ (ถ้ามี)
+              if (widget.slipImageUrl != null && widget.slipImageUrl!.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Divider(color: AppColors.border),
+                const SizedBox(height: 12),
+                Text(
+                  'หลักฐานการโอนเงิน',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.network(
+                    widget.slipImageUrl!,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 150,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.error_outline, color: AppColors.error),
+                            SizedBox(height: 4),
+                            Text('โหลดรูปภาพไม่สำเร็จ',
+                                style: TextStyle(color: AppColors.error)),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+
+              // ส่วนที่เพิ่ม: ปุ่มยืนยันการจ่ายเงิน (โชว์เฉพาะเมื่อสถานะเป็น pending และมีรูปสลิป)
+              if (widget.status == BadgeStatus.pending &&
+                  widget.slipImageUrl != null &&
+                  widget.slipImageUrl!.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: widget.onConfirm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.success,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.check_circle_outline, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'ยืนยันการจ่ายเงิน',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ],
           ],
         ),
