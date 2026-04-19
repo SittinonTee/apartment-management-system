@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 enum RepairStatus {
-  problem,      // REPORTED
-  inProgress,   // ASSIGNED, PENDING
-  completed,    // COMPLETED
-  cancelled,    // CANCELLED
+  problem, // REPORTED
+  inProgress, // ASSIGNED, PENDING
+  completed, // COMPLETED
+  cancelled, // CANCELLED
 }
 
 enum RepairType { water, electricity, air, other }
@@ -23,6 +23,7 @@ class RepairRequest {
   final String? categoryName;
   final String? repairsImageUrl;
   final String? preferredTime;
+  final int? technicianId;
 
   RepairRequest({
     required this.id,
@@ -38,6 +39,7 @@ class RepairRequest {
     this.categoryName,
     this.repairsImageUrl,
     this.preferredTime,
+    this.technicianId,
   });
 
   // แปลงจาก JSON สู่ Model
@@ -58,6 +60,7 @@ class RepairRequest {
       categoryName: json['category_name'],
       repairsImageUrl: json['repairsimage_url'],
       preferredTime: json['preferred_time'],
+      technicianId: json['technician_by'],
     );
   }
 

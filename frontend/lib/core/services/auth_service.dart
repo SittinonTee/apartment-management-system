@@ -13,6 +13,7 @@ class AuthService extends ChangeNotifier {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   UserRole _currentRole = UserRole.guest; // ค่า role ของ user
+  int? _userId; // ไอดีผู้ใช้
   String? _firstName; // ชื่อผู้ใช้
   String? _lastName; // นามสกุลผู้ใช้
   bool _isInitialized = false; // จริงถ้า auth service ถูกโหลดแล้ว
@@ -25,6 +26,7 @@ class AuthService extends ChangeNotifier {
   bool get isAuthenticated =>
       _currentRole != UserRole.guest; // จริงถ้า user ล็อกอินแล้ว
   UserRole get currentRole => _currentRole; // ค่า role ของ user
+  int? get userId => _userId; // ไอดีผู้ใช้
   String get userName => '${_firstName ?? ''} ${_lastName ?? ''}'.trim();
   String? get lastError => _lastError;
   bool get isInitialized => _isInitialized; // จริงถ้า auth service ถูกโหลดแล้ว
@@ -35,6 +37,8 @@ class AuthService extends ChangeNotifier {
 
     if (token != null && roleString != null) {
       _currentRole = _parseRole(roleString);
+      final idStr = await _storage.read(key: 'user_id');
+      if (idStr != null) _userId = int.tryParse(idStr);
       _firstName = await _storage.read(key: 'user_firstname');
       _lastName = await _storage.read(key: 'user_lastname');
     }
@@ -55,16 +59,21 @@ class AuthService extends ChangeNotifier {
         final data = response.data['data'];
         final token = data['token'];
         final roleString = data['user']['role'];
+        final userIdStr = data['user']['id'];
         final firstName = data['user']['firstname'];
         final lastName = data['user']['lastname'];
 
         // Save to secure storage
         await _storage.write(key: 'jwt_token', value: token);
         await _storage.write(key: 'user_role', value: roleString);
+        await _storage.write(key: 'user_id', value: userIdStr.toString());
         await _storage.write(key: 'user_firstname', value: firstName);
         await _storage.write(key: 'user_lastname', value: lastName);
 
         _currentRole = _parseRole(roleString);
+        _userId = userIdStr is int
+            ? userIdStr
+            : int.tryParse(userIdStr.toString());
         _firstName = firstName;
         _lastName = lastName;
         notifyListeners();
@@ -210,9 +219,11 @@ class AuthService extends ChangeNotifier {
 
     await _storage.delete(key: 'jwt_token');
     await _storage.delete(key: 'user_role');
+    await _storage.delete(key: 'user_id');
     await _storage.delete(key: 'user_firstname');
     await _storage.delete(key: 'user_lastname');
     _currentRole = UserRole.guest;
+    _userId = null;
     _firstName = null;
     _lastName = null;
     notifyListeners();

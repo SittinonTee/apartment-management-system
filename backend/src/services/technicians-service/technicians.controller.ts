@@ -44,4 +44,31 @@ export const TechniciansController = {
 			next(error);
 		}
 	},
+
+	// อัปเดตสถานะ
+	async updateStatus(req: Request, res: Response, next: NextFunction) {
+		try {
+			const { repairId, status, remark } = req.body;
+
+			if (!repairId || !status) {
+				return res.status(400).json({
+					status: "error",
+					message: "ข้อมูลไม่ครบถ้วน (repairId, status)",
+				});
+			}
+
+			const result = await TechniciansService.updateStatus(
+				Number(repairId),
+				status,
+				remark,
+			);
+
+			res.status(200).json({
+				status: "success",
+				message: result.message,
+			});
+		} catch (error) {
+			next(error);
+		}
+	},
 };
