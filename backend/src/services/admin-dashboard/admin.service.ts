@@ -94,8 +94,7 @@ export const addTenant = async (
 
 		const userId = userResult.insertId;
 
-		// 2. Create Contract
-		await connection.query(
+		const [contractResult] = await connection.query<ResultSetHeader>(
 			`
       INSERT INTO Contracts (
         contract_no, identification_card, address, room_id, 
@@ -117,6 +116,8 @@ export const addTenant = async (
 				adminId,
 			],
 		);
+
+		const contractId = contractResult.insertId;
 
 		// 3. Update Room Status
 		await connection.query(
@@ -144,7 +145,7 @@ export const addTenant = async (
       )
       VALUES (?, ?, ?, ?, ?, ?, 'PENDING')
     `,
-			[contract_no, bill_month, rate_id, rent_snapshot, 0, 0],
+			[contractId, bill_month, rate_id, rent_snapshot, 0, 0],
 		);
 
 		await connection.commit();

@@ -87,9 +87,11 @@ class ContractFormState extends State<ContractForm> {
       'room_id': _selectedRoomId,
       'room_name': _roomController.text,
       'rate_id': _selectedRate?.id,
-      'rate_room': _ratelPriceController.text.replaceAll(' บาท', '').trim(),
-      'rate_water': int.tryParse(_waterPriceController.text) ?? 0,
-      'rate_electric': int.tryParse(_electricPriceController.text) ?? 0,
+      'rate_room': Formatter.parseDouble(
+        _ratelPriceController.text.replaceAll(' บาท', '').trim(),
+      ),
+      'rate_water': Formatter.parseDouble(_waterPriceController.text),
+      'rate_electric': Formatter.parseDouble(_electricPriceController.text),
       // format กลับเป็น ค.ศ. รูปแบบ String (yyyy-MM-dd) ก่อนลง base
       'start_date': _startDate != null
           ? '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}'

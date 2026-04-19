@@ -17,14 +17,16 @@ export const getMyBills = async (userId: number): Promise<BILL_DETAILS[]> => {
 	return rows;
 };
 
-export const processPayment = async (billId: number): Promise<boolean> => {
-	const mockSlipUrl = "https://example.com/slip_feb.jpg";
+export const processPayment = async (
+	billId: number,
+	slipUrl: string,
+): Promise<boolean> => {
 	const query = `
     UPDATE Bills 
     SET slipimage_url = ?, 
         payment_date = NOW()
     WHERE bills_id = ?
   `;
-	const [result] = await pool.query(query, [mockSlipUrl, billId]);
+	const [result] = await pool.query(query, [slipUrl, billId]);
 	return (result as ResultSetHeader).affectedRows > 0;
 };
