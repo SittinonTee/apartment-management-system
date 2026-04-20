@@ -41,3 +41,27 @@ export const getAllBills = async (
 		next(error);
 	}
 };
+
+export const approveBill = async (
+	req: AuthRequest,
+	res: Response,
+	next: NextFunction,
+) => {
+	try {
+		const { id } = req.params;
+		const adminName = req.user?.email ? req.user.email : `Admin ${req.user?.id || ""}`.trim();
+
+		const success = await billService.approveBill(Number(id), adminName);
+
+		if (!success) {
+			throw new AppError("ไม่พบบิลที่ระบุ หรือดำเนินการไม่สำเร็จ", 404);
+		}
+
+		res.status(200).json({
+			status: "success",
+			message: "อนุมัติบิลเรียบร้อยแล้ว",
+		});
+	} catch (error) {
+		next(error);
+	}
+};

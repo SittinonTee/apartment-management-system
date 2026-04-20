@@ -67,6 +67,7 @@ class _BillsPageState extends State<BillsPage> {
 
             final pendingBills = allBills.where((b) {
               if (b['status'] == 'PAID') return false;
+              if (b['status'] == 'DRAFT') return false;
 
               // ถ้ามี slip แล้ว ให้ซ่อนจากการ์ด "กำหนดชำระ" (แปลว่ารอตรวจ)
               if (b['slipimage_url'] != null) return false;
@@ -164,6 +165,7 @@ class _BillsPageState extends State<BillsPage> {
                                 bill['grand_total']?.toString() ?? '0',
                               ) ??
                               0.0),
+                          isOverdue: bill['status'] == 'OVERDUE',
                           onPayPressed: () {
                             Navigator.push(
                               context,
