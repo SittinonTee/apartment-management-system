@@ -49,15 +49,17 @@ export const approveBill = async (
 ) => {
 	try {
 		const { billId } = req.params;
-		const success = await billService.approveBill(Number(billId));
+		const adminName = req.user?.email ? req.user.email : `Admin ${req.user?.id || ""}`.trim();
+
+		const success = await billService.approveBill(Number(billId), adminName);
 
 		if (!success) {
-			throw new AppError("ไม่พบข้อมูลบิล หรือดำเนินการไม่สำเร็จ", 404);
+			throw new AppError("ไม่พบบิลที่ระบุ หรือดำเนินการไม่สำเร็จ", 404);
 		}
 
 		res.status(200).json({
 			status: "success",
-			message: "ยืนยันการชำระเงินสำเร็จ",
+			message: "อนุมัติบิลเรียบร้อยแล้ว",
 		});
 	} catch (error) {
 		next(error);

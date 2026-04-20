@@ -5,6 +5,7 @@ import morgan from "morgan";
 import { AppError, globalErrorHandler } from "../middlewares/error.middleware";
 import config from "./config";
 import indexRoute from "./index.route";
+import { initAutoBilling } from "./billing-service/billing.auto";
 
 const app = express();
 const port = config.app.port;
@@ -50,6 +51,8 @@ app.use(globalErrorHandler);
 
 app.listen(port, () => {
 	console.log(`Server is running on port ${port}`);
+	// เริ่มการตรวจสอบบิลอัตโนมัติ (Boot-time + Cron)
+	initAutoBilling();
 });
 
 export default app;
