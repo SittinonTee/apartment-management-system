@@ -20,6 +20,21 @@ class _AdminPackagesPageState extends State<AdminPackagesPage> {
 
   final filters = ["ทั้งหมด", "สำเร็จ", "รอรับ", "ตกค้าง"];
 
+  final List<String> monthfull = [
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
+  ];
+
   final AdminPackagesProvider _provider = AdminPackagesProvider();
 
   String _formatThaiDateTime(String rawDate) {
@@ -62,7 +77,7 @@ class _AdminPackagesPageState extends State<AdminPackagesPage> {
         if (DateTime.now().difference(receivedDate).inDays >= 7) {
           return "ตกค้าง";
         }
-      } catch (e) {
+      } catch (_) {
         // Fallback
       }
       return "รอรับ";
@@ -157,47 +172,112 @@ class _AdminPackagesPageState extends State<AdminPackagesPage> {
                       return const Center(child: Text("ไม่มีข้อมูลพัสดุ"));
                     }
 
-                    return ListView.builder(
-                      itemCount: list.length,
-                      itemBuilder: (context, index) {
-                        final item = list[index];
-
-                        String displayStatus = _getMappedStatus(item);
-
+                    // จัดกลุ่มตามเดือน
+                    Map<int, List<Map<String, dynamic>>> groupedParcels = {};
+                    for (var item in list) {
+                      int m = 0;
+                      try {
                         String rawDate = item["received_at"]?.toString() ?? "";
-                        String displayDate = _formatThaiDateTime(rawDate);
+                        if (rawDate.isNotEmpty) {
+                          DateTime date = DateTime.parse(rawDate).toLocal();
+                          m = date.month;
+                        }
+                      } catch (_) {
+                        // ignore empty catch
+                      }
+                      groupedParcels.putIfAbsent(m, () => []).add(item);
+                    }
 
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => AdminPackagesDetail(
-                                  // ส่งไอดี หรือข้อมูลอื่นๆ ตามต้องการหน้า detail
-                                  id: item["parcels_id"] is int
-                                      ? item["parcels_id"]
-                                      : int.tryParse(
-                                              item["parcels_id"].toString(),
-                                            ) ??
-                                            0,
-                                  date: displayDate,
-                                  name: item["name"]?.toString() ?? "",
-                                  room: item["room_number"]?.toString() ?? "",
-                                  status: displayStatus,
-                                  receivedBy:
-                                      item["received_by"]?.toString() ??
-                                      "ไม่ทราบชื่อ",
-                                  imageUrl: item['parcelsimage_url']?.toString() ?? "",
+                    // เรียงเดือนจากล่าสุดไปเก่าสุด
+                    List<int> sortedMonths = groupedParcels.keys.toList()
+                      ..sort((a, b) => b.compareTo(a));
+
+                    return ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: sortedMonths.length,
+                      itemBuilder: (context, groupIndex) {
+                        int currentMonth = sortedMonths[groupIndex];
+                        List<Map<String, dynamic>> monthParcels =
+                            groupedParcels[currentMonth]!;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (currentMonth > 0 && currentMonth <= 12)
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: 16,
+                                  top: groupIndex == 0 ? 8 : 24,
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.calendar_month_outlined,
+                                      size: 28,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      monthfull[currentMonth - 1],
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                            color: AppColors.textSecondary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            );
-                          },
-                          child: ParcelCard(
-                            date: displayDate,
-                            name: item["name"]?.toString() ?? "",
-                            room: item["room_number"]?.toString() ?? "",
-                            status: displayStatus,
-                          ),
+                            ...monthParcels.map((item) {
+                              String displayStatus = _getMappedStatus(item);
+                              String rawDate =
+                                  item["received_at"]?.toString() ?? "";
+                              String displayDate = _formatThaiDateTime(rawDate);
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => AdminPackagesDetail(
+                                          id: item["parcels_id"] is int
+                                              ? item["parcels_id"]
+                                              : int.tryParse(
+                                                      item["parcels_id"]
+                                                          .toString(),
+                                                    ) ??
+                                                    0,
+                                          date: displayDate,
+                                          name: item["name"]?.toString() ?? "",
+                                          room:
+                                              item["room_number"]?.toString() ??
+                                              "",
+                                          status: displayStatus,
+                                          receivedBy:
+                                              item["received_by"]?.toString() ??
+                                              "ไม่ทราบชื่อ",
+                                          imageUrl:
+                                              item['parcelsimage_url']
+                                                  ?.toString() ??
+                                              "",
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: ParcelCard(
+                                    date: displayDate,
+                                    name: item["name"]?.toString() ?? "",
+                                    room: item["room_number"]?.toString() ?? "",
+                                    status: displayStatus,
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
                         );
                       },
                     );
