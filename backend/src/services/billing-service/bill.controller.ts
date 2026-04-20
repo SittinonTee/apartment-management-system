@@ -2,6 +2,7 @@ import type { NextFunction, Response } from "express";
 import type { AuthRequest } from "../../middlewares/auth.middleware";
 import { AppError } from "../../middlewares/error.middleware";
 import * as billService from "./bill.service";
+import pool from "../database";
 
 export const getMyBills = async (
 	req: AuthRequest,
@@ -49,7 +50,42 @@ export const approveBill = async (
 ) => {
 	try {
 		const { billId } = req.params;
-		const adminName = req.user?.email ? req.user.email : `Admin ${req.user?.id || ""}`.trim();
+		const userId = req.user?.id;
+
+		console.log(`[Approve Bill Request] BillID: ${billId}, UserID: ${userId}`);
+
+		if (!userId) {
+			throw new AppError("ไม่พบข้อมูลผู้ใช้งานในระบบ", 401);
+		}
+
+		let adminName = `Admin ${userId}`;
+		try {
+			// ลองดึงชื่อจริง (Firstname) ลองทั้ง Users และ users
+			const [userRows] = (await pool.query(
+				"SELECT firstname FROM Users WHERE user_id = ?",
+				[userId],
+			)) as [any[], unknown];
+
+			if (userRows.length > 0 && userRows[0].firstname) {
+				adminName = userRows[0].firstname;
+			}
+		} catch (dbErr) {
+			console.error("[DB Error] Failed to fetch admin firstname:", dbErr);
+			// ถ้า Users ไม่ผ่าน ลอง users ตัวเล็ก
+			try {
+				const [userRowsLower] = (await pool.query(
+					"SELECT firstname FROM users WHERE user_id = ?",
+					[userId],
+				)) as [any[], unknown];
+				if (userRowsLower.length > 0 && userRowsLower[0].firstname) {
+					adminName = userRowsLower[0].firstname;
+				}
+			} catch (e) {
+				console.error("[DB Error] Failed to fetch admin firstname (lowercase table):", e);
+			}
+		}
+
+		console.log(`[Approve Bill Execution] Final Admin Name to Save: "${adminName}"`);
 
 		const success = await billService.approveBill(Number(billId), adminName);
 
@@ -60,8 +96,10 @@ export const approveBill = async (
 		res.status(200).json({
 			status: "success",
 			message: "อนุมัติบิลเรียบร้อยแล้ว",
+			adminName: adminName
 		});
 	} catch (error) {
+		console.error("[Approve Bill Fatal Error]:", error);
 		next(error);
 	}
 };

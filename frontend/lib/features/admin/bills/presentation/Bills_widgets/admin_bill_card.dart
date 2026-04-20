@@ -20,6 +20,7 @@ class AdminBillCard extends StatefulWidget {
   payDate; // วันที่ฝั่งผู้เช่าชำระเงินเข้ามา (อาจเป็น null ได้ถ้ายังไม่จ่าย)
   final String? payMethod; // วิธีการชำระเงิน (เช่น "บัตรเครดิต")
   final String? slipImageUrl;
+  final String? approvedBy;
   final VoidCallback? onConfirm;
   final bool
   initialExpanded; // กำหนดว่าตอนโหลดมาครั้งแรก จะกางการ์ดนี้ไว้เลยหรือไม่
@@ -36,6 +37,7 @@ class AdminBillCard extends StatefulWidget {
     this.payDate,
     this.payMethod,
     this.slipImageUrl,
+    this.approvedBy,
     this.onConfirm,
     this.initialExpanded = false,
   });
@@ -230,9 +232,19 @@ class _AdminBillCardState extends State<AdminBillCard> {
                 textTheme,
                 isMethod: true,
               ),
+              if (widget.approvedBy != null && widget.approvedBy != '-') ...[
+                const SizedBox(height: 8),
+                _buildDetailRow(
+                  'อนุมัติโดย',
+                  widget.approvedBy!,
+                  true,
+                  textTheme,
+                ),
+              ],
 
               // ส่วนที่เพิ่ม: แสดงรูปภาพใบเสร็จ (ถ้ามี)
-              if (widget.slipImageUrl != null && widget.slipImageUrl!.isNotEmpty) ...[
+              if (widget.slipImageUrl != null &&
+                  widget.slipImageUrl!.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 const Divider(color: AppColors.border),
                 const SizedBox(height: 12),
@@ -256,7 +268,7 @@ class _AdminBillCardState extends State<AdminBillCard> {
                         child: CircularProgressIndicator(
                           value: loadingProgress.expectedTotalBytes != null
                               ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
+                                    loadingProgress.expectedTotalBytes!
                               : null,
                         ),
                       );
@@ -274,8 +286,10 @@ class _AdminBillCardState extends State<AdminBillCard> {
                           children: [
                             Icon(Icons.error_outline, color: AppColors.error),
                             SizedBox(height: 4),
-                            Text('โหลดรูปภาพไม่สำเร็จ',
-                                style: TextStyle(color: AppColors.error)),
+                            Text(
+                              'โหลดรูปภาพไม่สำเร็จ',
+                              style: TextStyle(color: AppColors.error),
+                            ),
                           ],
                         ),
                       );

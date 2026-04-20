@@ -8,11 +8,12 @@ class BillModel {
   final String roomNumber;
   final String tenantName;
   final String status;
-  final int amount;
+  final double amount;
   final DateTime dueDate;
   final DateTime? payDate;
   final String? payMethod;
   final String? slipImageUrl;
+  final String? approvedBy;
 
   BillModel({
     required this.billId,
@@ -24,6 +25,7 @@ class BillModel {
     this.payDate,
     this.payMethod,
     this.slipImageUrl,
+    this.approvedBy,
   });
 
   factory BillModel.fromJson(Map<String, dynamic> json) {
@@ -32,9 +34,7 @@ class BillModel {
       roomNumber: json['room_number']?.toString() ?? '',
       tenantName: json['tenant_name'] ?? '',
       status: json['status'] ?? 'pending',
-      amount: json['amount'] is int
-          ? json['amount']
-          : int.tryParse(json['amount']?.toString() ?? '0') ?? 0,
+      amount: double.tryParse(json['grand_total']?.toString() ?? '0') ?? 0.0,
       dueDate: json['due_date'] != null
           ? DateTime.parse(json['due_date'])
           : DateTime.now(),
@@ -43,6 +43,7 @@ class BillModel {
           : null,
       payMethod: json['pay_method'],
       slipImageUrl: json['slipimage_url'],
+      approvedBy: json['approved_by']?.toString(),
     );
   }
 }

@@ -49,6 +49,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
   ];
 
   late Future<List<BillModel>> _billsFuture;
+  int _refreshKey = 0; // เพิ่มตัวแปรสำหรับคุมการรีเฟรชหน้าจอแอดมิน
 
   @override
   void initState() {
@@ -146,9 +147,14 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
           backgroundColor: AppColors.success,
         ),
       );
-      setState(() {
-        _loadBills();
-      });
+      // หน่วงเวลาเล็กน้อยเพื่อให้ DB อัปเดตข้อมูล View เสร็จสมบูรณ์
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) {
+        setState(() {
+          _refreshKey++; // เปลี่ยน Key เพื่อบังคับรีโหลดใหม่
+          _loadBills();
+        });
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -221,6 +227,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
           const SizedBox(height: 16),
           Expanded(
             child: FutureBuilder<List<BillModel>>(
+              key: ValueKey(_refreshKey), // บังคับ Rebuild เมื่อ Key เปลี่ยน
               future: _billsFuture,
               builder: (context, snapshot) {
                 // ระหว่างโหลด API
@@ -343,6 +350,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
                                   : null,
                               payMethod: bill.payMethod,
                               slipImageUrl: bill.slipImageUrl,
+                              approvedBy: bill.approvedBy,
                               onConfirm: () => _confirmBill(bill.billId),
                             ),
                           );

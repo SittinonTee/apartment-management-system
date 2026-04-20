@@ -215,13 +215,20 @@ class BillPayPage extends StatelessWidget {
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    final result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => BillPayQrPage(billData: billData),
                       ),
                     );
+
+                    // ถ้าจ่ายสำเร็จจากหน้า QR ให้ปิดหน้านี้และส่ง true กลับไปหน้าหลัก
+                    if (result == true) {
+                      if (context.mounted) {
+                        Navigator.pop(context, true);
+                      }
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryLight,
