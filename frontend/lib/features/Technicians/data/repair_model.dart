@@ -135,9 +135,9 @@ class RepairRequest {
       case 'REPORTED':
         return const Color(0xFFFFE0E0);
       case 'ASSIGNED':
-        return const Color(0xFFFFF3DB);
+        return const Color(0xFFFEF9E7); // Light Yellow background
       case 'PENDING':
-        return const Color(0xFFFFF4E5); // Light Orange background
+        return const Color(0xFFE3F2FD); // Light Blue background
       case 'COMPLETED':
         return const Color(0xFFE8F5E9);
       case 'CANCELLED':
@@ -153,9 +153,9 @@ class RepairRequest {
       case 'REPORTED':
         return const Color(0xFFFF5252);
       case 'ASSIGNED':
-        return const Color(0xFFFFAB40);
+        return const Color(0xFFF1C40F); // Yellow text
       case 'PENDING':
-        return const Color(0xFFF2994A); // Dark Orange text
+        return const Color(0xFF2196F3); // Blue text
       case 'COMPLETED':
         return const Color(0xFF4CAF50);
       case 'CANCELLED':

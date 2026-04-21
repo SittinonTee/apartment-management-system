@@ -397,7 +397,7 @@ class _TechnicianRepairDetailPageState
               // ปุ่มเตรียมอุปกรณ์ (Orange)
               Expanded(
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : () => _updateStatus('PENDING'),
+                  onPressed: (_isLoading || widget.repair.status == 'PENDING') ? null : () => _updateStatus('PENDING'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFF2994A), // Orange
                     foregroundColor: Colors.white,
