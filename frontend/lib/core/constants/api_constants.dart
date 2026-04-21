@@ -1,8 +1,8 @@
 class ApiConstants {
-  // Use 10.0.2.2 for Android Emulator connecting to localhost
-  // Use localhost or 127.0.0.1 for iOS simulator / Web
-  // Change this to your actual network IP if testing on a physical device.
-  // static const String baseUrl = 'http://10.0.2.2:3000/api';
-  // static const String baseUrl = 'https://apartment-management-system-1.onrender.com/api';
-  static const String baseUrl = 'http://localhost:3000/api';
+  // ดึงค่า URL จากตัวแปรสภาพแวดล้อมตอน Build (ใช้ --dart-define=API_URL=...)
+  // หากไม่มีการกำหนด จะใช้ localhost:3000 เป็นค่าเริ่มต้น (สำหรับรันเทสในเครื่อง)
+  static const String baseUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: 'http://localhost:3000/api',
+  );
 }
