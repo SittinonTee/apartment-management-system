@@ -14,6 +14,7 @@ class GetRepairs extends ChangeNotifier {
     required String description,
     required String preferredTime,
     String? imageUrl,
+    String? repairsImageUrl,
   }) async {
     try {
       final response = await _dio.post(

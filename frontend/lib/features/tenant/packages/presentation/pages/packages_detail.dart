@@ -8,6 +8,7 @@ class TenantPackagesDetail extends StatelessWidget {
   final String room;
   final String status;
   final String receivedBy;
+  final String imageUrl;
 
   const TenantPackagesDetail({
     super.key,
@@ -17,6 +18,7 @@ class TenantPackagesDetail extends StatelessWidget {
     required this.room,
     required this.status,
     required this.receivedBy,
+    required this.imageUrl,
   });
 
   @override
@@ -58,15 +60,22 @@ class TenantPackagesDetail extends StatelessWidget {
                   color: Colors.blueGrey.shade50,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Image.asset(
-                  "assets/images/box.png",
-                  height: 150,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.inventory_2_outlined,
-                    size: 100,
-                    color: Colors.grey,
-                  ),
-                ),
+                child: imageUrl.isNotEmpty
+                    ? Image.network(
+                        imageUrl,
+                        height: 150,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => const Icon(
+                          Icons.inventory_2_outlined,
+                          size: 100,
+                          color: Colors.grey,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.inventory_2_outlined,
+                        size: 100,
+                        color: Colors.grey,
+                      ),
               ),
 
               const SizedBox(height: 20),

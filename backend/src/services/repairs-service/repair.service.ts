@@ -32,8 +32,8 @@ export const createRepairRequest = async (
 ): Promise<number> => {
 	const query = `
 		INSERT INTO Repairs_user (
-			user_id, category_id, head_repairs, description, preferred_time, status
-		) VALUES (?, ?, ?, ?, ?, 'REPORTED')
+			user_id, category_id, head_repairs, description, preferred_time, repairsimage_url, status
+		) VALUES (?, ?, ?, ?, ?, ?, 'REPORTED')
 	`;
 	const [result] = await pool.query<ResultSetHeader>(query, [
 		userId,
@@ -41,6 +41,7 @@ export const createRepairRequest = async (
 		data.head_repairs,
 		data.description,
 		data.preferred_time,
+		data.repairsimage_url || null,
 	]);
 	return result.insertId;
 };

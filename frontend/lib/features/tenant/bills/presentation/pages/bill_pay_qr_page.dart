@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/services/upload_service.dart';
 import '../../../../../core/widgets/custom_button.dart';
 import '../../data/bill_service.dart';
 
@@ -16,8 +17,8 @@ class BillPayQrPage extends StatefulWidget {
 }
 
 class _BillPayQrPageState extends State<BillPayQrPage> {
-  File? _selectedImage;
-  String? _webImagePath;
+  XFile? _selectedImage;
+  bool _isUploading = false;
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImage() async {
@@ -25,11 +26,7 @@ class _BillPayQrPageState extends State<BillPayQrPage> {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
       if (image != null) {
         setState(() {
-          if (kIsWeb) {
-            _webImagePath = image.path;
-          } else {
-            _selectedImage = File(image.path);
-          }
+          _selectedImage = image;
         });
       }
     } catch (e) {
@@ -38,17 +35,36 @@ class _BillPayQrPageState extends State<BillPayQrPage> {
   }
 
   Future<void> _confirmPayment() async {
-    if (_selectedImage == null && _webImagePath == null) {
+    if (_selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('กรุณาอัปโหลดสลิปเพื่อยืนยันการชำระเงิน')),
       );
       return;
     }
 
-    setState(() {}); // No loading state for now
+    setState(() {
+      _isUploading = true;
+    });
 
     final billId = int.tryParse(widget.billData['bills_id']?.toString() ?? '0') ?? 0;
-    final success = await BillService().processPayment(billId);
+    
+    // อัปโหลดไฟล์ขึ้น Firebase ผ่าน Backend
+    final slipUrl = await UploadService().uploadImage(_selectedImage!, folder: 'slips');
+    
+    if (slipUrl == null) {
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('อัปโหลดสลิปไม่สำเร็จ กรุณาลองใหม่')),
+        );
+      }
+      return;
+    }
+
+    // ค่อยนำ URL ที่ได้มา บันทึกกระบวนการจ่ายเงิน
+    final success = await BillService().processPayment(billId, slipUrl);
 
     if (mounted) {
       if (success) {
@@ -60,6 +76,9 @@ class _BillPayQrPageState extends State<BillPayQrPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('เกิดข้อผิดพลาดในการบันทึกข้อมูล')),
         );
+        setState(() {
+          _isUploading = false;
+        });
       }
     }
   }
@@ -125,7 +144,7 @@ class _BillPayQrPageState extends State<BillPayQrPage> {
                 ),
                 child: Column(
                   children: [
-                    if (_selectedImage == null && _webImagePath == null) ...[
+                    if (_selectedImage == null) ...[
                       const Icon(Icons.cloud_upload_outlined, size: 48, color: AppColors.primary),
                       const SizedBox(height: 12),
                       const Text(
@@ -137,13 +156,13 @@ class _BillPayQrPageState extends State<BillPayQrPage> {
                         borderRadius: BorderRadius.circular(8),
                         child: kIsWeb
                             ? Image.network(
-                                _webImagePath!,
+                                _selectedImage!.path,
                                 height: 150,
                                 width: double.infinity,
                                 fit: BoxFit.contain,
                               )
                             : Image.file(
-                                _selectedImage!,
+                                File(_selectedImage!.path),
                                 height: 150,
                                 width: double.infinity,
                                 fit: BoxFit.contain,
@@ -164,10 +183,12 @@ class _BillPayQrPageState extends State<BillPayQrPage> {
               ),
             ),
             const SizedBox(height: 48),
-            CustomButton(
-              text: 'ยืนยันการชำระเงิน',
-              onPressed: _confirmPayment,
-            ),
+            _isUploading
+                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                : CustomButton(
+                    text: 'ยืนยันการชำระเงิน',
+                    onPressed: _confirmPayment,
+                  ),
           ],
         ),
       ),

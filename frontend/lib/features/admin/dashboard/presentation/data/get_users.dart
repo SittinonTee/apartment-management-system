@@ -23,7 +23,7 @@ class UserTemplate {
   final int? billsId;
   final String userStatus;
   final String contractStatus;
-  
+  final int? contractId;
 
   UserTemplate({
     required this.userId,
@@ -45,7 +45,7 @@ class UserTemplate {
     this.billsId,
     required this.userStatus,
     required this.contractStatus,
-    
+    this.contractId,
   });
 
   factory UserTemplate.fromJson(Map<String, dynamic> json) {
@@ -55,7 +55,9 @@ class UserTemplate {
       lastname: json['lastname'],
       phone: json['phone'].toString(), // กัน error
       emergencyPhone: json['emergency_phone'].toString(), // กัน error
-      email: json['email']?.toString() ?? 'ยังไม่ได้เข้าสู่ระบบ', // กัน error ไม่มีค่า
+      email:
+          json['email']?.toString() ??
+          'ยังไม่ได้เข้าสู่ระบบ', // กัน error ไม่มีค่า
       role: json['role'],
       roomNumber: json['room_number'],
       floor: json['floor'],
@@ -69,6 +71,7 @@ class UserTemplate {
       billsId: json['bills_no'],
       userStatus: json['user_status'] ?? '',
       contractStatus: json['contract_status'] ?? '',
+      contractId: json['contract_id'],
     );
   }
 }
@@ -95,10 +98,12 @@ class AdminService extends ChangeNotifier {
       }
       return [];
     } on DioException catch (e) {
-      debugPrint('GetUserData DioError: ${e.response?.data}');
+      debugPrint(
+        'เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้ (Dio): ${e.response?.data}',
+      );
       return [];
     } catch (e) {
-      debugPrint('GetUserData Error: $e');
+      debugPrint('เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้: $e');
       return [];
     }
   }

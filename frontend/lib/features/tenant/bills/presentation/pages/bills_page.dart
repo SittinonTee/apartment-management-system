@@ -83,9 +83,16 @@ class _BillsPageState extends State<BillsPage> {
               }
             }).toList();
 
+            // เรียงลำดับบิลที่ค้างชำระจากเก่าไปใหม่ (วันที่น้อยสุดขึ้นก่อน)
+            pendingBills.sort((a, b) {
+              final dateA = a['due_date'] != null ? DateTime.tryParse(a['due_date'].toString()) : null;
+              final dateB = b['due_date'] != null ? DateTime.tryParse(b['due_date'].toString()) : null;
+              if (dateA != null && dateB != null) return dateA.compareTo(dateB);
+              return 0;
+            });
+
             final paidBills =
                 allBills.where((b) => b['status'] == 'PAID').toList();
-            final currentDue = pendingBills.isNotEmpty ? pendingBills.first : null;
 
             // --- คำนวณข้อมูลจริงสำหรับ TotalPaidCard ---
             double totalPaid = 0;
@@ -144,28 +151,31 @@ class _BillsPageState extends State<BillsPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // 2. Current Due Card (ถ้ามีบิลค้าง โชว์กล่องไข่ไก่)
-                  if (currentDue != null) ...[
-                    CurrentDueCard(
-                      dueDate: AppDateUtils.formatDateThai(
-                        currentDue['due_date'],
-                      ),
-                      amount:
-                          (double.tryParse(
-                            currentDue['grand_total']?.toString() ?? '0',
-                          ) ??
-                          0.0),
-                      onPayPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                BillPayPage(billData: currentDue),
+                  // 2. Current Due Cards (แสดงบิลค้างชำระทั้งหมด โดยเรียงจากเก่าไปใหม่)
+                  if (pendingBills.isNotEmpty) ...[
+                    ...pendingBills.map((bill) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: CurrentDueCard(
+                          dueDate: AppDateUtils.formatDateThai(
+                            bill['due_date'],
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 32),
+                          amount: (double.tryParse(
+                                bill['grand_total']?.toString() ?? '0',
+                              ) ??
+                              0.0),
+                          onPayPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BillPayPage(billData: bill),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 16),
                   ],
 
                   // 3. History List Area (เฉพาะบิล PAID)

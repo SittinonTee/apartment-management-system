@@ -19,11 +19,11 @@ class RepairTicketCard extends StatefulWidget {
   final DateTime? completedAt;
   final String tenantfirstname;
   final String tenantlastname;
-  final String roomNumber;
   final String tenantPhone;
   final String mechanicfirstname;
   final String mechaniclastname;
   final String mechanicPhone;
+  final List<String> imageUrls;
 
   final int repairId;
   final VoidCallback? onRefresh;
@@ -43,11 +43,11 @@ class RepairTicketCard extends StatefulWidget {
     this.completedAt,
     required this.tenantfirstname,
     required this.tenantlastname,
-    required this.roomNumber,
     required this.tenantPhone,
     required this.mechanicfirstname,
     required this.mechaniclastname,
     required this.mechanicPhone,
+    this.imageUrls = const [],
     this.onRefresh,
   });
 
@@ -348,6 +348,69 @@ class _RepairTicketCardState extends State<RepairTicketCard> {
                     ),
                   ),
                   const SizedBox(height: 12),
+
+                  if (widget.imageUrls.isNotEmpty) ...[
+                    Builder(
+                      builder: (context) {
+                        final urls = widget.imageUrls;
+                        if (urls.length == 1) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              urls[0],
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover,
+                              errorBuilder:
+                                  (context, error, stackTrace) => Container(
+                                    height: 200,
+                                    color: Colors.grey.shade100,
+                                    child: const Icon(
+                                      Icons.broken_image,
+                                      color: Colors.grey,
+                                      size: 50,
+                                    ),
+                                  ),
+                            ),
+                          );
+                        }
+                        return SizedBox(
+                          height: 150,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: urls.length,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 12),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    urls[index],
+                                    width: 200,
+                                    height: 150,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Container(
+                                              width: 200,
+                                              height: 150,
+                                              color: Colors.grey.shade100,
+                                              child: const Icon(
+                                                Icons.broken_image,
+                                                color: Colors.grey,
+                                                size: 30,
+                                              ),
+                                            ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
                   // วันที่รับงาน - วันที่จบงาน
                   Row(

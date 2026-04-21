@@ -3,15 +3,20 @@ import 'package:frontend/features/tenant/repairs/data/get_repairs.dart';
 import 'package:frontend/features/tenant/repairs/data/repair_model.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
+import 'dart:io';
 import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/core/widgets/custom_text_field.dart';
+import 'package:frontend/core/services/upload_service.dart';
 
 /// หน้าจอนี้ใช้สำหรับให้ผู้เช่าส่งคำร้องแจ้งซ่อมใหม่
 /// โดยมีแบบฟอร์มให้กรอกข้อมูลต่างๆ เช่น บ้านเลขที่, อาคาร, ชั้นห้อง,
 /// ประเภทงานซ่อม, หัวข้อ, รายละเอียด และเบอร์โทรศัพท์ติดต่อกลับ
 class NewRepairPage extends StatefulWidget {
-  final String? roomNumber;
-  const NewRepairPage({super.key, this.roomNumber});
+  const NewRepairPage({super.key});
 
   @override
   State<NewRepairPage> createState() => _NewRepairPageState();
@@ -24,8 +29,6 @@ class _NewRepairPageState extends State<NewRepairPage> {
   // ---------------- Controllers ---------------- //
   // ใช้สำหรับควบคุมและดึงข้อความจากช่องกรอกข้อมูลต่างๆ
   final _houseNumberController = TextEditingController();
-  final _buildingController = TextEditingController();
-  final _roomController = TextEditingController();
   final _titleController =
       TextEditingController(); // ควบคุมช่อง "หัวข้อแจ้งซ่อม"
   final _descriptionController =
@@ -38,15 +41,27 @@ class _NewRepairPageState extends State<NewRepairPage> {
   // เก็บ ID ของประเภทงานซ่อมที่ถูกเลือก โดยส่งประเภทเริ่มต้นเป็น 2 (ไฟฟ้า)
   int _selectedCategoryId = 1;
 
+  final List<XFile> _selectedImages = [];
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImages() async {
+    try {
+      final List<XFile> images = await _picker.pickMultiImage();
+      if (images.isNotEmpty) {
+        setState(() {
+          _selectedImages.addAll(images);
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking images: $e');
+    }
+  }
+
   // ---------------- Controllers ---------------- //
 
   @override
   void initState() {
     super.initState();
-    // ถ้ามีการส่งข้อมูลเลขห้องมา ให้กำหนดค่าเริ่มต้นให้กับ Controller ทันที
-    if (widget.roomNumber != null) {
-      _houseNumberController.text = widget.roomNumber!;
-    }
     _loadCategories();
   }
 
@@ -54,8 +69,6 @@ class _NewRepairPageState extends State<NewRepairPage> {
   void dispose() {
     // ล้างค่า Controller ทิ้งเมื่อหน้าจอนี้ถูกทำลาย/ปิดทิ้งไปแล้ว
     _houseNumberController.dispose();
-    _buildingController.dispose();
-    _roomController.dispose();
     _titleController.dispose();
     _descriptionController.dispose();
     _phoneController.dispose();
@@ -125,6 +138,36 @@ class _NewRepairPageState extends State<NewRepairPage> {
           throw Exception('Token not found');
         }
 
+        List<String> imageUrls = [];
+        if (_selectedImages.isNotEmpty) {
+          for (var image in _selectedImages) {
+            final url = await UploadService().uploadImage(
+              image,
+              folder: 'repairs',
+            );
+            if (url != null) {
+              imageUrls.add(url);
+            }
+          }
+
+          if (imageUrls.length != _selectedImages.length) {
+            if (mounted) {
+              Navigator.pop(context); // Close loading
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('อัพโหลดรูปภาพบางส่วนล้มเหลว'),
+                  backgroundColor: AppColors.error,
+                ),
+              );
+            }
+            return;
+          }
+        }
+
+        final repairsImageUrlJson = imageUrls.isNotEmpty
+            ? jsonEncode(imageUrls)
+            : null;
+
         final success = await GetRepairs().createRepairRequest(
           token: token,
           categoryId: _selectedCategoryId,
@@ -133,6 +176,7 @@ class _NewRepairPageState extends State<NewRepairPage> {
           preferredTime: _preferredTimeController.text.isEmpty
               ? 'ไม่ระบุ'
               : _preferredTimeController.text,
+          imageUrl: repairsImageUrlJson,
         );
 
         if (mounted) Navigator.pop(context); // Close loading
@@ -217,7 +261,7 @@ class _NewRepairPageState extends State<NewRepairPage> {
       children: [
         _buildLabel('แนบรูปภาพประกอบ'),
         const Text(
-          'สามารถแนบรูปภาพเพื่อช่วยให้ช่างเข้าใจปัญหาได้ชัดเจนขึ้น(สูงสุด 5)',
+          'สามารถแนบรูปภาพเพื่อช่วยให้ช่างเข้าใจปัญหาได้ชัดเจนขึ้น',
           style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
         ),
         const SizedBox(height: 12),
@@ -225,14 +269,59 @@ class _NewRepairPageState extends State<NewRepairPage> {
           height: 100,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
             children: [
               _buildAddImageButton(),
-              const SizedBox(width: 12),
-              // ตัวอย่างการแสดงกล่องเปล่าสำหรับรูปถัดๆ ไป
-              _buildEmptyImageSlot(),
-              const SizedBox(width: 12),
-              _buildEmptyImageSlot(),
+              ..._selectedImages.asMap().entries.map((entry) {
+                int index = entry.key;
+                XFile image = entry.value;
+                return Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                            width: 1,
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: kIsWeb
+                              ? Image.network(image.path, fit: BoxFit.cover)
+                              : Image.file(File(image.path), fit: BoxFit.cover),
+                        ),
+                      ),
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedImages.removeAt(index);
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: const BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
             ],
           ),
         ),
@@ -243,9 +332,7 @@ class _NewRepairPageState extends State<NewRepairPage> {
   // ----------------------------------- Widget สำหรับปุ่มเพิ่มรูปภาพ (Add Button) ---------------------------------//
   Widget _buildAddImageButton() {
     return InkWell(
-      onTap: () {
-        // จัดการการเลือกรูปภาพในอนาคต
-      },
+      onTap: _pickImages,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         width: 100,
@@ -281,21 +368,6 @@ class _NewRepairPageState extends State<NewRepairPage> {
     );
   }
   // ----------------------------------- Widget สำหรับปุ่มเพิ่มรูปภาพ (Add Button) ---------------------------------//
-
-  // ----------------------------------- Widget สำหรับช่องแสดงรูปภาพที่ยังไม่ได้เลือก (Placeholder) ---------------------------------//
-  Widget _buildEmptyImageSlot() {
-    return Container(
-      width: 100,
-      height: 100,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200, width: 1.5),
-      ),
-      child: Icon(Icons.image_outlined, color: Colors.grey.shade300, size: 28),
-    );
-  }
-  // ----------------------------------- Widget สำหรับช่องแสดงรูปภาพที่ยังไม่ได้เลือก (Placeholder) ---------------------------------//
 
   @override
   Widget build(BuildContext context) {
@@ -334,27 +406,6 @@ class _NewRepairPageState extends State<NewRepairPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomTextField(
-                    labelText: 'ห้อง',
-                    controller: _houseNumberController,
-                    hintText: 'ระบุหมายเลขห้อง',
-                    isRequired: true,
-                    readOnly: true,
-                  ),
-                  const SizedBox(height: 16),
-
-                  CustomTextField(
-                    labelText: 'อาคาร',
-                    controller: _buildingController,
-                    hintText: 'ระบุอาคาร',
-                  ),
-                  const SizedBox(height: 16),
-
-                  CustomTextField(
-                    labelText: 'ชั้น',
-                    controller: _roomController,
-                    hintText: 'ระบุชั้น',
-                  ),
                   const SizedBox(height: 16),
 
                   _buildLabel('ประเภทงานซ่อม', isRequired: true),
@@ -522,6 +573,16 @@ class _NewRepairPageState extends State<NewRepairPage> {
                     hintText: 'พิมพ์เบอร์โทรศัพท์',
                     isRequired: true,
                     keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                    ],
+                    validator: (value) {
+                      if (value != null && value.length != 10) {
+                        return 'กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 16),
 

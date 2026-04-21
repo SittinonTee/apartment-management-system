@@ -21,11 +21,13 @@ class AcceptJobDialog extends StatefulWidget {
 
 class _AcceptJobDialogState extends State<AcceptJobDialog> {
   late DateTime selectedDate;
+  late TimeOfDay selectedTime;
 
   @override
   void initState() {
     super.initState();
     selectedDate = DateTime.now();
+    selectedTime = TimeOfDay.now();
   }
 
   String _formatThaiDate(DateTime date) {
@@ -73,13 +75,19 @@ class _AcceptJobDialogState extends State<AcceptJobDialog> {
             _buildPopupRow('สะดวกที่ :', widget.repair.preferredTime ?? 'ไม่ระบุ'),
             const SizedBox(height: 24),
 
-            // การเลือกวันที่
+            // การเลือกวันที่และเวลา
             const Text(
-              'เลือกวันที่ที่จะเข้ามาทำงาน',
+              'เลือกวันที่และเวลาที่จะเข้ามาทำงาน',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            _buildDatePicker(context),
+            Row(
+              children: [
+                Expanded(flex: 3, child: _buildDatePicker(context)),
+                const SizedBox(width: 12),
+                Expanded(flex: 2, child: _buildTimePicker(context)),
+              ],
+            ),
             const SizedBox(height: 32),
 
             // ปุ่มแอคชั่น
@@ -136,6 +144,50 @@ class _AcceptJobDialogState extends State<AcceptJobDialog> {
     );
   }
 
+  Widget _buildTimePicker(BuildContext context) {
+    return InkWell(
+      onTap: widget.isLoading
+          ? null
+          : () async {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: selectedTime,
+                builder: (context, child) => Theme(
+                  data: Theme.of(context).copyWith(
+                    colorScheme: const ColorScheme.light(
+                      primary: Color(0xFF5AB6A9),
+                      onPrimary: Colors.white,
+                      onSurface: Colors.black,
+                    ),
+                  ),
+                  child: child!,
+                ),
+              );
+              if (picked != null) {
+                setState(() => selectedTime = picked);
+              }
+            },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE0E0E0)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
+              style: const TextStyle(color: AppColors.textPrimary),
+            ),
+            const Icon(Icons.access_time, color: Colors.grey, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildActionButtons(BuildContext context) {
     return Row(
       children: [
@@ -149,7 +201,18 @@ class _AcceptJobDialogState extends State<AcceptJobDialog> {
         const SizedBox(width: 12),
         Expanded(
           child: ElevatedButton(
-            onPressed: widget.isLoading ? null : () => widget.onConfirm(selectedDate),
+            onPressed: widget.isLoading 
+                ? null 
+                : () {
+                    final combined = DateTime(
+                      selectedDate.year,
+                      selectedDate.month,
+                      selectedDate.day,
+                      selectedTime.hour,
+                      selectedTime.minute,
+                    );
+                    widget.onConfirm(combined);
+                  },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF5AB6A9),
               disabledBackgroundColor: const Color(0xFF5AB6A9).withValues(alpha: 0.5),

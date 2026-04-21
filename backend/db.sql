@@ -62,7 +62,9 @@ CREATE TABLE Contracts (
     end_date DATE, -- วันที่สิ้นสุดสัญญา
     deposit VARCHAR(50), -- จำนวนเงินมัดจำ / ล่วงหน้า
     contractfile_url VARCHAR(255), -- ลิงก์เก็บรูปภาพเอกสารสแกนใบสัญญา
+    cancelcontactfile_url VARCHAR(255), -- ลิงก์เก็บรูปภาพเอกสารยกเลิกสัญญา
     status ENUM('PENDING', 'ACTIVE', 'EXPIRED', 'TERMINATED'), -- สถานะของสัญญา
+    cancel_at DATETIME, -- วันที่ยกเลิกสัญญา
     -- pending = รออนุมัติ
     -- active = อนุมัติแล้ว
     -- expired = หมดอายุ
@@ -149,4 +151,3 @@ CREATE TABLE Repair_categories (
     category_id INT PRIMARY KEY AUTO_INCREMENT, -- รหัสหมวดหมู่การแจ้งซ่อม
     name_category VARCHAR(100) -- ชื่อหมวดหมู่ (เช่น 'ประปา', 'แอร์', 'ไฟฟ้า')
 );
-

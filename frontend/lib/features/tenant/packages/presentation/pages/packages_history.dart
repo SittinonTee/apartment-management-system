@@ -94,6 +94,7 @@ class _PackagesHistoryPageState extends State<PackagesHistoryPage> {
                         room: item["room_number"] ?? "",
                         status: "สำเร็จ",
                         receivedBy: item["received_by"] ?? "ไม่ทราบชื่อ",
+                        imageUrl: item["parcelsimage_url"]?.toString() ?? "",
                       ),
                     ),
                   );

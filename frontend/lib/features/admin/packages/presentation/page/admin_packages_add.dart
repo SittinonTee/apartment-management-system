@@ -1,5 +1,9 @@
+  import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:frontend/core/constants/app_colors.dart';
+import 'package:frontend/core/services/upload_service.dart';
 
 import 'package:frontend/features/admin/packages/data/admin_packages_provider.dart';
 
@@ -13,7 +17,22 @@ class AdminPackagesAdd extends StatefulWidget {
 class _AdminPackagesAddState extends State<AdminPackagesAdd> {
   final _roomController = TextEditingController();
   final _nameController = TextEditingController();
+  XFile? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        setState(() {
+          _selectedImage = image;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -33,10 +52,25 @@ class _AdminPackagesAddState extends State<AdminPackagesAdd> {
 
     setState(() => _isLoading = true);
 
+    String parcelsImageUrl = "";
+    if (_selectedImage != null) {
+      final url = await UploadService().uploadImage(_selectedImage!, folder: 'packages');
+      if (url == null) {
+        setState(() => _isLoading = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('อัพโหลดรูปล้มเหลว กรุณาลองใหม่')),
+          );
+        }
+        return;
+      }
+      parcelsImageUrl = url;
+    }
+
     final errorMessage = await AdminPackagesProvider().addParcel({
       "room_number": _roomController.text.trim(),
       "name": _nameController.text.trim(),
-      "parcelsimage_url": "", // สามารถเพิ่มฟังก์ชันอัปโหลดรูปในอนาคต
+      "parcelsimage_url": parcelsImageUrl,
     });
 
     setState(() => _isLoading = false);
@@ -123,22 +157,38 @@ class _AdminPackagesAddState extends State<AdminPackagesAdd> {
 
                   const SizedBox(height: 16),
 
-                  // ===== UPLOAD BOX ===== ตย
-                  Container(
-                    height: 180,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.3),
+                  // ===== UPLOAD BOX =====
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      height: 180,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                        ),
                       ),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "อัพโหลดรูปพัสดุ",
-                        style: TextStyle(color: Colors.grey, fontSize: 18),
-                      ),
+                      child: _selectedImage == null
+                          ? const Center(
+                              child: Text(
+                                "อัพโหลดรูปพัสดุ",
+                                style: TextStyle(color: Colors.grey, fontSize: 18),
+                              ),
+                            )
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: kIsWeb
+                                  ? Image.network(
+                                      _selectedImage!.path,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.file(
+                                      File(_selectedImage!.path),
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
                     ),
                   ),
 
