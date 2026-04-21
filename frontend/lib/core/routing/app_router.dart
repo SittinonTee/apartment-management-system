@@ -7,9 +7,11 @@ import 'package:frontend/features/auth/presentation/pages/login_page.dart';
 import 'package:frontend/features/auth/presentation/pages/register_page.dart';
 import 'package:frontend/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:frontend/features/tenant/main/presentation/pages/main_screen.dart';
+import 'package:frontend/features/Technicians/presentation/pages/technician_repairs_page.dart';
 import 'package:frontend/features/admin/dashboard/presentation/pages/new_tenant_page.dart';
 import 'package:frontend/features/admin/dashboard/presentation/pages/user_infomation_page.dart';
 import 'package:frontend/features/admin/dashboard/presentation/data/get_users.dart';
+import 'package:frontend/features/admin/repairs/presentation/pages/admin_technicians_page.dart';
 
 class AppRouter {
   static final AuthService _authService = AuthService();
@@ -38,8 +40,7 @@ class AppRouter {
         if (_authService.currentRole == UserRole.admin) {
           return '/admin';
         } else if (_authService.currentRole == UserRole.technician) {
-          // ในอนาคตอาจมีหน้าแยกสำหรับ Technician
-          return '/tenant';
+          return '/technician';
         } else {
           return '/tenant';
         }
@@ -48,9 +49,9 @@ class AppRouter {
       // Handle root path
       if (state.matchedLocation == '/') {
         if (isAuthenticated) {
-          return _authService.currentRole == UserRole.admin
-              ? '/admin'
-              : '/tenant';
+          if (_authService.currentRole == UserRole.admin) return '/admin';
+          if (_authService.currentRole == UserRole.technician) return '/technician';
+          return '/tenant';
         }
         return '/login';
       }
@@ -69,6 +70,10 @@ class AppRouter {
       ),
       GoRoute(path: '/tenant', builder: (context, state) => const MainScreen()),
       GoRoute(
+        path: '/technician',
+        builder: (context, state) => const TechnicianRepairsPage(),
+      ),
+      GoRoute(
         path: '/admin',
         builder: (context, state) => const AdminMainScreen(),
       ),
@@ -82,6 +87,10 @@ class AppRouter {
       GoRoute(
         path: '/admin/newTenant',
         builder: (context, state) => const NewTenantPage(),
+      ),
+      GoRoute(
+        path: '/admin/technicians',
+        builder: (context, state) => const AdminTechniciansPage(),
       ),
     ],
   );

@@ -62,7 +62,9 @@ CREATE TABLE Contracts (
     end_date DATE, -- วันที่สิ้นสุดสัญญา
     deposit VARCHAR(50), -- จำนวนเงินมัดจำ / ล่วงหน้า
     contractfile_url VARCHAR(255), -- ลิงก์เก็บรูปภาพเอกสารสแกนใบสัญญา
+    cancelcontactfile_url VARCHAR(255), -- ลิงก์เก็บรูปภาพเอกสารยกเลิกสัญญา
     status ENUM('PENDING', 'ACTIVE', 'EXPIRED', 'TERMINATED'), -- สถานะของสัญญา
+    cancel_at DATETIME, -- วันที่ยกเลิกสัญญา
     -- pending = รออนุมัติ
     -- active = อนุมัติแล้ว
     -- expired = หมดอายุ
@@ -106,9 +108,10 @@ CREATE TABLE Parcels (
     room_number VARCHAR(10), -- เลขห้อง
     received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- เวลาที่พัสดุมาถึงนิติบุคคล
     parcelsimage_url VARCHAR(255), -- รูปรวมกล่องหรือรูปชื่อหน้ากล่อง
-    status ENUM('RECEIVED', 'PICKED_UP'), -- สถานะพัสดุ
+    status ENUM('RECEIVED', 'PICKED_UP', 'PENDING'), -- สถานะพัสดุ
     -- received = รับแล้ว
     -- picked_up = รับแล้ว (ผู้เช่ามารับไปแล้ว)
+    -- Pending = รอรับ/ตกค้าง
     confirmed_at TIMESTAMP, 
     -- ตราประทับเวลาอัตโนมัติเมื่อผู้เช่ามาเซ็นรับของออกไป
     received_by VARCHAR(100) -- ชื่อพนักงานนิติฯ ที่เป็นคนกดรับกล่องเข้าระบบ

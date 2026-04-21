@@ -41,6 +41,13 @@ dependencies:
   intl: ^0.20.2
   provider: ^6.1.1
   material_symbols_icons: ^4.2819.3
+  url_launcher: ^6.3.2
+  path_provider: ^2.1.5
+  open_filex: ^4.7.0
+  permission_handler: ^12.0.1
+  universal_html: ^2.3.0
+  image_picker: ^1.1.2
+  file_picker: ^8.2.0
 
 # flutter_launcher_icons:
 #   android: "launcher_icon"

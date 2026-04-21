@@ -13,7 +13,7 @@ class BillService {
       if (token == null) return [];
 
       final response = await _dio.get(
-        '/bills/my-bills',
+        '/tenant-billing/my-bills',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (response.data['status'] == 'success') {
@@ -28,6 +28,27 @@ class BillService {
         print('Error fetching bills: $e');
       }
       return [];
+    }
+  }
+
+
+
+  Future<bool> processPayment(int billId, String slipUrl) async {
+    try {
+      final token = await _authService.getToken();
+      if (token == null) return false;
+
+      final response = await _dio.patch(
+        '/tenant-billing/payment/$billId',
+        data: {'slipUrl': slipUrl},
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      return response.data['status'] == 'success';
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error processing payment: $e');
+      }
+      return false;
     }
   }
 }
