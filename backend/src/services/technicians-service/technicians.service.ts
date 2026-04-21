@@ -45,8 +45,8 @@ export const TechniciansService = {
 
 			// 2. บันทึกข้อมูลการมอบหมายงานให้ช่างคนนี้ และลงนัดหมาย (+7 ชม สำหรับเวลาท้องถิ่น)
 			await connection.query(
-				"INSERT INTO Repairs_technicians (repairsuser_id, technician_by, scheduled_at, assigned_at) VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 7 HOUR))",
-				[repairId, technicianId, scheduledAt],
+				"INSERT INTO Repairs_technicians (repairsuser_id, technician_by, scheduled_at, assigned_at) VALUES (?, ?, ?, ?)",
+				[repairId, technicianId, scheduledAt, new Date()], // ใช้เวลาไทยจาก Node.js
 			);
 
 			await connection.commit();
@@ -71,8 +71,8 @@ export const TechniciansService = {
 
 			if (status === "COMPLETED") {
 				await connection.query(
-					"UPDATE Repairs_user SET status = ?, completed_at = DATE_ADD(NOW(), INTERVAL 7 HOUR) WHERE repairsuser_id = ?",
-					[status, repairId],
+					"UPDATE Repairs_user SET status = ?, completed_at = ? WHERE repairsuser_id = ?",
+					[status, new Date(), repairId], // ใช้เวลาไทยจาก Node.js
 				);
 			} else {
 				await connection.query(

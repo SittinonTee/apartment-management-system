@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 
 enum RepairStatus {
   problem, // REPORTED
@@ -60,13 +61,34 @@ class RepairRequest {
           : null,
       tenantPhone: json['phone'],
       categoryName: json['category_name'],
-      repairsImageUrl: json['repairsimage_url'],
+      repairsImageUrl: _parseImageUrl(json['repairsimage_url']),
       preferredTime: json['preferred_time'],
       technicianId: json['technician_by'],
       mechanicName: json['mechanic_firstname'] != null
           ? '${json['mechanic_firstname']} ${json['mechanic_lastname'] ?? ''}'.trim()
           : null,
     );
+  }
+
+  // ฟังก์ชันช่วยจัดการ URL รูปภาพ (รองรับทั้ง String ธรรมดา และ JSON Array String)
+  static String? _parseImageUrl(dynamic rawUrl) {
+    if (rawUrl == null || rawUrl.toString().isEmpty) return null;
+    
+    String url = rawUrl.toString().trim();
+    
+    // ถ้ามาเป็น JSON Array เช่น ["https://..."]
+    if (url.startsWith('[') && url.endsWith(']')) {
+      try {
+        final List<dynamic> urls = jsonDecode(url);
+        if (urls.isNotEmpty) {
+          return urls.first.toString();
+        }
+      } catch (e) {
+        debugPrint('Error parsing image URL with jsonDecode: $e');
+      }
+    }
+    
+    return url.isEmpty ? null : url;
   }
 
   // แปลงสถานะจาก String เป็น Enum สำหรับ UI

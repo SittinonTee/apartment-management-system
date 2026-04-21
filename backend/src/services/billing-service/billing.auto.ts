@@ -17,6 +17,16 @@ function getYYYYMM(date: Date): string {
 	return `${yyyy}-${mm}`;
 }
 
+/**
+ * Returns YYYY-MM-DD format using local time (prevents -7 hours shift)
+ */
+function formatLocalYYYYMMDD(date: Date): string {
+	const yyyy = date.getFullYear();
+	const mm = String(date.getMonth() + 1).padStart(2, "0");
+	const dd = String(date.getDate()).padStart(2, "0");
+	return `${yyyy}-${mm}-${dd}`;
+}
+
 async function checkAndCreateDraftBills() {
 	try {
 		const now = new Date();
@@ -47,7 +57,7 @@ async function checkAndCreateDraftBills() {
 				AND DATE(c.start_date) <= DATE(?)
 			`;
 			const [activeContracts] = (await pool.query(queryContracts, [
-				endOfMonth.toISOString().slice(0, 10),
+				formatLocalYYYYMMDD(endOfMonth),
 			])) as [any[], unknown];
 
 			for (const contract of activeContracts) {
@@ -72,13 +82,14 @@ async function checkAndCreateDraftBills() {
 
 					const queryInsert = `
 						INSERT INTO Bills (contract_id, bill_month, rate_id, rent_snapshot, status, created_at)
-						VALUES (?, ?, ?, ?, 'DRAFT', NOW())
+						VALUES (?, ?, ?, ?, 'DRAFT', ?)
 					`;
 					await pool.query(queryInsert, [
 						contract.contracts_id,
 						billMonthStr,
 						contract.rate_id,
 						rentSnapshotStr,
+						new Date(), // ใช้เวลาจาก Node.js ที่เป็น Asia/Bangkok
 					]);
 					console.log(
 						`[Auto-Billing] Created DRAFT bill for contract ${contract.contracts_id} (${billMonthStr})`,
@@ -119,7 +130,7 @@ async function checkAndPublishBills() {
 
 			// Due date is the end of the publish month (billMonth + 1)
 			const dueDateObj = getLastDayOfMonth(billYear, billMonth + 1);
-			const dueDateStr = dueDateObj.toISOString().slice(0, 10);
+			const dueDateStr = formatLocalYYYYMMDD(dueDateObj);
 
 			const queryUpdate = `
 				UPDATE Bills 
@@ -138,7 +149,7 @@ async function checkAndPublishBills() {
 
 async function checkOverdueBills() {
 	try {
-		const nowStr = new Date().toISOString().slice(0, 10);
+		const nowStr = formatLocalYYYYMMDD(new Date());
 
 		// Change PENDING to OVERDUE if today > due_date
 		const queryUpdate = `
