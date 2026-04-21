@@ -27,6 +27,24 @@ function formatLocalYYYYMMDD(date: Date): string {
 	return `${yyyy}-${mm}-${dd}`;
 }
 
+interface ContractRow {
+	contracts_id: number;
+	rate_id: number;
+	start_date: string | Date;
+	rate_room: number;
+	rate_water: number;
+	rate_electric: number;
+}
+
+interface BillRow {
+	bills_id: number;
+	bill_month: string;
+}
+
+interface UpdateResult {
+	affectedRows: number;
+}
+
 async function checkAndCreateDraftBills() {
 	try {
 		const now = new Date();
@@ -44,7 +62,9 @@ async function checkAndCreateDraftBills() {
 
 			// If current time hasn't reached the end of this month yet, skip
 			// We trigger draft generation ON or AFTER the exact last day of the month
-			const isLastDayOrLater = now.getTime() >= new Date(year, month - 1, endOfMonth.getDate()).getTime();
+			const isLastDayOrLater =
+				now.getTime() >=
+				new Date(year, month - 1, endOfMonth.getDate()).getTime();
 			if (!isLastDayOrLater) continue;
 
 			// Get all ACTIVE contracts where start_date is on or before the end of this month
@@ -58,18 +78,18 @@ async function checkAndCreateDraftBills() {
 			`;
 			const [activeContracts] = (await pool.query(queryContracts, [
 				formatLocalYYYYMMDD(endOfMonth),
-			])) as [any[], unknown];
+			])) as [ContractRow[], unknown];
 
 			for (const contract of activeContracts) {
 				// Check if a bill already exists for this contract and month
-				const queryCheckBill = `
+				const _queryCheckBill = `
 					SELECT bills_id FROM Bills 
 					WHERE contract_id = ? AND bill_month = ?
 				`;
-				const [existingBills] = (await pool.query(queryCheckBill, [
+				const [existingBills] = (await pool.query(_queryCheckBill, [
 					contract.contracts_id,
 					billMonthStr,
-				])) as [any[], unknown];
+				])) as [{ bills_id: number }[], unknown];
 
 				if (existingBills.length === 0) {
 					// Create DRAFT bill with rent_snapshot
@@ -117,9 +137,10 @@ async function checkAndPublishBills() {
 			AND water_unit IS NOT NULL 
 			AND electric_unit IS NOT NULL
 		`;
-		const [draftBills] = (await pool.query(queryDrafts, [
-			currentMonthStr,
-		])) as [any[], unknown];
+		const [draftBills] = (await pool.query(queryDrafts, [currentMonthStr])) as [
+			BillRow[],
+			unknown,
+		];
 
 		for (const bill of draftBills) {
 			// Calculate due_date. Due date is the end of the month AFTER the bill_month.
@@ -157,7 +178,10 @@ async function checkOverdueBills() {
 			SET status = 'OVERDUE' 
 			WHERE status = 'PENDING' AND due_date < ?
 		`;
-		const [result] = (await pool.query(queryUpdate, [nowStr])) as [any, unknown];
+		const [result] = (await pool.query(queryUpdate, [nowStr])) as [
+			UpdateResult,
+			unknown,
+		];
 		if (result.affectedRows > 0) {
 			console.log(
 				`[Auto-Billing] Marked ${result.affectedRows} bills as OVERDUE.`,

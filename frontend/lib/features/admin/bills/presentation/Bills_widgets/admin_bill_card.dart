@@ -65,8 +65,11 @@ class _AdminBillCardState extends State<AdminBillCard> {
       case BadgeStatus.completed: // สถานะสำเร็จ (เขียวจางๆ)
         return AppColors.success.withValues(alpha: 0.15);
       case BadgeStatus.urgent: // สถานะด่วน/เกินกำหนด (แดงจางๆ)
-      case BadgeStatus.info:
         return AppColors.error.withValues(alpha: 0.15);
+      case BadgeStatus.info:
+        return AppColors.info.withValues(alpha: 0.15);
+      case BadgeStatus.cancelled: // สถานะยกเลิก (เทาจางๆ)
+        return Colors.grey.withValues(alpha: 0.15);
     }
   }
 
@@ -78,8 +81,11 @@ class _AdminBillCardState extends State<AdminBillCard> {
       case BadgeStatus.completed:
         return AppColors.success;
       case BadgeStatus.urgent:
-      case BadgeStatus.info:
         return AppColors.error;
+      case BadgeStatus.info:
+        return AppColors.info;
+      case BadgeStatus.cancelled:
+        return Colors.grey;
     }
   }
 
@@ -91,8 +97,11 @@ class _AdminBillCardState extends State<AdminBillCard> {
       case BadgeStatus.completed:
         return Icons.check_circle_outline; // รูปติ๊กถูก
       case BadgeStatus.urgent:
-      case BadgeStatus.info:
         return Icons.warning_amber_rounded; // รูปตกใจกระพริบ
+      case BadgeStatus.info:
+        return Icons.info_outline;
+      case BadgeStatus.cancelled:
+        return Icons.cancel_outlined; // รูปกากบาท
     }
   }
 

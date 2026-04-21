@@ -1,8 +1,8 @@
 import type { NextFunction, Response } from "express";
 import type { AuthRequest } from "../../middlewares/auth.middleware";
 import { AppError } from "../../middlewares/error.middleware";
-import * as billService from "./bill.service";
 import pool from "../database";
+import * as billService from "./bill.service";
 
 export const getMyBills = async (
 	req: AuthRequest,
@@ -64,7 +64,7 @@ export const approveBill = async (
 			const [userRows] = (await pool.query(
 				"SELECT firstname FROM Users WHERE user_id = ?",
 				[userId],
-			)) as [any[], unknown];
+			)) as [{ firstname: string }[], unknown];
 
 			if (userRows.length > 0 && userRows[0].firstname) {
 				adminName = userRows[0].firstname;
@@ -76,16 +76,21 @@ export const approveBill = async (
 				const [userRowsLower] = (await pool.query(
 					"SELECT firstname FROM users WHERE user_id = ?",
 					[userId],
-				)) as [any[], unknown];
+				)) as [{ firstname: string }[], unknown];
 				if (userRowsLower.length > 0 && userRowsLower[0].firstname) {
 					adminName = userRowsLower[0].firstname;
 				}
 			} catch (e) {
-				console.error("[DB Error] Failed to fetch admin firstname (lowercase table):", e);
+				console.error(
+					"[DB Error] Failed to fetch admin firstname (lowercase table):",
+					e,
+				);
 			}
 		}
 
-		console.log(`[Approve Bill Execution] Final Admin Name to Save: "${adminName}"`);
+		console.log(
+			`[Approve Bill Execution] Final Admin Name to Save: "${adminName}"`,
+		);
 
 		const success = await billService.approveBill(Number(billId), adminName);
 
@@ -96,7 +101,7 @@ export const approveBill = async (
 		res.status(200).json({
 			status: "success",
 			message: "อนุมัติบิลเรียบร้อยแล้ว",
-			adminName: adminName
+			adminName: adminName,
 		});
 	} catch (error) {
 		console.error("[Approve Bill Fatal Error]:", error);

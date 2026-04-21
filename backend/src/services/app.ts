@@ -3,9 +3,9 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import { AppError, globalErrorHandler } from "../middlewares/error.middleware";
+import { initAutoBilling } from "./billing-service/billing.auto";
 import config from "./config";
 import indexRoute from "./index.route";
-import { initAutoBilling } from "./billing-service/billing.auto";
 
 const app = express();
 const port = config.app.port;

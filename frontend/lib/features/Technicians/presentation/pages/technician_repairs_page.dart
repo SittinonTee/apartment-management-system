@@ -8,7 +8,9 @@ import '../widgets/technician_repair_card.dart';
 import 'technician_repair_detail_page.dart';
 import 'technician_repair_history.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/widgets/month_year_filter.dart';
 import '../../../../core/services/auth_service.dart';
+import '../../../../core/widgets/searchbar.dart';
 
 class TechnicianRepairsPage extends StatefulWidget {
   const TechnicianRepairsPage({super.key});
@@ -20,12 +22,15 @@ class TechnicianRepairsPage extends StatefulWidget {
 class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
   final RepairService _repairService = RepairService();
   int _selectedIndex = 0;
+  String _searchQuery = '';
+  int? _selectedMonth;
+  int? _selectedYear;
+
   final List<String> _categories = [
     'ทั้งหมด',
     'ปัญหา', // REPORTED
-    'กำลังดำเนินการ', // ASSIGNED, PENDING
-    'เสร็จสิ้น', // COMPLETED
-    'ยกเลิก', // CANCELLED
+    'กำลังดำเนินการ', // ASSIGNED
+    'เตรียมอุปกรณ์', // PENDING
   ];
 
   List<RepairRequest> _allRepairs = [];
@@ -53,17 +58,41 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
   }
 
   List<RepairRequest> get _filteredRepairs {
-    if (_selectedIndex == 0) return _allRepairs;
+    List<RepairRequest> filtered = _allRepairs.where((r) {
+      // หน้าแรกแสดงแต่งานที่ยังไม่เสร็จ (ไม่เอา COMPLETED, CANCELLED)
+      return r.status != 'COMPLETED' && r.status != 'CANCELLED';
+    }).toList();
 
-    // แปลง Text แถบเมนูเป็น Enum สถานะเพื่อกรองข้อมูล
-    final category = _categories[_selectedIndex];
-    RepairStatus? status;
-    if (category == 'ปัญหา') status = RepairStatus.problem;
-    if (category == 'กำลังดำเนินการ') status = RepairStatus.inProgress;
-    if (category == 'เสร็จสิ้น') status = RepairStatus.completed;
-    if (category == 'ยกเลิก') status = RepairStatus.cancelled;
+    // กรองตามแถบสถานะ (Tab)
+    if (_selectedIndex != 0) {
+      final category = _categories[_selectedIndex];
+      RepairStatus? status;
+      if (category == 'ปัญหา') status = RepairStatus.problem;
+      if (category == 'กำลังดำเนินการ') status = RepairStatus.inProgress;
+      if (category == 'เตรียมอุปกรณ์') status = RepairStatus.pending;
+      filtered = filtered.where((r) => r.statusEnum == status).toList();
+    }
 
-    return _allRepairs.where((r) => r.statusEnum == status).toList();
+    // กรองตามการค้นหา (เลขห้อง หรือ ชื่อ)
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((r) {
+        final searchLower = _searchQuery.toLowerCase();
+        final roomMatch = r.roomNumber?.toLowerCase().contains(searchLower) ?? false;
+        final nameMatch = r.tenantName?.toLowerCase().contains(searchLower) ?? false;
+        final titleMatch = r.title.toLowerCase().contains(searchLower);
+        return roomMatch || nameMatch || titleMatch;
+      }).toList();
+    }
+
+    // กรองตามเดือน/ปี
+    if (_selectedMonth != null) {
+      filtered = filtered.where((r) => r.date.month == _selectedMonth).toList();
+    }
+    if (_selectedYear != null) {
+      filtered = filtered.where((r) => r.date.year == _selectedYear).toList();
+    }
+
+    return filtered;
   }
 
   @override
@@ -75,6 +104,8 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
+            _buildSearchAndFilter(),
+            const SizedBox(height: 16),
             _buildFilterTabs(),
             const SizedBox(height: 16),
             Expanded(
@@ -142,7 +173,7 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
                 isPrimary: false,
                 isOutlined: true,
                 onPressed: () {
-                  context.read<AuthService>().logout();
+                  Provider.of<AuthService>(context, listen: false).logout();
                 },
                 icon: const Icon(
                   Icons.logout,
@@ -155,6 +186,31 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchAndFilter() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          SearchWidget(
+            onChanged: (value) => setState(() => _searchQuery = value),
+            onSearch: (value) => setState(() => _searchQuery = value),
+          ),
+          const SizedBox(height: 12),
+          MonthYearFilter(
+            selectedMonth: _selectedMonth,
+            selectedYear: _selectedYear,
+            onChanged: (month, year) {
+              setState(() {
+                _selectedMonth = month;
+                _selectedYear = year;
+              });
+            },
           ),
         ],
       ),
@@ -217,7 +273,7 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
                     TechnicianRepairDetailPage(repair: tasks[index]),
               ),
             );
-            
+
             // ถ้ารับงานสำเร็จ (result == true) ให้โหลดข้อมูลใหม่ทันที
             if (result == true) {
               _fetchRepairs();

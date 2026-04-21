@@ -3,7 +3,8 @@ import 'dart:convert';
 
 enum RepairStatus {
   problem, // REPORTED
-  inProgress, // ASSIGNED, PENDING
+  inProgress, // ASSIGNED
+  pending, // PENDING (ใช้เป็น จัดซื้อวัสดุ)
   completed, // COMPLETED
   cancelled, // CANCELLED
 }
@@ -65,7 +66,8 @@ class RepairRequest {
       preferredTime: json['preferred_time'],
       technicianId: json['technician_by'],
       mechanicName: json['mechanic_firstname'] != null
-          ? '${json['mechanic_firstname']} ${json['mechanic_lastname'] ?? ''}'.trim()
+          ? '${json['mechanic_firstname']} ${json['mechanic_lastname'] ?? ''}'
+                .trim()
           : null,
     );
   }
@@ -73,9 +75,9 @@ class RepairRequest {
   // ฟังก์ชันช่วยจัดการ URL รูปภาพ (รองรับทั้ง String ธรรมดา และ JSON Array String)
   static String? _parseImageUrl(dynamic rawUrl) {
     if (rawUrl == null || rawUrl.toString().isEmpty) return null;
-    
+
     String url = rawUrl.toString().trim();
-    
+
     // ถ้ามาเป็น JSON Array เช่น ["https://..."]
     if (url.startsWith('[') && url.endsWith(']')) {
       try {
@@ -87,7 +89,7 @@ class RepairRequest {
         debugPrint('Error parsing image URL with jsonDecode: $e');
       }
     }
-    
+
     return url.isEmpty ? null : url;
   }
 
@@ -97,8 +99,9 @@ class RepairRequest {
       case 'REPORTED':
         return RepairStatus.problem;
       case 'ASSIGNED':
-      case 'PENDING':
         return RepairStatus.inProgress;
+      case 'PENDING':
+        return RepairStatus.pending;
       case 'COMPLETED':
         return RepairStatus.completed;
       case 'CANCELLED':
@@ -114,8 +117,9 @@ class RepairRequest {
       case 'REPORTED':
         return 'ปัญหา';
       case 'ASSIGNED':
-      case 'PENDING':
         return 'กำลังดำเนินการ';
+      case 'PENDING':
+        return 'เตรียมอุปกรณ์';
       case 'COMPLETED':
         return 'เสร็จสิ้น';
       case 'CANCELLED':
@@ -131,8 +135,9 @@ class RepairRequest {
       case 'REPORTED':
         return const Color(0xFFFFE0E0);
       case 'ASSIGNED':
-      case 'PENDING':
         return const Color(0xFFFFF3DB);
+      case 'PENDING':
+        return const Color(0xFFFFF4E5); // Light Orange background
       case 'COMPLETED':
         return const Color(0xFFE8F5E9);
       case 'CANCELLED':
@@ -148,8 +153,9 @@ class RepairRequest {
       case 'REPORTED':
         return const Color(0xFFFF5252);
       case 'ASSIGNED':
-      case 'PENDING':
         return const Color(0xFFFFAB40);
+      case 'PENDING':
+        return const Color(0xFFF2994A); // Dark Orange text
       case 'COMPLETED':
         return const Color(0xFF4CAF50);
       case 'CANCELLED':

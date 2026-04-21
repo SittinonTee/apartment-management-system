@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/widgets/section_card.dart';
-import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/services/auth_service.dart';
 import 'package:provider/provider.dart';
 import '../../data/repair_model.dart';
@@ -46,16 +45,56 @@ class _TechnicianRepairDetailPageState
                     _buildImageSection(),
                     const SizedBox(height: 16),
                     _buildTenantSection(),
+                    const SizedBox(height: 16),
+                    _buildMechanicSection(),
                     const SizedBox(height: 24),
                   ],
                 ),
               ),
             ),
-            if (widget.repair.status == 'REPORTED') _buildBottomAction(context),
+            _buildBottomAction(context),
           ],
         ),
       ),
     );
+  }
+
+  // ฟังก์ชันอัปเดตสถานะทั่วไป
+  Future<void> _updateStatus(String status, {String? remark}) async {
+    setState(() => _isLoading = true);
+    try {
+      final response = await _dio.post(
+        '${ApiConstants.baseUrl}/technicians/status',
+        data: {
+          'repairId': widget.repair.id,
+          'status': status,
+          'remark': remark ?? '',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'อัปเดตสถานะเป็น ${status == 'PENDING' ? 'เตรียมอุปกรณ์' : status} เรียบร้อยแล้ว',
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('เกิดข้อผิดพลาด: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   // ฟังก์ชันส่งข้อมูลรับงานไปหลังบ้าน
@@ -82,7 +121,7 @@ class _TechnicianRepairDetailPageState
         // แสดงข้อความสำเร็จ
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('รับงานสำเร็จแล้ว! ตรวจสอบที่หน้า "รับงานแล้ว"'),
+            content: Text('รับงานสำเร็จแล้ว! ตรวจสอบที่หน้า "รายการงาน"'),
             backgroundColor: Colors.green,
           ),
         );
@@ -173,7 +212,8 @@ class _TechnicianRepairDetailPageState
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          if (widget.repair.status != 'REPORTED' && widget.repair.mechanicName != null)
+          if (widget.repair.status != 'REPORTED' &&
+              widget.repair.mechanicName != null)
             RepairDetailRow(
               label: 'ช่างรับผิดชอบ :',
               value: Text(
@@ -291,14 +331,157 @@ class _TechnicianRepairDetailPageState
     );
   }
 
+  // --- ข้อมูลช่างผู้รับงาน ---
+  Widget _buildMechanicSection() {
+    return SectionCard(
+      padding: const EdgeInsets.all(20),
+      child: RepairDetailRow(
+        label: 'ช่างผู้รับงาน :',
+        value: Text(
+          widget.repair.mechanicName ?? 'รอมอบหมาย',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.primary,
+          ),
+        ),
+        showDivider: false,
+      ),
+    );
+  }
+
   // --- ปุ่มกดยืนยันด้านล่าง ---
   Widget _buildBottomAction(BuildContext context) {
+    if (widget.repair.status == 'COMPLETED' ||
+        widget.repair.status == 'CANCELLED') {
+      return const SizedBox.shrink();
+    }
+
+    if (widget.repair.status == 'REPORTED') {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        child: ElevatedButton(
+          onPressed: _isLoading ? null : () => _showAcceptJobDialog(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            minimumSize: const Size(double.infinity, 56),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: _isLoading
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text(
+                  'ยืนยันการรับงาน',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+        ),
+      );
+    }
+
+    // กรณีสถานะ ASSIGNED, PENDING
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-      child: CustomButton(
-        text: 'ยืนยันการรับงาน',
-        height: 56,
-        onPressed: () => _showAcceptJobDialog(context),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              // ปุ่มเตรียมอุปกรณ์ (Orange)
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : () => _updateStatus('PENDING'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFF2994A), // Orange
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'เตรียมอุปกรณ์',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // ปุ่มยกเลิก (Red)
+              Expanded(
+                child: ElevatedButton(
+                  onPressed:
+                      _isLoading ? null : () => _updateStatus('CANCELLED'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEB5757), // Red
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'ยกเลิก',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // ปุ่มเสร็จสิ้น (Green)
+          ElevatedButton(
+            onPressed: _isLoading ? null : () => _updateStatus('COMPLETED'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF27AE60), // Green
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 56),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: _isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Text(
+                    'เสร็จสิ้น',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+          ),
+        ],
       ),
     );
   }
