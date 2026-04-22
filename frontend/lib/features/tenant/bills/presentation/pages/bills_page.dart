@@ -18,6 +18,7 @@ class BillsPage extends StatefulWidget {
 
 class _BillsPageState extends State<BillsPage> {
   late Future<Map<String, dynamic>> _dataFuture;
+  int _refreshKey = 0; // เพิ่มตัวแปรสำหรับคุมการรีเฟรชหน้าจอ
 
   @override
   void initState() {
@@ -46,6 +47,7 @@ class _BillsPageState extends State<BillsPage> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: FutureBuilder<Map<String, dynamic>>(
+          key: ValueKey(_refreshKey), // ใช้ Key เพื่อบังคับให้สร้าง FutureBuilder ใหม่เมื่อค่าเปลี่ยน
           future: _dataFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -67,9 +69,10 @@ class _BillsPageState extends State<BillsPage> {
 
             final pendingBills = allBills.where((b) {
               if (b['status'] == 'PAID') return false;
+              if (b['status'] == 'DRAFT') return false;
 
-              // ถ้ามี slip แล้ว ให้ซ่อนจากการ์ด "กำหนดชำระ" (แปลว่ารอตรวจ)
-              if (b['slipimage_url'] != null) return false;
+              // ถ้าเป็นสถานะ รอยืนยัน หรือ ถูกปฏิเสธ (CANCELLED) ให้แสดงในการ์ด
+              if (b['status'] == 'WAITING_CONFIRM' || b['status'] == 'CANCELLED') return true;
 
               final billMonthStr = b['bill_month'] as String?;
               if (billMonthStr == null) return false;
@@ -85,27 +88,37 @@ class _BillsPageState extends State<BillsPage> {
 
             // เรียงลำดับบิลที่ค้างชำระจากเก่าไปใหม่ (วันที่น้อยสุดขึ้นก่อน)
             pendingBills.sort((a, b) {
-              final dateA = a['due_date'] != null ? DateTime.tryParse(a['due_date'].toString()) : null;
-              final dateB = b['due_date'] != null ? DateTime.tryParse(b['due_date'].toString()) : null;
+              final dateA = a['due_date'] != null
+                  ? DateTime.tryParse(a['due_date'].toString())
+                  : null;
+              final dateB = b['due_date'] != null
+                  ? DateTime.tryParse(b['due_date'].toString())
+                  : null;
               if (dateA != null && dateB != null) return dateA.compareTo(dateB);
               return 0;
             });
 
-            final paidBills =
-                allBills.where((b) => b['status'] == 'PAID').toList();
+            final paidBills = allBills
+                .where((b) => b['status'] == 'PAID')
+                .toList();
 
             // --- คำนวณข้อมูลจริงสำหรับ TotalPaidCard ---
             double totalPaid = 0;
             for (var bill in paidBills) {
-              totalPaid += double.tryParse(bill['grand_total']?.toString() ?? '0') ?? 0;
+              totalPaid +=
+                  double.tryParse(bill['grand_total']?.toString() ?? '0') ?? 0;
             }
 
             int paidMonthsCount = paidBills.length;
             int totalMonths = 12; // Default 12 month if no contract found
-            
-            if (contract != null && contract['start_date'] != null && contract['end_date'] != null) {
+
+            if (contract != null &&
+                contract['start_date'] != null &&
+                contract['end_date'] != null) {
               try {
-                final startDate = DateTime.parse(contract['start_date'].toString());
+                final startDate = DateTime.parse(
+                  contract['start_date'].toString(),
+                );
                 final endDate = DateTime.parse(contract['end_date'].toString());
                 totalMonths = _calculateMonthDifference(startDate, endDate);
               } catch (_) {
@@ -113,7 +126,9 @@ class _BillsPageState extends State<BillsPage> {
               }
             }
 
-            final progressPercent = totalMonths > 0 ? (paidMonthsCount / totalMonths) : 0.0;
+            final progressPercent = totalMonths > 0
+                ? (paidMonthsCount / totalMonths)
+                : 0.0;
 
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
@@ -160,17 +175,34 @@ class _BillsPageState extends State<BillsPage> {
                           dueDate: AppDateUtils.formatDateThai(
                             bill['due_date'],
                           ),
-                          amount: (double.tryParse(
+                          amount:
+                              (double.tryParse(
                                 bill['grand_total']?.toString() ?? '0',
                               ) ??
                               0.0),
-                          onPayPressed: () {
-                            Navigator.push(
+                          isOverdue: bill['status'] == 'OVERDUE',
+                          isVerifying: bill['status'] == 'WAITING_CONFIRM',
+                          isRejected: bill['status'] == 'CANCELLED',
+                          onPayPressed: () async {
+                            final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => BillPayPage(billData: bill),
+                                builder: (context) =>
+                                    BillPayPage(billData: bill),
                               ),
                             );
+
+                            // ถ้ามีการจ่ายเงินสำเร็จ (ส่งค่า true กลับมา) ให้รีโหลดข้อมูลใหม่
+                            if (result == true) {
+                              // หน่วงเวลาเพื่อให้ DB บันทึกเสร็จชัวร์
+                              await Future.delayed(const Duration(milliseconds: 800));
+                              if (mounted) {
+                                setState(() {
+                                  _refreshKey++; // เปลี่ยน Key เพื่อบังคับ FutureBuilder สร้างใหม่
+                                  _dataFuture = _fetchData();
+                                });
+                              }
+                            }
                           },
                         ),
                       );

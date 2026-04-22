@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/core/widgets/section_card.dart';
 import 'package:frontend/core/widgets/status_badge.dart';
-import 'package:frontend/features/admin/dashboard/presentation/data/get_users.dart';
+import 'package:frontend/features/admin/dashboard/data/get_users.dart';
 import 'package:frontend/core/utils/formatter.dart';
-import 'package:frontend/features/admin/dashboard/presentation/data/admin_service_api.dart';
+import 'package:frontend/features/admin/dashboard/data/admin_service_api.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
 

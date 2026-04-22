@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
-import 'package:frontend/features/admin/dashboard/presentation/data/get_users.dart';
+import 'package:frontend/features/admin/dashboard/data/get_users.dart';
 
 class AdminUsersInfoCard extends StatelessWidget {
   final UserTemplate user;

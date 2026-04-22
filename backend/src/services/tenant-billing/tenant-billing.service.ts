@@ -24,9 +24,10 @@ export const processPayment = async (
 	const query = `
     UPDATE Bills 
     SET slipimage_url = ?, 
-        payment_date = NOW()
+        payment_date = ?,
+        status = 'WAITING_CONFIRM'
     WHERE bills_id = ?
   `;
-	const [result] = await pool.query(query, [slipUrl, billId]);
+	const [result] = await pool.query(query, [slipUrl, new Date(), billId]);
 	return (result as ResultSetHeader).affectedRows > 0;
 };
