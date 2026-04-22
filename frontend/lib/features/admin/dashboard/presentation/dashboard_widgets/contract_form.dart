@@ -305,15 +305,7 @@ class ContractFormState extends State<ContractForm> {
                     controller: _rentalDurationController,
                     keyboardType: TextInputType.number,
                     onChanged: (_) => _recalculateEndDateFromDuration(),
-                    suffixIcon: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(right: 12),
-                          child: Text('เดือน'),
-                        ),
-                      ],
-                    ),
+                    suffixText: 'เดือน',
                   ),
                 ),
               ],
@@ -376,15 +368,7 @@ class ContractFormState extends State<ContractForm> {
                     labelText: 'ค่าน้ำประปาหน่วยละ',
                     controller: _waterPriceController,
                     keyboardType: TextInputType.number,
-                    suffixIcon: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(right: 12),
-                          child: Text('บาท'),
-                        ),
-                      ],
-                    ),
+                    suffixText: 'บาท',
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -394,15 +378,7 @@ class ContractFormState extends State<ContractForm> {
                     labelText: 'ค่าไฟฟ้าหน่วยละ',
                     controller: _electricPriceController,
                     keyboardType: TextInputType.number,
-                    suffixIcon: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(right: 12),
-                          child: Text('บาท'),
-                        ),
-                      ],
-                    ),
+                    suffixText: 'บาท',
                   ),
                 ),
               ],
@@ -413,15 +389,7 @@ class ContractFormState extends State<ContractForm> {
               labelText: 'เงินประกันความเสียหาย',
               controller: _depositController,
               keyboardType: TextInputType.number,
-              suffixIcon: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(right: 12),
-                    child: Text('บาท'),
-                  ),
-                ],
-              ),
+              suffixText: 'บาท',
             ),
           ],
         ),
