@@ -5,7 +5,7 @@ import 'core/routing/app_router.dart';
 import 'core/constants/app_theme.dart';
 import 'core/services/auth_service.dart';
 // import 'package:provider/provider.dart';
-import 'features/admin/dashboard/presentation/data/get_users.dart';
+import 'features/admin/dashboard/data/get_users.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

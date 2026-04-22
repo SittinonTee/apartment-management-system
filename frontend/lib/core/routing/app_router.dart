@@ -10,7 +10,7 @@ import 'package:frontend/features/tenant/main/presentation/pages/main_screen.dar
 import 'package:frontend/features/Technicians/presentation/pages/technician_repairs_page.dart';
 import 'package:frontend/features/admin/dashboard/presentation/pages/new_tenant_page.dart';
 import 'package:frontend/features/admin/dashboard/presentation/pages/user_infomation_page.dart';
-import 'package:frontend/features/admin/dashboard/presentation/data/get_users.dart';
+import 'package:frontend/features/admin/dashboard/data/get_users.dart';
 import 'package:frontend/features/admin/repairs/presentation/pages/admin_technicians_page.dart';
 
 class AppRouter {

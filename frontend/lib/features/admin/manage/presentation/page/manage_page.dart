@@ -4,9 +4,9 @@ import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/core/widgets/custom_button.dart';
 import 'package:frontend/core/widgets/custom_text_field.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/custom_dropdown_menu.dart';
-import 'package:frontend/features/admin/dashboard/presentation/data/get_rate.dart';
-import 'package:frontend/features/admin/dashboard/presentation/data/rate_manage_api.dart';
-import 'package:frontend/features/admin/dashboard/presentation/data/room_manage_api.dart';
+import 'package:frontend/features/admin/dashboard/data/get_rate.dart';
+import 'package:frontend/features/admin/dashboard/data/rate_manage_api.dart';
+import 'package:frontend/features/admin/dashboard/data/room_manage_api.dart';
 import 'package:frontend/core/widgets/searchbar.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/users_info_card.dart'; // From users_info_card.dart
 

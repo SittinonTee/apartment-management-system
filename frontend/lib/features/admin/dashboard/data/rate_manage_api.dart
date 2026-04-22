@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import '../../../../../core/constants/api_constants.dart';
-import '../../../../../core/services/auth_service.dart';
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/services/auth_service.dart';
 
 class RateManageApi {
   static final RateManageApi _instance = RateManageApi._internal();

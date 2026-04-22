@@ -184,7 +184,7 @@ class UserFormState extends State<UserForm> {
               children: [
                 Text(
                   'เอกสารสัญญาฉบับกระดาษ',
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.secondary,
                   ),
