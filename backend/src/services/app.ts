@@ -3,6 +3,7 @@ import express from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import { AppError, globalErrorHandler } from "../middlewares/error.middleware";
+import { initAutoBilling } from "./billing-service/billing.auto";
 import config from "./config";
 import indexRoute from "./index.route";
 
@@ -50,6 +51,8 @@ app.use(globalErrorHandler);
 
 app.listen(port, () => {
 	console.log(`Server is running on port ${port}`);
+	// เริ่มการตรวจสอบบิลอัตโนมัติ (Boot-time + Cron)
+	initAutoBilling();
 });
 
 export default app;

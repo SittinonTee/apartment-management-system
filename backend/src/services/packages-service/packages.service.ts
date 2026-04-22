@@ -37,14 +37,15 @@ export const addParcel = async (data: AddParcelRequest, adminId: number) => {
 
 	// 2. บันทึกพัสดุเข้า Database
 	const [result] = await pool.query<ResultSetHeader>(
-		`INSERT INTO Parcels (user_id, name, room_number, parcelsimage_url, status, received_by)
-         VALUES (?, ?, ?, ?, 'RECEIVED', ?)`,
+		`INSERT INTO Parcels (user_id, name, room_number, parcelsimage_url, status, received_by, received_at)
+         VALUES (?, ?, ?, ?, 'RECEIVED', ?, ?)`,
 		[
 			userId,
 			data.name,
 			data.room_number,
 			data.parcelsimage_url,
 			receivedByAdmin,
+			new Date(), // ใช้เวลาไทยจาก Node.js
 		],
 	);
 
@@ -54,10 +55,15 @@ export const addParcel = async (data: AddParcelRequest, adminId: number) => {
 export const getParcelsAdmin = async (status?: string, search?: string) => {
 	// 1. อัปเดตข้อมูลใน Database อัตโนมัติ (แก้ไขสถานะเป็น PENDING จริงๆในฐานข้อมูล)
 	try {
+		// คำนวณวันที่ย้อนหลัง 7 วันจากเวลาปัจจุบัน (ไทย)
+		const sevenDaysAgo = new Date();
+		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
 		await pool.query(
 			`UPDATE Parcels 
              SET status = 'PENDING' 
-             WHERE status = 'RECEIVED' AND received_at <= NOW() - INTERVAL 7 DAY`,
+             WHERE status = 'RECEIVED' AND received_at <= ?`,
+			[sevenDaysAgo],
 		);
 	} catch (_error) {
 		console.error("\n DATABASE ENUM ERROR ");
@@ -84,10 +90,14 @@ export const getParcelsAdmin = async (status?: string, search?: string) => {
 export const getParcelsByUser = async (userId: number) => {
 	// 1. อัปเดตข้อมูลใน Database อัตโนมัติ (แก้ไขสถานะเป็น PENDING จริงๆในฐานข้อมูล)
 	try {
+		const sevenDaysAgo = new Date();
+		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
 		await pool.query(
 			`UPDATE Parcels 
              SET status = 'PENDING' 
-             WHERE status = 'RECEIVED' AND received_at <= NOW() - INTERVAL 7 DAY`,
+             WHERE status = 'RECEIVED' AND received_at <= ?`,
+			[sevenDaysAgo],
 		);
 	} catch (_error) {
 		console.error("DATABASE ENUM ERROR");
@@ -103,9 +113,9 @@ export const getParcelsByUser = async (userId: number) => {
 export const markParcelAsPickedUp = async (parcelId: number) => {
 	const [result] = await pool.query<ResultSetHeader>(
 		`UPDATE Parcels 
-         SET status = 'PICKED_UP', confirmed_at = CURRENT_TIMESTAMP 
+         SET status = 'PICKED_UP', confirmed_at = ? 
          WHERE parcels_id = ? AND status IN ('RECEIVED', 'PENDING')`,
-		[parcelId],
+		[new Date(), parcelId],
 	);
 
 	if (result.affectedRows === 0) {

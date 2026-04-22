@@ -37,10 +37,14 @@ class _DashboardPageState extends State<DashboardPage> {
     try {
       final contractData = await _contractService.getMyContract();
       final bills = await _billService.getMyBills();
+      
+      // Filter out DRAFT bills so tenants don't see incomplete bills
+      final visibleBills = bills.where((b) => b['status'] != 'DRAFT').toList();
+
       if (mounted) {
         setState(() {
           _contractData = contractData;
-          _bills = bills;
+          _bills = visibleBills;
           _isLoading = false;
         });
       }

@@ -50,18 +50,12 @@ class TechnicianRepairCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     repair.categoryName ?? 'อื่นๆ',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey,
-                    ),
+                    style: const TextStyle(fontSize: 13, color: Colors.grey),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'ลงวันที่ : ${repair.date.day} พ.ค. ${repair.date.year + 543}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
+                    'ลงวันที่ : ${repair.date.day} ${_getMonthThai(repair.date.month)} ${repair.date.year + 543}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),
@@ -78,16 +72,29 @@ class TechnicianRepairCard extends StatelessWidget {
                   textColor: repair.statusTextColor,
                 ),
                 const SizedBox(height: 12),
-                const Icon(
-                  Icons.chevron_right,
-                  color: Colors.grey,
-                  size: 20,
-                ),
+                const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
               ],
             ),
           ],
         ),
       ),
     );
+  }
+  String _getMonthThai(int month) {
+    const months = [
+      'ม.ค.',
+      'ก.พ.',
+      'มี.ค.',
+      'เม.ย.',
+      'พ.ค.',
+      'มิ.ย.',
+      'ก.ค.',
+      'ส.ค.',
+      'ก.ย.',
+      'ต.ค.',
+      'พ.ย.',
+      'ธ.ค.'
+    ];
+    return months[month - 1];
   }
 }

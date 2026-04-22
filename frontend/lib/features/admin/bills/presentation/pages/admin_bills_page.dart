@@ -4,6 +4,7 @@ import 'package:frontend/core/widgets/searchbar.dart';
 import 'package:frontend/core/widgets/choicechip_filter.dart';
 import 'package:frontend/core/widgets/status_badge.dart';
 import 'package:frontend/features/admin/bills/presentation/Bills_widgets/admin_bill_card.dart';
+import 'package:frontend/core/widgets/month_year_filter.dart';
 
 import 'package:frontend/features/admin/bills/data/get_bills.dart';
 
@@ -16,21 +17,17 @@ class AdminBillsPage extends StatefulWidget {
 
 class _AdminBillsPageState extends State<AdminBillsPage> {
   String searchQuery = '';
-  int selectedMonthIndex = 0;
-  final List<String> monthList = [
+  int? selectedMonth;
+  int? selectedYear;
+  String selectedStatus = 'ทั้งหมด';
+
+  final List<String> statusList = [
     'ทั้งหมด',
-    'ม.ค.',
-    'ก.พ.',
-    'มี.ค.',
-    'เม.ย.',
-    'พ.ค.',
-    'มิ.ย.',
-    'ก.ค.',
-    'ส.ค.',
-    'ก.ย.',
-    'ต.ค.',
-    'พ.ย.',
-    'ธ.ค.',
+    'รอยืนยัน',
+    'ค้างชำระ',
+    'ชำระสำเร็จ',
+    'เลยกำหนด',
+    'ยกเลิก',
   ];
 
   final List<String> monthfull = [
@@ -49,6 +46,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
   ];
 
   late Future<List<BillModel>> _billsFuture;
+  int _refreshKey = 0; // เพิ่มตัวแปรสำหรับคุมการรีเฟรชหน้าจอแอดมิน
 
   @override
   void initState() {
@@ -72,6 +70,11 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
       case 'overdue':
         return BadgeStatus.urgent;
       case 'pending':
+        return BadgeStatus.pending;
+      case 'cancelled':
+        return BadgeStatus.cancelled;
+      case 'waiting_confirm':
+        return BadgeStatus.verifying;
       default:
         return BadgeStatus.pending;
     }
@@ -88,6 +91,11 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
       case 'overdue':
         return 'เลยกำหนด';
       case 'pending':
+        return 'ค้างชำระ';
+      case 'cancelled':
+        return 'ยกเลิก';
+      case 'waiting_confirm':
+        return 'รอยืนยัน';
       default:
         return 'ค้างชำระ';
     }
@@ -146,9 +154,14 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
           backgroundColor: AppColors.success,
         ),
       );
-      setState(() {
-        _loadBills();
-      });
+      // หน่วงเวลาเล็กน้อยเพื่อให้ DB อัปเดตข้อมูล View เสร็จสมบูรณ์
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) {
+        setState(() {
+          _refreshKey++; // เปลี่ยน Key เพื่อบังคับรีโหลดใหม่
+          _loadBills();
+        });
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -158,6 +171,72 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
       );
     }
   }
+
+  Future<void> _rejectBill(int billId) async {
+    // แสดง Dialog ยืนยันก่อนปฏิเสธ
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('ปฏิเสธการชำระเงิน'),
+          content: const Text(
+            'คุณแน่ใจหรือไม่ว่าต้องการปฏิเสธการชำระเงินนี้? ข้อมูลสลิปจะถูกลบทิ้งและบิลจะกลับเป็นสถานะค้างชำระ',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text(
+                'ยกเลิก',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                'ยืนยันการปฏิเสธ',
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    final success = await BillsService().rejectBill(billId);
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('ปฏิเสธการชำระเงินเรียบร้อยแล้ว'),
+          backgroundColor: AppColors.warning,
+        ),
+      );
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) {
+        setState(() {
+          _refreshKey++;
+          _loadBills();
+        });
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('เกิดข้อผิดพลาดในการปฏิเสธการชำระเงิน'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -195,22 +274,33 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
               });
             },
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+          MonthYearFilter(
+            selectedMonth: selectedMonth,
+            selectedYear: selectedYear,
+            onChanged: (month, year) {
+              setState(() {
+                selectedMonth = month;
+                selectedYear = year;
+              });
+            },
+          ),
+          const SizedBox(height: 16),
           SizedBox(
             height: 40,
             child: ListView.builder(
               physics: const BouncingScrollPhysics(),
               scrollDirection: Axis.horizontal,
-              itemCount: monthList.length,
+              itemCount: statusList.length,
               itemBuilder: (context, i) {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: ChoiceChipFilter(
-                    label: monthList[i],
-                    selected: selectedMonthIndex == i,
+                    label: statusList[i],
+                    selected: selectedStatus == statusList[i],
                     onSelected: (_) {
                       setState(() {
-                        selectedMonthIndex = i;
+                        selectedStatus = statusList[i];
                       });
                     },
                   ),
@@ -221,6 +311,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
           const SizedBox(height: 16),
           Expanded(
             child: FutureBuilder<List<BillModel>>(
+              key: ValueKey(_refreshKey), // บังคับ Rebuild เมื่อ Key เปลี่ยน
               future: _billsFuture,
               builder: (context, snapshot) {
                 // ระหว่างโหลด API
@@ -261,40 +352,62 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
                       .toList();
                 }
 
-                // 2. กรองตาม "เดือนที่กดเลือก" (ชิปด้านบน)
-                // index 0 คือ 'ทั้งหมด' ดังนั้นดึงทุกอัน, ถ้า index เบอร์อื่น ให้ดึงแค่บิลของเดือนนั้น
-                if (selectedMonthIndex != 0) {
+                // 2. กรองตาม "เดือนและปีที่เลือก"
+                if (selectedMonth != null) {
                   bills = bills
-                      .where((b) => b.dueDate.month == selectedMonthIndex)
+                      .where((b) => b.dueDate.month == selectedMonth)
+                      .toList();
+                }
+                if (selectedYear != null) {
+                  bills = bills
+                      .where((b) => b.dueDate.year == selectedYear)
                       .toList();
                 }
 
-                // 3. จัดกลุ่มบิลตามเดือน
-                Map<int, List<BillModel>> groupedBills = {};
-                for (var bill in bills) {
-                  int m = bill.dueDate.month;
-                  groupedBills.putIfAbsent(m, () => []).add(bill);
+                // 3. กรองตาม "สถานะ"
+                if (selectedStatus != 'ทั้งหมด') {
+                  bills = bills.where((b) {
+                    final text = _mapStatusText(b.status);
+                    return text == selectedStatus;
+                  }).toList();
                 }
 
-                // สั่งเรียงเดือนจาก ล่าสุดไปเก่าสุด หรือตามลำดับในลิสต์ 1-12
-                List<int> sortedMonths = groupedBills.keys.toList()..sort();
+                // 4. จัดกลุ่มบิลตามเดือนและปี
+                Map<String, List<BillModel>> groupedBills = {};
+                for (var bill in bills) {
+                  String key = "${bill.dueDate.year}-${bill.dueDate.month}";
+                  groupedBills.putIfAbsent(key, () => []).add(bill);
+                }
 
-                if (sortedMonths.isEmpty) {
+                // เรียงลำดับกลุ่มบิล (ปี-เดือน) จากล่าสุดไปเก่าสุด
+                List<String> sortedKeys = groupedBills.keys.toList()
+                  ..sort((a, b) {
+                    // เรียงจากค่ามากไปหาน้อย (ล่าสุดไปเก่าสุด)
+                    return b.compareTo(a);
+                  });
+
+                if (sortedKeys.isEmpty) {
                   return const Center(
                     child: Text(
-                      'ไม่พบรายการบิลค่าเช่าในเดือนที่เลือก',
+                      'ไม่พบรายการบิลค่าเช่าตามเงื่อนไขที่เลือก',
                       style: TextStyle(color: AppColors.textSecondary),
                     ),
                   );
                 }
 
-                // 4. สร้าง ListView ที่แต่ละ Item เป็นกลุ่มของเดือนๆ นั้น
+                // 5. สร้าง ListView ที่แต่ละ Item เป็นกลุ่มของเดือนๆ นั้น
                 return ListView.builder(
                   physics: const BouncingScrollPhysics(),
-                  itemCount: sortedMonths.length,
+                  itemCount: sortedKeys.length,
                   itemBuilder: (context, groupIndex) {
-                    int currentMonth = sortedMonths[groupIndex];
-                    List<BillModel> monthBills = groupedBills[currentMonth]!;
+                    String currentKey = sortedKeys[groupIndex];
+                    List<int> parts = currentKey
+                        .split('-')
+                        .map(int.parse)
+                        .toList();
+                    int year = parts[0];
+                    int month = parts[1];
+                    List<BillModel> monthBills = groupedBills[currentKey]!;
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,7 +429,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                monthfull[currentMonth - 1],
+                                '${monthfull[month - 1]} ${year + 543}',
                                 style: textTheme.titleLarge?.copyWith(
                                   color: AppColors.textSecondary,
                                   fontWeight: FontWeight.bold,
@@ -343,7 +456,9 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
                                   : null,
                               payMethod: bill.payMethod,
                               slipImageUrl: bill.slipImageUrl,
+                              approvedBy: bill.approvedBy,
                               onConfirm: () => _confirmBill(bill.billId),
+                              onReject: () => _rejectBill(bill.billId),
                             ),
                           );
                         }),

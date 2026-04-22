@@ -25,9 +25,9 @@ export const verifyBillAccess = async (
 		// หมายเหตุ: ใช้ SQL ธรรมดาเพื่อความรวดเร็วในการเช็คสิทธิ์เบื้องต้น
 		const [rows] = await pool.query<RowDataPacket[]>(
 			`SELECT c.user_id, b.status 
-             FROM Bills b 
-             JOIN Contracts c ON b.contract_id = c.contracts_id 
-             WHERE b.bills_id = ?`,
+			 FROM Bills b 
+			 JOIN Contracts c ON b.contract_id = c.contracts_id 
+			 WHERE b.bills_id = ?`,
 			[billId],
 		);
 
