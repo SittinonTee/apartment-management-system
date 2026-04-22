@@ -34,7 +34,7 @@ class CustomDropdownMenu<T> extends StatelessWidget {
         if (label != null) ...[
           Text(
             label!,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.secondary,
             ),
@@ -72,7 +72,7 @@ class CustomDropdownMenu<T> extends StatelessWidget {
                   controller: controller,
                   hintText: hintText,
                   menuHeight: menuHeight,
-                  textStyle: Theme.of(context).textTheme.bodyLarge,
+                  textStyle: Theme.of(context).textTheme.bodyMedium,
                   dropdownMenuEntries: dropdownMenuEntries,
                   onSelected: (value) {
                     state.didChange(value);

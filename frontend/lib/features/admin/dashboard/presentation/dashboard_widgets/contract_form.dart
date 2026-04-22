@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:frontend/core/widgets/custom_text_field.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/users_info_card.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/custom_dropdown_menu.dart';
-import 'package:frontend/features/admin/dashboard/presentation/data/get_rate.dart';
+import 'package:frontend/features/admin/dashboard/data/get_rate.dart';
 import 'package:frontend/core/utils/formatter.dart';
-import 'package:frontend/features/admin/dashboard/presentation/data/get_vailable_room.dart';
+import 'package:frontend/features/admin/dashboard/data/get_vailable_room.dart';
 
 class ContractForm extends StatefulWidget {
   final Function(String?)? onRoomSelected;
@@ -274,7 +274,7 @@ class ContractFormState extends State<ContractForm> {
                               label: 'ไม่พบห้องว่าง',
                               labelWidget: Text(
                                 'ไม่พบห้องว่าง',
-                                style: Theme.of(context).textTheme.bodyLarge,
+                                style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),
                           ]
@@ -284,7 +284,7 @@ class ContractFormState extends State<ContractForm> {
                               label: 'ห้อง ${room.roomNumber}',
                               labelWidget: Text(
                                 'ห้อง ${room.roomNumber}',
-                                style: Theme.of(context).textTheme.bodyLarge,
+                                style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             );
                           }).toList(),
@@ -359,7 +359,7 @@ class ContractFormState extends State<ContractForm> {
                   label: '${Formatter.formatStringNumber(rate.rateRoom)} บาท',
                   labelWidget: Text(
                     '${Formatter.formatStringNumber(rate.rateRoom)} บาท',
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 );
               }).toList(),
