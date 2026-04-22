@@ -53,12 +53,7 @@ export const verifyBillAccess = async (
 			});
 		}
 
-		// ถ้าบิลถูกยกเลิก (CANCELLED) ห้ามยุ่ง
-		if (bill.status === "CANCELLED") {
-			return res.status(400).json({
-				message: "บิลใบนี้ถูกยกเลิกแล้ว ไม่สามารถแจ้งชำระเงินได้",
-			});
-		}
+		// หมายเหตุ: ยอมรับสถานะ CANCELLED (ถูกปฏิเสธสลิป) ให้สามารถส่งสลิปใหม่ได้
 
 		// ผ่านทุกด่าน! ทำงานขั้นต่อไป (Controller) ได้
 		next();

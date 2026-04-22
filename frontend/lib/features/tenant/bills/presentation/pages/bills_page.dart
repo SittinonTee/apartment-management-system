@@ -71,8 +71,8 @@ class _BillsPageState extends State<BillsPage> {
               if (b['status'] == 'PAID') return false;
               if (b['status'] == 'DRAFT') return false;
 
-              // ถ้าเป็นสถานะ รอยืนยัน ให้แสดงในการ์ดเพื่อบอกสถานะผู้เช่า
-              if (b['status'] == 'WAITING_CONFIRM') return true;
+              // ถ้าเป็นสถานะ รอยืนยัน หรือ ถูกปฏิเสธ (CANCELLED) ให้แสดงในการ์ด
+              if (b['status'] == 'WAITING_CONFIRM' || b['status'] == 'CANCELLED') return true;
 
               final billMonthStr = b['bill_month'] as String?;
               if (billMonthStr == null) return false;
@@ -182,6 +182,7 @@ class _BillsPageState extends State<BillsPage> {
                               0.0),
                           isOverdue: bill['status'] == 'OVERDUE',
                           isVerifying: bill['status'] == 'WAITING_CONFIRM',
+                          isRejected: bill['status'] == 'CANCELLED',
                           onPayPressed: () async {
                             final result = await Navigator.push(
                               context,

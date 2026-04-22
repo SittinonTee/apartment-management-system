@@ -56,22 +56,18 @@ class ContractService {
   // ดึงข้อสัญญาอันล่าสุดสำหรับใช้โชว์ใน Dashboard
   Future<Map<String, dynamic>?> getMyContract() async {
     try {
-      final token = await _authService.getToken();
-      if (token == null) return null;
-
-      final response = await _dio.get(
-        '/contracts/my-contract', // Old endpoint used by dashboard
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
-
-      if (response.data['status'] == 'success') {
-        return response.data['data'];
+      final contracts = await getMyContracts();
+      if (contracts != null && contracts.isNotEmpty) {
+        // คืนค่าใบที่ Active หรือใบแรกที่เจอ
+        try {
+          return contracts.firstWhere((c) => c['status'] == 'ACTIVE');
+        } catch (_) {
+          return contracts.first;
+        }
       }
       return null;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching contract: $e');
-      }
+      if (kDebugMode) print('Error in getMyContract: $e');
       return null;
     }
   }
