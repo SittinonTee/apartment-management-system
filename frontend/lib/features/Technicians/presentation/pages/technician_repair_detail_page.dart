@@ -232,9 +232,9 @@ class _TechnicianRepairDetailPageState
           ),
           RepairDetailRow(
             label: 'วันที่แจ้ง :',
-            value: const Text(
-              '19 พ.ค. 69 | 14:30 น.',
-              style: TextStyle(color: AppColors.textSecondary),
+            value: Text(
+              '${widget.repair.date.day} ${_getMonthThai(widget.repair.date.month)} ${widget.repair.date.year + 543} | ${widget.repair.date.hour.toString().padLeft(2, '0')}:${widget.repair.date.minute.toString().padLeft(2, '0')} น.',
+              style: const TextStyle(color: AppColors.textSecondary),
             ),
             showDivider: false,
           ),
@@ -496,5 +496,22 @@ class _TechnicianRepairDetailPageState
         onConfirm: _handleAcceptJob,
       ),
     );
+  }
+  String _getMonthThai(int month) {
+    const months = [
+      'ม.ค.',
+      'ก.พ.',
+      'มี.ค.',
+      'เม.ย.',
+      'พ.ค.',
+      'มิ.ย.',
+      'ก.ค.',
+      'ส.ค.',
+      'ก.ย.',
+      'ต.ค.',
+      'พ.ย.',
+      'ธ.ค.'
+    ];
+    return months[month - 1];
   }
 }

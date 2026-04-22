@@ -54,7 +54,7 @@ class TechnicianRepairCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'ลงวันที่ : ${repair.date.day} พ.ค. ${repair.date.year + 543}',
+                    'ลงวันที่ : ${repair.date.day} ${_getMonthThai(repair.date.month)} ${repair.date.year + 543}',
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
@@ -79,5 +79,22 @@ class TechnicianRepairCard extends StatelessWidget {
         ),
       ),
     );
+  }
+  String _getMonthThai(int month) {
+    const months = [
+      'ม.ค.',
+      'ก.พ.',
+      'มี.ค.',
+      'เม.ย.',
+      'พ.ค.',
+      'มิ.ย.',
+      'ก.ค.',
+      'ส.ค.',
+      'ก.ย.',
+      'ต.ค.',
+      'พ.ย.',
+      'ธ.ค.'
+    ];
+    return months[month - 1];
   }
 }

@@ -108,3 +108,26 @@ export const approveBill = async (
 		next(error);
 	}
 };
+
+export const rejectBill = async (
+	req: AuthRequest,
+	res: Response,
+	next: NextFunction,
+) => {
+	try {
+		const { billId } = req.params;
+
+		const success = await billService.rejectBill(Number(billId));
+
+		if (!success) {
+			throw new AppError("ไม่พบบิลที่ระบุ หรือดำเนินการไม่สำเร็จ", 404);
+		}
+
+		res.status(200).json({
+			status: "success",
+			message: "ปฏิเสธการชำระเงินเรียบร้อยแล้ว บิลกลับสู่สถานะค้างชำระ",
+		});
+	} catch (error) {
+		next(error);
+	}
+};

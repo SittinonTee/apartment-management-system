@@ -40,3 +40,19 @@ export const approveBill = async (
 	];
 	return result.affectedRows > 0;
 };
+
+export const rejectBill = async (billId: number): Promise<boolean> => {
+	const query = `
+        UPDATE Bills 
+        SET status = 'PENDING', 
+            slipimage_url = NULL, 
+            payment_date = NULL,
+            approved_by = NULL
+        WHERE bills_id = ?
+    `;
+	const [result] = (await pool.query(query, [billId])) as [
+		{ affectedRows: number },
+		unknown,
+	];
+	return result.affectedRows > 0;
+};

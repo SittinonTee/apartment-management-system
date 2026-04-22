@@ -23,6 +23,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
 
   final List<String> statusList = [
     'ทั้งหมด',
+    'รอยืนยัน',
     'ค้างชำระ',
     'ชำระสำเร็จ',
     'เลยกำหนด',
@@ -72,6 +73,8 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
         return BadgeStatus.pending;
       case 'cancelled':
         return BadgeStatus.cancelled;
+      case 'waiting_confirm':
+        return BadgeStatus.verifying;
       default:
         return BadgeStatus.pending;
     }
@@ -91,6 +94,8 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
         return 'ค้างชำระ';
       case 'cancelled':
         return 'ยกเลิก';
+      case 'waiting_confirm':
+        return 'รอยืนยัน';
       default:
         return 'ค้างชำระ';
     }
@@ -166,6 +171,72 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
       );
     }
   }
+
+  Future<void> _rejectBill(int billId) async {
+    // แสดง Dialog ยืนยันก่อนปฏิเสธ
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('ปฏิเสธการชำระเงิน'),
+          content: const Text(
+            'คุณแน่ใจหรือไม่ว่าต้องการปฏิเสธการชำระเงินนี้? ข้อมูลสลิปจะถูกลบทิ้งและบิลจะกลับเป็นสถานะค้างชำระ',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text(
+                'ยกเลิก',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                'ยืนยันการปฏิเสธ',
+                style: TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    final success = await BillsService().rejectBill(billId);
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('ปฏิเสธการชำระเงินเรียบร้อยแล้ว'),
+          backgroundColor: AppColors.warning,
+        ),
+      );
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) {
+        setState(() {
+          _refreshKey++;
+          _loadBills();
+        });
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('เกิดข้อผิดพลาดในการปฏิเสธการชำระเงิน'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -387,6 +458,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
                               slipImageUrl: bill.slipImageUrl,
                               approvedBy: bill.approvedBy,
                               onConfirm: () => _confirmBill(bill.billId),
+                              onReject: () => _rejectBill(bill.billId),
                             ),
                           );
                         }),

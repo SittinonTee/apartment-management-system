@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_typography.dart';
 
-enum BadgeStatus { pending, completed, urgent, info, cancelled }
+enum BadgeStatus { pending, completed, urgent, info, cancelled, verifying }
 
 class StatusBadge extends StatelessWidget {
   final String text; // ข้อความที่จะแสดงบนปุ่ม (จำเป็นต้องใส่)
@@ -23,6 +23,8 @@ class StatusBadge extends StatelessWidget {
         return AppColors.info.withValues(alpha: 0.15);
       case BadgeStatus.cancelled: // สถานะ "ยกเลิก"
         return Colors.grey.withValues(alpha: 0.15);
+      case BadgeStatus.verifying: // สถานะ "รอยืนยัน" (Blue/Info tone)
+        return AppColors.info.withValues(alpha: 0.15);
     }
   }
 
@@ -38,6 +40,8 @@ class StatusBadge extends StatelessWidget {
         return AppColors.info;
       case BadgeStatus.cancelled: // สถานะ "ยกเลิก"
         return Colors.grey;
+      case BadgeStatus.verifying: // สถานะ "รอยืนยัน"
+        return AppColors.info;
     }
   }
 
