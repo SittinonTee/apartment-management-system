@@ -69,8 +69,6 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
       case 'urgent':
       case 'overdue':
         return BadgeStatus.urgent;
-      case 'pending':
-        return BadgeStatus.pending;
       case 'cancelled':
         return BadgeStatus.cancelled;
       case 'waiting_confirm':
@@ -93,7 +91,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
       case 'pending':
         return 'ค้างชำระ';
       case 'cancelled':
-        return 'ยกเลิก';
+        return 'ถูกปฏิเสธ';
       case 'waiting_confirm':
         return 'รอยืนยัน';
       default:

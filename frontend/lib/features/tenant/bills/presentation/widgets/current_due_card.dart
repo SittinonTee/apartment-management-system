@@ -8,6 +8,7 @@ class CurrentDueCard extends StatelessWidget {
   final VoidCallback onPayPressed;
   final bool isOverdue;
   final bool isVerifying;
+  final bool isRejected;
 
   const CurrentDueCard({
     super.key,
@@ -16,6 +17,7 @@ class CurrentDueCard extends StatelessWidget {
     required this.onPayPressed,
     this.isOverdue = false,
     this.isVerifying = false,
+    this.isRejected = false,
   });
 
   @override
@@ -43,14 +45,24 @@ class CurrentDueCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isVerifying 
-                      ? AppColors.info.withValues(alpha: 0.15)
-                      : Colors.orange.withValues(alpha: 0.15),
+                  color: isRejected
+                      ? AppColors.error.withValues(alpha: 0.15)
+                      : isVerifying
+                          ? AppColors.info.withValues(alpha: 0.15)
+                          : Colors.orange.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  isVerifying ? Icons.youtube_searched_for : Icons.access_time,
-                  color: isVerifying ? AppColors.info : Colors.orange,
+                  isRejected
+                      ? Icons.error_outline
+                      : isVerifying
+                          ? Icons.youtube_searched_for
+                          : Icons.access_time,
+                  color: isRejected
+                      ? AppColors.error
+                      : isVerifying
+                          ? AppColors.info
+                          : Colors.orange,
                   size: 28,
                 ),
               ),
@@ -68,18 +80,35 @@ class CurrentDueCard extends StatelessWidget {
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        if (isOverdue) ...[
+                        if (isRejected) ...[
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.red.shade100,
+                              color: AppColors.error.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'ถูกปฏิเสธ',
+                              style: TextStyle(
+                                color: AppColors.error,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ] else if (isOverdue) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.purple.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: const Text(
                               'เลยกำหนด',
                               style: TextStyle(
-                                color: Colors.red,
+                                color: Colors.purple,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -131,7 +160,11 @@ class CurrentDueCard extends StatelessWidget {
             child: ElevatedButton(
               onPressed: isVerifying ? null : onPayPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor: isVerifying ? Colors.grey.shade400 : AppColors.primaryLight,
+                backgroundColor: isRejected
+                    ? AppColors.error
+                    : isVerifying
+                        ? Colors.grey.shade400
+                        : AppColors.primaryLight,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -141,13 +174,21 @@ class CurrentDueCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    isVerifying ? Icons.hourglass_bottom : Icons.account_balance_wallet_outlined,
+                    isRejected
+                        ? Icons.replay
+                        : isVerifying
+                            ? Icons.hourglass_bottom
+                            : Icons.account_balance_wallet_outlined,
                     color: Colors.white,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    isVerifying ? 'รอยืนยันการตรวจสอบ' : 'ชำระทันที',
+                    isRejected
+                        ? 'ส่งสลิปอีกครั้ง'
+                        : isVerifying
+                            ? 'รอยืนยันการตรวจสอบ'
+                            : 'ชำระทันที',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

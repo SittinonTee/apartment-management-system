@@ -44,7 +44,7 @@ export const approveBill = async (
 export const rejectBill = async (billId: number): Promise<boolean> => {
 	const query = `
         UPDATE Bills 
-        SET status = 'PENDING', 
+        SET status = 'CANCELLED', 
             slipimage_url = NULL, 
             payment_date = NULL,
             approved_by = NULL

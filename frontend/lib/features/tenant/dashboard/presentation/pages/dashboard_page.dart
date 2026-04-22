@@ -8,8 +8,8 @@ import '../widgets/contract_progress_card.dart';
 import '../widgets/quick_action_menu.dart';
 import '../widgets/recent_bill_card.dart';
 import '../widgets/user_greeting.dart';
-
-import 'package:intl/intl.dart';
+import '../../../bills/presentation/pages/bill_pay_page.dart';
+import '../../../../../core/utils/date_utils.dart';
 
 class DashboardPage extends StatefulWidget {
   final Function(int)? onTabSelected;
@@ -79,15 +79,24 @@ class _DashboardPageState extends State<DashboardPage> {
 
   //-------------------------------------แปลงวันที่-----------------------------------------------
   String _formatDate(String dateStr) {
-    try {
-      // Use toLocal() to ensure 17:00:00Z becomes 00:00:00 (next day) in Thailand (UTC+7)
-      final date = DateTime.parse(dateStr).toLocal();
-      final year = date.year + 543;
-      final formatter = DateFormat('d MMM', 'th');
-      return '${formatter.format(date)} $year';
-    } catch (e) {
-      if (kDebugMode) print('DateFormat Error: $e');
-      return dateStr;
+    return AppDateUtils.formatDateThai(dateStr);
+  }
+
+  //-------------------------------------แมพสถานะบิล-----------------------------------------------
+  (BadgeStatus, String) _getBillStatusInfo(String? dbStatus) {
+    switch (dbStatus?.toUpperCase()) {
+      case 'PAID':
+        return (BadgeStatus.completed, 'ชำระแล้ว');
+      case 'PENDING':
+        return (BadgeStatus.pending, 'รอชำระ');
+      case 'OVERDUE':
+        return (BadgeStatus.urgent, 'เลยกำหนด');
+      case 'WAITING_CONFIRM':
+        return (BadgeStatus.verifying, 'รอยืนยัน');
+      case 'CANCELLED':
+        return (BadgeStatus.cancelled, 'ถูกปฏิเสธ');
+      default:
+        return (BadgeStatus.pending, 'รอชำระ');
     }
   }
 
@@ -99,10 +108,20 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     // Process data from backend
-    final roomNumber = _contractData?['room_number'] ?? 'ไม่มีข้อมูลห้อง';
-    final floor = _contractData?['floor']?.toString() ?? '-';
-    final buildingInfo =
-        'อาคาร ${_contractData?['building'] ?? '-'} ชั้น $floor';
+    // พยายามดึงข้อมูลห้องจากสัญญา ถ้าไม่มีให้ดึงจากบิลใบล่าสุด (Fallback)
+    String roomNumber = _contractData?['room_number']?.toString() ?? '';
+    String floor = _contractData?['floor']?.toString() ?? '';
+    
+    if (roomNumber.isEmpty && _bills.isNotEmpty) {
+      roomNumber = _bills.first['room_number']?.toString() ?? '';
+      floor = _bills.first['floor']?.toString() ?? '';
+    }
+
+    // กำหนดค่า Default ถ้ายังไม่มีจริงๆ
+    if (roomNumber.isEmpty) roomNumber = 'ไม่มีข้อมูลห้อง';
+    if (floor.isEmpty) floor = '-';
+
+    final buildingInfo = 'ชั้น $floor';
     final startDate = _contractData?['start_date'];
     final endDate = _contractData?['end_date'];
 
@@ -150,34 +169,52 @@ class _DashboardPageState extends State<DashboardPage> {
                 const SizedBox(height: 32),
                 Builder(
                   builder: (context) {
-                    final latestBill = _bills.isNotEmpty ? _bills.first : null;
-                    final snapshot = latestBill?['rent_snapshot'];
-                    double totalAmount = 0.0;
-                    if (snapshot is Map) {
-                      totalAmount =
-                          ((snapshot['room'] ?? 0) +
-                                  (snapshot['water'] ?? 0) +
-                                  (snapshot['electric'] ?? 0))
-                              .toDouble();
+                    // ค้นหาบิลที่ด่วนที่สุดมาโชว์ (CANCELLED > OVERDUE > PENDING > WAITING_CONFIRM > PAID)
+                    Map<String, dynamic>? priorityBill;
+                    
+                    final rejected = _bills.where((b) => b['status'] == 'CANCELLED').toList();
+                    final overdue = _bills.where((b) => b['status'] == 'OVERDUE').toList();
+                    final pending = _bills.where((b) => b['status'] == 'PENDING').toList();
+                    final waiting = _bills.where((b) => b['status'] == 'WAITING_CONFIRM').toList();
+
+                    if (rejected.isNotEmpty) {
+                      priorityBill = rejected.first;
+                    } else if (overdue.isNotEmpty) {
+                      priorityBill = overdue.first;
+                    } else if (pending.isNotEmpty) {
+                      priorityBill = pending.first;
+                    } else if (waiting.isNotEmpty) {
+                      priorityBill = waiting.first;
+                    } else if (_bills.isNotEmpty) {
+                      priorityBill = _bills.first; // ถ้าจ่ายหมดแล้ว โชว์ใบลาสุด
                     }
-                    final billStatus = latestBill?['status'];
+
+                    if (priorityBill == null) {
+                      return const SizedBox.shrink();
+                    }
+
+                    final amount = double.tryParse(priorityBill['grand_total']?.toString() ?? '0') ?? 0.0;
+                    final billMonth = AppDateUtils.formatMonthFull(priorityBill['bill_month']);
+                    final (status, statusText) = _getBillStatusInfo(priorityBill['status']);
+                    final canPay = priorityBill['status'] != 'PAID' && priorityBill['status'] != 'WAITING_CONFIRM';
+
                     return BillSummaryCard(
-                      amount: totalAmount,
-                      month:
-                          latestBill?['bill_month'] ?? 'ไม่มีข้อมูลบิลล่าสุด',
-                      status: billStatus == 'PAID'
-                          ? BadgeStatus.completed
-                          : billStatus == 'PENDING'
-                          ? BadgeStatus.pending
-                          : BadgeStatus.urgent,
-                      statusText: billStatus == 'PAID'
-                          ? 'ชำระแล้ว'
-                          : billStatus == 'PENDING'
-                          ? 'รอชำระ'
-                          : billStatus == 'OVERDUE'
-                          ? 'ค้างชำระ'
-                          : 'ไม่มีค้างชำระ',
-                      onPayPressed: () {},
+                      amount: amount,
+                      month: billMonth,
+                      status: status,
+                      statusText: statusText,
+                      showPayButton: canPay,
+                      onPayPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BillPayPage(billData: priorityBill!),
+                          ),
+                        );
+                        if (result == true) {
+                          _fetchDashboardData();
+                        }
+                      },
                     );
                   },
                 ),
@@ -223,30 +260,13 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                           );
                         }
+                        // แสดงรายการล่าสุดแค่ 3 รายการ
+                        final recentBills = _bills.take(3).toList();
+                        
                         return Column(
-                          children: _bills.map((bill) {
-                            final snapshot = bill['rent_snapshot'];
-                            double total = 0.0;
-                            if (snapshot is Map) {
-                              total =
-                                  ((snapshot['room'] ?? 0) +
-                                          (snapshot['water'] ?? 0) +
-                                          (snapshot['electric'] ?? 0))
-                                      .toDouble();
-                            }
-                            final billStatus = bill['status'];
-                            final status = billStatus == 'PAID'
-                                ? BadgeStatus.completed
-                                : billStatus == 'PENDING'
-                                ? BadgeStatus.pending
-                                : BadgeStatus.urgent;
-                            final statusText = billStatus == 'PAID'
-                                ? 'ชำระแล้ว'
-                                : billStatus == 'PENDING'
-                                ? 'รอชำระ'
-                                : billStatus == 'OVERDUE'
-                                ? 'ค้างชำระ'
-                                : '-';
+                          children: recentBills.map((bill) {
+                            final total = double.tryParse(bill['grand_total']?.toString() ?? '0') ?? 0.0;
+                            final (status, statusText) = _getBillStatusInfo(bill['status']);
 
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
