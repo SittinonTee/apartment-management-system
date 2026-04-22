@@ -32,8 +32,8 @@ export const createRepairRequest = async (
 ): Promise<number> => {
 	const query = `
 		INSERT INTO Repairs_user (
-			user_id, category_id, head_repairs, description, preferred_time, repairsimage_url, status
-		) VALUES (?, ?, ?, ?, ?, ?, 'REPORTED')
+			user_id, category_id, head_repairs, description, preferred_time, repairsimage_url, status, created_at
+		) VALUES (?, ?, ?, ?, ?, ?, 'REPORTED', ?)
 	`;
 	const [result] = await pool.query<ResultSetHeader>(query, [
 		userId,
@@ -42,6 +42,7 @@ export const createRepairRequest = async (
 		data.description,
 		data.preferred_time,
 		data.repairsimage_url || null,
+		new Date(), // ใช้เวลาไทยจาก Node.js
 	]);
 	return result.insertId;
 };

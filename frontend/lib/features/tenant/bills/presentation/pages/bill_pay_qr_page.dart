@@ -71,7 +71,7 @@ class _BillPayQrPageState extends State<BillPayQrPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('บันทึกการชำระเงินเรียบร้อยแล้ว')),
         );
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        Navigator.of(context).pop(true);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('เกิดข้อผิดพลาดในการบันทึกข้อมูล')),

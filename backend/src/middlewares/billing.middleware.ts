@@ -25,9 +25,9 @@ export const verifyBillAccess = async (
 		// หมายเหตุ: ใช้ SQL ธรรมดาเพื่อความรวดเร็วในการเช็คสิทธิ์เบื้องต้น
 		const [rows] = await pool.query<RowDataPacket[]>(
 			`SELECT c.user_id, b.status 
-             FROM Bills b 
-             JOIN Contracts c ON b.contract_id = c.contracts_id 
-             WHERE b.bills_id = ?`,
+			 FROM Bills b 
+			 JOIN Contracts c ON b.contract_id = c.contracts_id 
+			 WHERE b.bills_id = ?`,
 			[billId],
 		);
 
@@ -53,12 +53,7 @@ export const verifyBillAccess = async (
 			});
 		}
 
-		// ถ้าบิลถูกยกเลิก (CANCELLED) ห้ามยุ่ง
-		if (bill.status === "CANCELLED") {
-			return res.status(400).json({
-				message: "บิลใบนี้ถูกยกเลิกแล้ว ไม่สามารถแจ้งชำระเงินได้",
-			});
-		}
+		// หมายเหตุ: ยอมรับสถานะ CANCELLED (ถูกปฏิเสธสลิป) ให้สามารถส่งสลิปใหม่ได้
 
 		// ผ่านทุกด่าน! ทำงานขั้นต่อไป (Controller) ได้
 		next();

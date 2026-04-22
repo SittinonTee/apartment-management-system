@@ -4,7 +4,7 @@ import 'package:frontend/core/widgets/custom_button.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/confirm_dialog.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/contract_form.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/users_form.dart';
-import 'package:frontend/features/admin/dashboard/presentation/data/admin_service_api.dart';
+import 'package:frontend/features/admin/dashboard/data/admin_service_api.dart';
 import 'package:go_router/go_router.dart';
 
 class NewTenantPage extends StatefulWidget {
@@ -135,7 +135,7 @@ class _NewTenantPageState extends State<NewTenantPage> {
                   children: [
                     Text(
                       'เพิ่มผู้เช่าใหม่',
-                      style: textTheme.displaySmall?.copyWith(
+                      style: textTheme.headlineSmall?.copyWith(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.bold,
                       ),
@@ -168,7 +168,7 @@ class _NewTenantPageState extends State<NewTenantPage> {
                   text: 'ยืนยันข้อมูลและสร้างสัญญา',
                   height: 56,
                   textStyle: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                   ),
                   onPressed: _showConfirmation,
@@ -197,7 +197,7 @@ class _NewTenantPageState extends State<NewTenantPage> {
             Text(
               title,
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
               ),

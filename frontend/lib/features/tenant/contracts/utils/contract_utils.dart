@@ -17,8 +17,9 @@ class ContractUtils {
       case 'EXPIRED':
         return BadgeStatus.info; // สีฟ้าเทา
       case 'TERMINATED':
-      case 'CANCELLED':
         return BadgeStatus.urgent; // สีแดง
+      case 'CANCELLED':
+        return BadgeStatus.cancelled; // สีเทา
       default:
         return BadgeStatus.info;
     }
@@ -68,6 +69,10 @@ class ContractUtils {
       case BadgeStatus.urgent:
         return AppColors.error.withValues(alpha: 0.1);
       case BadgeStatus.info:
+        return AppColors.info.withValues(alpha: 0.1);
+      case BadgeStatus.cancelled:
+        return Colors.grey.withValues(alpha: 0.1);
+      case BadgeStatus.verifying:
         return AppColors.info.withValues(alpha: 0.1);
     }
   }

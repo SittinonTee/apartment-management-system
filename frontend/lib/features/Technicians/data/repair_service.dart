@@ -22,7 +22,16 @@ class RepairService {
       if (response.data['status'] == 'success') {
         final List<dynamic> repairsList =
             response.data['data']['repairs'] ?? [];
-        return repairsList.map((json) => RepairRequest.fromJson(json)).toList();
+        
+        List<RepairRequest> repairs = [];
+        for (var json in repairsList) {
+          try {
+            repairs.add(RepairRequest.fromJson(json));
+          } catch (e) {
+            if (kDebugMode) print('Skipping a malformed repair record: $e');
+          }
+        }
+        return repairs;
       }
       return [];
     } catch (e) {

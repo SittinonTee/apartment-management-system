@@ -7,5 +7,6 @@ const router = Router();
 router.get("/my-bills", verifyToken, billController.getMyBills);
 router.get("/all-bills", verifyToken, billController.getAllBills);
 router.patch("/approve/:billId", verifyToken, billController.approveBill);
+router.patch("/reject/:billId", verifyToken, billController.rejectBill);
 
 export default router;
