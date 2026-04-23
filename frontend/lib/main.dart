@@ -5,13 +5,27 @@ import 'core/routing/app_router.dart';
 import 'core/constants/app_theme.dart';
 import 'core/services/auth_service.dart';
 // import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'core/services/notification_service.dart';
 import 'features/admin/dashboard/data/get_users.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase (Requires google-services.json / GoogleService-Info.plist)
+  try {
+    await Firebase.initializeApp();
+    final notificationService = NotificationService();
+    await notificationService.initialize();
+  } catch (e) {
+    debugPrint('Firebase initialization failed: $e');
+    debugPrint('Make sure you have added google-services.json to android/app/');
+  }
+
   await initializeDateFormatting('th', null);
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

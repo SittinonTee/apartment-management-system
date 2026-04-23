@@ -2,6 +2,7 @@
 
 import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import pool from "../database";
+import { sendPushNotification } from "../notification-service/notification.service";
 import type { AddParcelRequest, Parcel } from "./config/type";
 
 export const addParcel = async (data: AddParcelRequest, adminId: number) => {
@@ -48,6 +49,19 @@ export const addParcel = async (data: AddParcelRequest, adminId: number) => {
 			new Date(), // ใช้เวลาไทยจาก Node.js
 		],
 	);
+
+	// 3. ส่ง Push Notification แจ้งเตือนลูกบ้าน
+	try {
+		await sendPushNotification(
+			userId,
+			"📦 พัสดุใหม่มาถึงแล้ว!",
+			`พัสดุของคุณ (${data.name}) มาถึงแล้วที่ห้อง ${data.room_number}`,
+			{ type: "parcel", id: result.insertId.toString() },
+		);
+	} catch (notifError) {
+		console.error("⚠️ [NOTIFICATION] Failed to send push:", notifError);
+		// ไม่ throw error เพื่อไม่ให้การบันทึกพัสดุหลักพัง
+	}
 
 	return { parcel_id: result.insertId, message: "รับพัสดุเข้าระบบเรียบร้อยแล้ว" };
 };

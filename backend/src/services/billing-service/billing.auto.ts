@@ -1,5 +1,6 @@
 import cron from "node-cron";
 import pool from "../database";
+import { sendPushNotification } from "../notification-service/notification.service";
 
 /**
  * Returns the last day of the given year and month (1-indexed month).
@@ -39,10 +40,6 @@ interface ContractRow {
 interface BillRow {
 	bills_id: number;
 	bill_month: string;
-}
-
-interface UpdateResult {
-	affectedRows: number;
 }
 
 async function checkAndCreateDraftBills() {
@@ -128,28 +125,26 @@ async function checkAndPublishBills() {
 		const currentMonthStr = getYYYYMM(now);
 
 		// Find all DRAFT bills from PAST months
-		// If today is May 1st (2026-05), we want to publish DRAFT bills of April (2026-04) or older
+		// We need user_id to send notifications
 		const queryDrafts = `
-			SELECT bills_id, bill_month 
-			FROM Bills 
-			WHERE status = 'DRAFT' 
-			AND bill_month < ?
-			AND water_unit IS NOT NULL 
-			AND electric_unit IS NOT NULL
+			SELECT b.bills_id, b.bill_month, c.user_id 
+			FROM Bills b 
+			INNER JOIN Contracts c ON b.contract_id = c.contracts_id
+			WHERE b.status = 'DRAFT' 
+			AND b.bill_month < ?
+			AND b.water_unit_end IS NOT NULL 
+			AND b.electric_unit_end IS NOT NULL
 		`;
 		const [draftBills] = (await pool.query(queryDrafts, [currentMonthStr])) as [
-			BillRow[],
+			(BillRow & { user_id: number })[],
 			unknown,
 		];
 
 		for (const bill of draftBills) {
-			// Calculate due_date. Due date is the end of the month AFTER the bill_month.
-			// E.g., bill_month = '2026-04'. It is published on May 1st. Due date = May 31st.
 			const [yyyy, mm] = bill.bill_month.split("-");
 			const billYear = parseInt(yyyy, 10);
 			const billMonth = parseInt(mm, 10);
 
-			// Due date is the end of the publish month (billMonth + 1)
 			const dueDateObj = getLastDayOfMonth(billYear, billMonth + 1);
 			const dueDateStr = formatLocalYYYYMMDD(dueDateObj);
 
@@ -162,6 +157,14 @@ async function checkAndPublishBills() {
 			console.log(
 				`[Auto-Billing] Published bill ${bill.bills_id} to PENDING (due: ${dueDateStr})`,
 			);
+
+			// ส่งแจ้งเตือนลูกบ้าน
+			await sendPushNotification(
+				bill.user_id,
+				"📑 ใบแจ้งหนี้ใหม่!",
+				`บิลค่าเช่าประจำเดือน ${bill.bill_month} ออกแล้ว กรุณาชำระเงินภายในวันที่ ${dueDateStr}`,
+				{ type: "bill", id: bill.bills_id.toString() },
+			);
 		}
 	} catch (error) {
 		console.error("[Auto-Billing] Error in checkAndPublishBills:", error);
@@ -172,19 +175,33 @@ async function checkOverdueBills() {
 	try {
 		const nowStr = formatLocalYYYYMMDD(new Date());
 
-		// Change PENDING to OVERDUE if today > due_date
-		const queryUpdate = `
-			UPDATE Bills 
-			SET status = 'OVERDUE' 
-			WHERE status = 'PENDING' AND due_date < ?
+		// หาบิลที่กำลังจะกลายเป็น OVERDUE เพื่อเอา user_id มาแจ้งเตือน
+		const queryFindOverdue = `
+			SELECT b.bills_id, c.user_id, b.bill_month
+			FROM Bills b
+			INNER JOIN Contracts c ON b.contract_id = c.contracts_id
+			WHERE b.status = 'PENDING' AND b.due_date < ?
 		`;
-		const [result] = (await pool.query(queryUpdate, [nowStr])) as [
-			UpdateResult,
+		const [overdueBills] = (await pool.query(queryFindOverdue, [nowStr])) as [
+			(BillRow & { user_id: number })[],
 			unknown,
 		];
-		if (result.affectedRows > 0) {
-			console.log(
-				`[Auto-Billing] Marked ${result.affectedRows} bills as OVERDUE.`,
+
+		for (const bill of overdueBills) {
+			const queryUpdate = `
+				UPDATE Bills 
+				SET status = 'OVERDUE' 
+				WHERE bills_id = ?
+			`;
+			await pool.query(queryUpdate, [bill.bills_id]);
+			console.log(`[Auto-Billing] Marked bill ${bill.bills_id} as OVERDUE.`);
+
+			// ส่งแจ้งเตือนลูกบ้าน
+			await sendPushNotification(
+				bill.user_id,
+				"⚠️ แจ้งเตือนค้างชำระ!",
+				`บิลค่าเช่าประจำเดือน ${bill.bill_month} ของคุณเกินกำหนดชำระแล้ว กรุณาดำเนินการโดยด่วน`,
+				{ type: "bill", id: bill.bills_id.toString(), status: "overdue" },
 			);
 		}
 	} catch (error) {

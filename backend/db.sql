@@ -151,3 +151,14 @@ CREATE TABLE Repair_categories (
     category_id INT PRIMARY KEY AUTO_INCREMENT, -- รหัสหมวดหมู่การแจ้งซ่อม
     name_category VARCHAR(100) -- ชื่อหมวดหมู่ (เช่น 'ประปา', 'แอร์', 'ไฟฟ้า')
 );
+
+-- 6. ตารางสำหรับเก็บ FCM Token ของผู้ใช้งาน
+CREATE TABLE User_FCM_Tokens (
+    fcm_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    fcm_token VARCHAR(255) NOT NULL UNIQUE,
+    device_type ENUM('ANDROID', 'IOS', 'WEB') DEFAULT 'ANDROID',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);

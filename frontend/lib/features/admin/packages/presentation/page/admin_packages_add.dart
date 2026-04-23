@@ -1,4 +1,4 @@
-  import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
@@ -6,6 +6,9 @@ import 'package:frontend/core/constants/app_colors.dart';
 import 'package:frontend/core/services/upload_service.dart';
 
 import 'package:frontend/features/admin/packages/data/admin_packages_provider.dart';
+import 'package:frontend/features/admin/dashboard/data/get_vailable_room.dart';
+import 'package:frontend/features/admin/dashboard/data/room_manage_api.dart';
+import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/custom_dropdown_menu.dart';
 
 class AdminPackagesAdd extends StatefulWidget {
   const AdminPackagesAdd({super.key});
@@ -20,6 +23,26 @@ class _AdminPackagesAddState extends State<AdminPackagesAdd> {
   XFile? _selectedImage;
   final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
+
+  String? _selectedRoomId;
+  List<RoomTemplate> _occupiedRooms = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOccupiedRooms();
+  }
+
+  Future<void> _fetchOccupiedRooms() async {
+    final allRooms = await RoomManageApi().getAllRooms();
+    if (!mounted) return;
+    setState(() {
+      _occupiedRooms = allRooms
+          .where((r) => r['room_status'] == 'OCCUPIED')
+          .map((r) => RoomTemplate.fromJson(r))
+          .toList();
+    });
+  }
 
   Future<void> _pickImage() async {
     try {
@@ -42,7 +65,8 @@ class _AdminPackagesAddState extends State<AdminPackagesAdd> {
   }
 
   void _submit() async {
-    if (_roomController.text.trim().isEmpty ||
+    if (_selectedRoomId == null ||
+        _selectedRoomId!.isEmpty ||
         _nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('กรุณากรอกข้อมูลให้ครบถ้วน')),
@@ -54,7 +78,10 @@ class _AdminPackagesAddState extends State<AdminPackagesAdd> {
 
     String parcelsImageUrl = "";
     if (_selectedImage != null) {
-      final url = await UploadService().uploadImage(_selectedImage!, folder: 'packages');
+      final url = await UploadService().uploadImage(
+        _selectedImage!,
+        folder: 'packages',
+      );
       if (url == null) {
         setState(() => _isLoading = false);
         if (mounted) {
@@ -67,8 +94,13 @@ class _AdminPackagesAddState extends State<AdminPackagesAdd> {
       parcelsImageUrl = url;
     }
 
+    final selectedRoom = _occupiedRooms.firstWhere(
+      (room) => room.id == _selectedRoomId,
+      orElse: () => RoomTemplate(id: '', roomNumber: ''),
+    );
+
     final errorMessage = await AdminPackagesProvider().addParcel({
-      "room_number": _roomController.text.trim(),
+      "room_number": selectedRoom.roomNumber,
       "name": _nameController.text.trim(),
       "parcelsimage_url": parcelsImageUrl,
     });
@@ -174,7 +206,10 @@ class _AdminPackagesAddState extends State<AdminPackagesAdd> {
                           ? const Center(
                               child: Text(
                                 "อัพโหลดรูปพัสดุ",
-                                style: TextStyle(color: Colors.grey, fontSize: 18),
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 18,
+                                ),
                               ),
                             )
                           : ClipRRect(
@@ -219,14 +254,50 @@ class _AdminPackagesAddState extends State<AdminPackagesAdd> {
                         const SizedBox(height: 12),
 
                         // ห้อง
-                        const Text("เลขห้องพัก"),
-                        const SizedBox(height: 4),
-                        TextField(
+                        CustomDropdownMenu<String>(
+                          label: 'เลขห้อง',
+                          hintText: 'เลือกเลขห้อง',
                           controller: _roomController,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            isDense: true,
-                          ),
+                          enableFilter: true,
+                          requestFocusOnTap: true,
+                          validator: (value) {
+                            if (_selectedRoomId == null ||
+                                _selectedRoomId!.isEmpty) {
+                              return 'กรุณาเลือกเลขห้องพัก';
+                            }
+                            return null;
+                          },
+                          dropdownMenuEntries: _occupiedRooms.isEmpty
+                              ? [
+                                  DropdownMenuEntry<String>(
+                                    value: '',
+                                    enabled: false,
+                                    label: 'ไม่พบห้องที่มีผู้เช่า',
+                                    labelWidget: Text(
+                                      'ไม่พบห้องที่มีผู้เช่า',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyMedium,
+                                    ),
+                                  ),
+                                ]
+                              : _occupiedRooms.map((room) {
+                                  return DropdownMenuEntry<String>(
+                                    value: room.id,
+                                    label: 'ห้อง ${room.roomNumber}',
+                                    labelWidget: Text(
+                                      'ห้อง ${room.roomNumber}',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyMedium,
+                                    ),
+                                  );
+                                }).toList(),
+                          onSelected: (roomId) {
+                            setState(() {
+                              _selectedRoomId = roomId;
+                            });
+                          },
                         ),
 
                         const SizedBox(height: 12),
@@ -251,6 +322,9 @@ class _AdminPackagesAddState extends State<AdminPackagesAdd> {
                             Expanded(
                               child: OutlinedButton(
                                 onPressed: () {
+                                  setState(() {
+                                    _selectedRoomId = null;
+                                  });
                                   _roomController.clear();
                                   _nameController.clear();
                                 },
