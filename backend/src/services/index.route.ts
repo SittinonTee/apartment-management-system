@@ -3,6 +3,7 @@ import adminRoute from "./admin-dashboard/admin.route";
 import authRoute from "./auth-service/auth.route";
 import billRoute from "./billing-service/bill.route";
 import contractRoute from "./contract-service/contract.route";
+import notificationRoute from "./notification-service/notification.route";
 import packagesRoute from "./packages-service/packages.route";
 import rateRoute from "./rates-service/rate.route";
 import repairRoute from "./repairs-service/repair.route";
@@ -26,5 +27,6 @@ router.use("/technicians", techniciansRoute);
 router.use("/repairs", repairRoute);
 router.use("/upload", uploadRoute);
 router.use("/packages", packagesRoute);
+router.use("/notifications", notificationRoute);
 
 export default router;

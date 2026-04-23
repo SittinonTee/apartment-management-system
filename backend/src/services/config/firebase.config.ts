@@ -51,3 +51,10 @@ export const getFirebaseBucket = () => {
 	}
 	return admin.apps.length ? admin.storage().bucket() : null;
 };
+
+export const getFirebaseMessaging = () => {
+	if (!admin.apps.length) {
+		initializeFirebase();
+	}
+	return admin.apps.length ? admin.messaging() : null;
+};
