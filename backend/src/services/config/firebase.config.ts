@@ -32,7 +32,8 @@ export const initializeFirebase = () => {
 			admin.initializeApp({
 				credential: admin.credential.cert(serviceAccount),
 				storageBucket:
-					process.env.FIREBASE_STORAGE_BUCKET || "your-project.appspot.com",
+					process.env.FIREBASE_STORAGE_BUCKET ||
+					`${serviceAccount.projectId}.firebasestorage.app`,
 			});
 			console.log("✅ [FIREBASE] Successfully initialized.");
 		}
