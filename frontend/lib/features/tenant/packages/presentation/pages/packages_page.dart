@@ -214,9 +214,13 @@ class _PackagesPageState extends State<PackagesPage> {
                       return const Center(child: Text("ไม่มีข้อมูลพัสดุ"));
                     }
 
-                    return ListView.builder(
-                      itemCount: list.length,
-                      itemBuilder: (context, index) {
+                    return RefreshIndicator(
+                      onRefresh: () => _provider.fetchParcels(),
+                      child: ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: list.length,
+                        itemBuilder: (context, index) {
+
                         final item = list[index];
 
                         String displayStatus = _getMappedStatus(item);
@@ -256,8 +260,9 @@ class _PackagesPageState extends State<PackagesPage> {
                           ),
                         );
                       },
-                    );
-                  },
+                    ),
+                  );
+                },
                 ),
               ),
             ],

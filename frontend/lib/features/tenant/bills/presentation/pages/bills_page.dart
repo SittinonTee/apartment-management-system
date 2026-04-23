@@ -130,15 +130,24 @@ class _BillsPageState extends State<BillsPage> {
                 ? (paidMonthsCount / totalMonths)
                 : 0.0;
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 32.0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
+            return RefreshIndicator(
+              onRefresh: () async {
+                setState(() {
+                  _refreshKey++;
+                  _dataFuture = _fetchData();
+                });
+                await _dataFuture;
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 32.0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
                   const Text(
                     'ค่าเช่า',
                     style: TextStyle(
@@ -263,8 +272,10 @@ class _BillsPageState extends State<BillsPage> {
                   const SizedBox(height: 80),
                 ],
               ),
-            );
-          },
+            ),
+          );
+        },
+
         ),
       ),
     );
