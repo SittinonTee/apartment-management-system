@@ -104,7 +104,7 @@ export const addTenant = async (
 
 		const userId = userResult.insertId;
 
-		const [contractResult] = await connection.query<ResultSetHeader>(
+		await connection.query<ResultSetHeader>(
 			`
       INSERT INTO Contracts (
         contract_no, identification_card, address, room_id, 
@@ -128,8 +128,6 @@ export const addTenant = async (
 			],
 		);
 
-		const contractId = contractResult.insertId;
-
 		// 3. Update Room Status
 		await connection.query(
 			'UPDATE Room SET room_status = "OCCUPIED" WHERE room_id = ?',
@@ -146,18 +144,6 @@ export const addTenant = async (
 		console.log(rate_water);
 		console.log(rate_electric);
 		console.log(rent_snapshot);
-
-		// 5. Create Bills (เดือนแรก)
-		const bill_month = new Date(start_date).toISOString().slice(0, 7); // "YYYY-MM"
-		await connection.query(
-			`
-      INSERT INTO Bills (
-        contract_id, bill_month, rate_id, rent_snapshot, water_unit, electric_unit, status
-      )
-      VALUES (?, ?, ?, ?, ?, ?, 'PENDING')
-    `,
-			[contractId, bill_month, rate_id, rent_snapshot, 0, 0],
-		);
 
 		await connection.commit();
 		return { user_id: userId, contract_no };

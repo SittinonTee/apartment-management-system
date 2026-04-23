@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import '../../../../../core/constants/api_constants.dart';
-import '../../../../../core/services/auth_service.dart';
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/services/auth_service.dart';
 
 class AdminServiceApi {
   static final AdminServiceApi _instance = AdminServiceApi._internal();

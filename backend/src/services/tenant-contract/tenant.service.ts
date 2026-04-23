@@ -4,7 +4,12 @@ import { pool } from "../database";
 export const getMyContracts = async (userId: number) => {
 	// Fetch all contracts for the specific user from the view
 	const [rows] = await pool.query<RowDataPacket[]>(
-		`SELECT * FROM vw_contract_details WHERE user_id = ? ORDER BY start_date DESC`,
+		`SELECT c.*, r.room_number, r.floor, u.firstname, u.lastname 
+		 FROM Contracts c
+		 LEFT JOIN Room r ON c.room_id = r.room_id
+		 LEFT JOIN Users u ON c.user_id = u.user_id
+		 WHERE c.user_id = ? 
+		 ORDER BY c.start_date DESC`,
 		[userId],
 	);
 
@@ -17,7 +22,11 @@ export const getContractDetails = async (
 ) => {
 	// Fetch specific contract details for the user
 	const [rows] = await pool.query<RowDataPacket[]>(
-		`SELECT * FROM vw_contract_details WHERE user_id = ? AND contracts_id = ?`,
+		`SELECT c.*, r.room_number, r.floor, u.firstname, u.lastname 
+		 FROM Contracts c
+		 LEFT JOIN Room r ON c.room_id = r.room_id
+		 LEFT JOIN Users u ON c.user_id = u.user_id
+		 WHERE c.user_id = ? AND c.contracts_id = ?`,
 		[userId, contractId],
 	);
 

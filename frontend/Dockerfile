@@ -12,7 +12,9 @@ RUN flutter pub get
 COPY . .
 
 # สร้างไฟล์ Web Production แบบ Release (ขนาดเล็ก ประสิทธิภาพสูง)
-RUN flutter build web --release
+# รับค่า API_URL มาจากภายนอกตอน Build
+ARG API_URL
+RUN flutter build web --release --dart-define=API_URL=$API_URL
 
 # Stage 2: Serve Web using Nginx (ลดขนาด Image จาก ~3GB เหลือแค่ไม่กี่สิบ MB)
 FROM nginx:alpine

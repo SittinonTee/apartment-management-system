@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
-// import 'package:frontend/core/widgets/choicechip_filter.dart';
+import 'package:frontend/core/widgets/choicechip_filter.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/users_info_card.dart';
 import 'package:frontend/core/widgets/searchbar.dart';
 import 'package:frontend/core/widgets/custom_button.dart';
-import 'package:frontend/features/admin/dashboard/presentation/data/get_users.dart';
+import 'package:frontend/features/admin/dashboard/data/get_users.dart';
 import 'package:frontend/features/admin/dashboard/presentation/dashboard_widgets/dashboard_summary.dart';
-import 'package:frontend/features/admin/dashboard/presentation/data/get_vailable_room.dart';
+import 'package:frontend/features/admin/dashboard/data/get_vailable_room.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:frontend/core/services/auth_service.dart';
@@ -40,17 +40,27 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   // ---------------- filter & search ----------------
-  // int selectedFilterIndex = 0;
-  // final List<String> fillterList = ['ทั้งหมด', 'ADMIN', 'TENANT', 'TECHNICIAN'];
+  int selectedFilterIndex = 1;
+  final List<String> filterList = [
+    'ทั้งหมด',
+    'ACTIVE',
+    'INACTIVE',
+    'TERMINATED',
+  ];
 
   String searchQuery = '';
 
   List<UserTemplate> filteredUsers(List<UserTemplate> users) {
-    var result = users;
-    // if (selectedFilterIndex != 0) {
-    //   final role = fillterList[selectedFilterIndex];
-    //   result = result.where((user) => user.role == role).toList();
-    // }
+    var result = users.where((user) => user.role == 'TENANT').toList();
+    if (selectedFilterIndex != 0) {
+      final status = filterList[selectedFilterIndex];
+      result = result
+          .where(
+            (user) =>
+                user.contractStatus == status || user.userStatus == status,
+          )
+          .toList();
+    }
     if (searchQuery.isNotEmpty) {
       result = result
           .where(
@@ -159,25 +169,25 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           SearchWidget(
             onSearch: (value) => setState(() => searchQuery = value),
           ),
-          // const SizedBox(height: 20),
-          // SizedBox(
-          //   height: 40,
-          //   child: ListView.builder(
-          //     physics: const BouncingScrollPhysics(),
-          //     scrollDirection: Axis.horizontal,
-          //     itemCount: fillterList.length,
-          //     itemBuilder: (context, i) {
-          //       return Padding(
-          //         padding: const EdgeInsets.only(right: 8),
-          //         child: ChoiceChipFilter(
-          //           label: fillterList[i],
-          //           selected: selectedFilterIndex == i,
-          //           onSelected: (_) => setState(() => selectedFilterIndex = i),
-          //         ),
-          //       );
-          //     },
-          //   ),
-          // ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 40,
+            child: ListView.builder(
+              physics: const BouncingScrollPhysics(),
+              scrollDirection: Axis.horizontal,
+              itemCount: filterList.length,
+              itemBuilder: (context, i) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChipFilter(
+                    label: filterList[i],
+                    selected: selectedFilterIndex == i,
+                    onSelected: (_) => setState(() => selectedFilterIndex = i),
+                  ),
+                );
+              },
+            ),
+          ),
           const SizedBox(height: 20),
           Text(
             "ผู้ใช้งานทั้งหมดในระบบ",

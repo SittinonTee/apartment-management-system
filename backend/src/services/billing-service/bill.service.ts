@@ -1,4 +1,3 @@
-import type { ResultSetHeader } from "mysql2/promise";
 import pool from "../database";
 import type { Bill } from "./config/type";
 
@@ -26,8 +25,34 @@ export async function getAllBills(): Promise<Bill[]> {
 	return rows;
 }
 
-export async function approveBill(billId: number): Promise<boolean> {
-	const query = `UPDATE Bills SET status = 'PAID' WHERE bills_id = ?`;
-	const [result] = await pool.query<ResultSetHeader>(query, [billId]);
+export const approveBill = async (
+	billId: number,
+	adminName: string,
+): Promise<boolean> => {
+	const query = `
+        UPDATE Bills 
+        SET status = 'PAID', approved_by = ? 
+        WHERE bills_id = ?
+    `;
+	const [result] = (await pool.query(query, [adminName, billId])) as [
+		{ affectedRows: number },
+		unknown,
+	];
 	return result.affectedRows > 0;
-}
+};
+
+export const rejectBill = async (billId: number): Promise<boolean> => {
+	const query = `
+        UPDATE Bills 
+        SET status = 'CANCELLED', 
+            slipimage_url = NULL, 
+            payment_date = NULL,
+            approved_by = NULL
+        WHERE bills_id = ?
+    `;
+	const [result] = (await pool.query(query, [billId])) as [
+		{ affectedRows: number },
+		unknown,
+	];
+	return result.affectedRows > 0;
+};

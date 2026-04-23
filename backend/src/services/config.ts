@@ -1,3 +1,5 @@
+process.env.TZ = "Asia/Bangkok";
+
 const config = {
 	app: {
 		port: process.env.PORT || 3000,

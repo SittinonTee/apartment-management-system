@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/core/constants/app_colors.dart';
-import 'package:frontend/features/admin/dashboard/presentation/data/get_users.dart';
+import 'package:frontend/features/admin/dashboard/data/get_users.dart';
 
 class UsersInfoCard extends StatelessWidget {
   final UserTemplate user;
@@ -27,13 +27,46 @@ class UsersInfoCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  "${user.firstname} ${user.lastname}",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    color: Color(0xFF1A1A1A),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "${user.firstname} ${user.lastname}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: Color(0xFF1A1A1A),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        if (user.contractStatus.isNotEmpty) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: user.contractStatus == 'ACTIVE'
+                                  ? Colors.green.withValues(alpha: 0.1)
+                                  : Colors.orange.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              user.contractStatus,
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: user.contractStatus == 'ACTIVE'
+                                    ? Colors.green
+                                    : Colors.orange,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
