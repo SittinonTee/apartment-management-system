@@ -9,7 +9,7 @@ export const initializeFirebase = () => {
 
 		// 1. ลองอ่านจาก Environment Variable ก่อน (สำหรับ Production บน Render)
 		if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-			serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+			serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT.trim());
 			console.log("✅ [FIREBASE] Initializing using Environment Variable.");
 		} else {
 			// 2. ถ้าไม่มี ให้ลองอ่านจากไฟล์ (สำหรับ Local Development)
