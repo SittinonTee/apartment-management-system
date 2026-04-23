@@ -5,20 +5,28 @@ import * as admin from "firebase-admin";
 // Defensive approach for initializing Firebase
 export const initializeFirebase = () => {
 	try {
-		// Assume file is in the backend root
-		const keyPath = path.resolve(
-			__dirname,
-			"../../../firebase-service-account.json",
-		);
+		let serviceAccount: admin.ServiceAccount;
 
-		if (!fs.existsSync(keyPath)) {
-			console.warn(
-				"⚠️ [FIREBASE] 'firebase-service-account.json' not found. File uploads will fail.",
+		// 1. ลองอ่านจาก Environment Variable ก่อน (สำหรับ Production บน Render)
+		if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+			serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+			console.log("✅ [FIREBASE] Initializing using Environment Variable.");
+		} else {
+			// 2. ถ้าไม่มี ให้ลองอ่านจากไฟล์ (สำหรับ Local Development)
+			const keyPath = path.resolve(
+				__dirname,
+				"../../../firebase-service-account.json",
 			);
-			return null;
-		}
 
-		const serviceAccount = JSON.parse(fs.readFileSync(keyPath, "utf-8"));
+			if (!fs.existsSync(keyPath)) {
+				console.warn(
+					"⚠️ [FIREBASE] 'firebase-service-account.json' not found and no Env Var. File uploads will fail.",
+				);
+				return null;
+			}
+			serviceAccount = JSON.parse(fs.readFileSync(keyPath, "utf-8"));
+			console.log("✅ [FIREBASE] Initializing using local JSON file.");
+		}
 
 		if (!admin.apps.length) {
 			admin.initializeApp({
