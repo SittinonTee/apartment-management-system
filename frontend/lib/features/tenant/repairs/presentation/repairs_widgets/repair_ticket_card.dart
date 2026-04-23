@@ -543,27 +543,29 @@ class _RepairTicketCardState extends State<RepairTicketCard> {
                             ),
                           ),
                           const SizedBox(width: 16),
-                          const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'ยังไม่มีผู้รับคำขอนี้',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.error,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  'ยังไม่มีผู้รับคำขอนี้',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.error,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                'กำลังรอช่างเทคนิครับคำขอ',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: AppColors.textSecondary,
+                                Text(
+                                  'กำลังรอช่างเทคนิครับคำขอ',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          const Spacer(),
+                          const SizedBox(width: 8),
 
                           OutlinedButton(
                             onPressed: _handleCancel,
