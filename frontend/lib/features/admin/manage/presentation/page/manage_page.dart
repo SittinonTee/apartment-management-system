@@ -300,13 +300,7 @@ class _ManagePageState extends State<ManagePage>
                     }
 
                     // Check for duplicate room
-                    final isDuplicate = _rooms.any(
-                      (room) =>
-                          room['room_number'].toString().toLowerCase() ==
-                          roomNo.toLowerCase(),
-                    );
-
-                    if (isDuplicate) {
+                    if (_isRoomDuplicate(roomNo)) {
                       setStateDialog(() {
                         roomNoError = 'หมายเลขห้องนี้มีอยู่ในระบบแล้ว';
                       });
@@ -342,6 +336,14 @@ class _ManagePageState extends State<ManagePage>
           },
         );
       },
+    );
+  }
+
+  bool _isRoomDuplicate(String roomNo) {
+    return _rooms.any(
+      (room) =>
+          room['room_number'].toString().toLowerCase() ==
+          roomNo.trim().toLowerCase(),
     );
   }
 
