@@ -22,6 +22,8 @@ class AdminBillCard extends StatefulWidget {
   final String? slipImageUrl;
   final String? approvedBy;
   final VoidCallback? onConfirm;
+  final VoidCallback? onReject;
+
   final bool
   initialExpanded; // กำหนดว่าตอนโหลดมาครั้งแรก จะกางการ์ดนี้ไว้เลยหรือไม่
 
@@ -39,6 +41,8 @@ class AdminBillCard extends StatefulWidget {
     this.slipImageUrl,
     this.approvedBy,
     this.onConfirm,
+    this.onReject,
+
     this.initialExpanded = false,
   });
 
@@ -70,6 +74,8 @@ class _AdminBillCardState extends State<AdminBillCard> {
         return AppColors.info.withValues(alpha: 0.15);
       case BadgeStatus.cancelled: // สถานะยกเลิก (เทาจางๆ)
         return Colors.grey.withValues(alpha: 0.15);
+      case BadgeStatus.verifying:
+        return AppColors.info.withValues(alpha: 0.15);
     }
   }
 
@@ -86,6 +92,8 @@ class _AdminBillCardState extends State<AdminBillCard> {
         return AppColors.info;
       case BadgeStatus.cancelled:
         return Colors.grey;
+      case BadgeStatus.verifying:
+        return AppColors.info;
     }
   }
 
@@ -102,6 +110,8 @@ class _AdminBillCardState extends State<AdminBillCard> {
         return Icons.info_outline;
       case BadgeStatus.cancelled:
         return Icons.cancel_outlined; // รูปกากบาท
+      case BadgeStatus.verifying:
+        return Icons.youtube_searched_for; // รูปค้นหา/ตรวจสอบ
     }
   }
 
@@ -307,41 +317,73 @@ class _AdminBillCardState extends State<AdminBillCard> {
                 ),
               ],
 
-              // ส่วนที่เพิ่ม: ปุ่มยืนยันการจ่ายเงิน (โชว์เฉพาะเมื่อสถานะเป็น pending และมีรูปสลิป)
-              if (widget.status == BadgeStatus.pending &&
-                  widget.slipImageUrl != null &&
-                  widget.slipImageUrl!.isNotEmpty) ...[
+              // ส่วนที่เพิ่ม: ปุ่มอนุมัติและปฏิเสธการจ่ายเงิน (โชว์เฉพาะเมื่อสถานะเป็น verifying)
+              if (widget.status == BadgeStatus.verifying) ...[
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: widget.onConfirm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.success,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.check_circle_outline, size: 20),
-                        SizedBox(width: 8),
-                        Text(
-                          'ยืนยันการจ่ายเงิน',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                Row(
+                  children: [
+                    // ปุ่มปฏิเสธ (สีแดง)
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: widget.onReject,
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppColors.error),
+                          foregroundColor: AppColors.error,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                      ],
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.close, size: 20),
+                            SizedBox(width: 8),
+                            Text(
+                              'ปฏิเสธ',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    // ปุ่มอนุมัติ (สีเขียว)
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: widget.onConfirm,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.success,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.check, size: 20),
+                            SizedBox(width: 8),
+                            Text(
+                              'อนุมัติ',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
+
             ],
           ],
         ),

@@ -71,8 +71,8 @@ class _BillsPageState extends State<BillsPage> {
               if (b['status'] == 'PAID') return false;
               if (b['status'] == 'DRAFT') return false;
 
-              // ถ้ามี slip แล้ว ให้ซ่อนจากการ์ด "กำหนดชำระ" (แปลว่ารอตรวจ)
-              if (b['slipimage_url'] != null) return false;
+              // ถ้าเป็นสถานะ รอยืนยัน หรือ ถูกปฏิเสธ (CANCELLED) ให้แสดงในการ์ด
+              if (b['status'] == 'WAITING_CONFIRM' || b['status'] == 'CANCELLED') return true;
 
               final billMonthStr = b['bill_month'] as String?;
               if (billMonthStr == null) return false;
@@ -130,15 +130,24 @@ class _BillsPageState extends State<BillsPage> {
                 ? (paidMonthsCount / totalMonths)
                 : 0.0;
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 32.0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header
+            return RefreshIndicator(
+              onRefresh: () async {
+                setState(() {
+                  _refreshKey++;
+                  _dataFuture = _fetchData();
+                });
+                await _dataFuture;
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 32.0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
                   const Text(
                     'ค่าเช่า',
                     style: TextStyle(
@@ -181,6 +190,8 @@ class _BillsPageState extends State<BillsPage> {
                               ) ??
                               0.0),
                           isOverdue: bill['status'] == 'OVERDUE',
+                          isVerifying: bill['status'] == 'WAITING_CONFIRM',
+                          isRejected: bill['status'] == 'CANCELLED',
                           onPayPressed: () async {
                             final result = await Navigator.push(
                               context,
@@ -261,8 +272,10 @@ class _BillsPageState extends State<BillsPage> {
                   const SizedBox(height: 80),
                 ],
               ),
-            );
-          },
+            ),
+          );
+        },
+
         ),
       ),
     );

@@ -7,6 +7,7 @@ class CustomTextField extends StatelessWidget {
   final String? labelText;
   final IconData? prefixIcon;
   final Widget? suffixIcon;
+  final String? suffixText;
   final bool obscureText;
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
@@ -28,6 +29,7 @@ class CustomTextField extends StatelessWidget {
     this.labelText,
     this.prefixIcon,
     this.suffixIcon,
+    this.suffixText,
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
     this.validator,
@@ -52,7 +54,7 @@ class CustomTextField extends StatelessWidget {
         if (labelText != null) ...[
           Text(
             labelText!,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.secondary,
             ),
@@ -85,9 +87,11 @@ class CustomTextField extends StatelessWidget {
             hintText: hintText,
             prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
             suffixIcon: suffixIcon,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
+            suffixText: suffixText,
+            suffixStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(
+                context,
+              ).colorScheme.secondary.withValues(alpha: 0.7),
             ),
           ),
         ),

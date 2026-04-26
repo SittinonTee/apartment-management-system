@@ -309,80 +309,89 @@ class _RepairsPageState extends State<RepairsPage> {
       return r.status.toUpperCase() == statusMap[_selectedFilterIndex];
     }).toList();
 
-    return Column(
-      children: [
-        _buildSummaryGrid(allRepairs),
-        const SizedBox(height: 24),
+    return RefreshIndicator(
+      onRefresh: _loadRepairs,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            _buildSummaryGrid(allRepairs),
+            const SizedBox(height: 24),
 
-        /// Filter Chips
-        SizedBox(
-          height: 40,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: _filters.length,
-            itemBuilder: (context, i) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChipFilter(
-                  label: _filters[i],
-                  selected: _selectedFilterIndex == i,
-                  onSelected: (_) {
-                    setState(() {
-                      _selectedFilterIndex = i;
-                    });
-                  },
-                ),
-              );
-            },
-          ),
-        ),
+            /// Filter Chips
+            SizedBox(
+              height: 40,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _filters.length,
+                itemBuilder: (context, i) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChipFilter(
+                      label: _filters[i],
+                      selected: _selectedFilterIndex == i,
+                      onSelected: (_) {
+                        setState(() {
+                          _selectedFilterIndex = i;
+                        });
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
 
-        const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-        /// List
-        Expanded(
-          child: filteredRepairs.isEmpty
-              ? const Center(
-                  child: Text(
-                    'ไม่มีรายการแจ้งซ่อม',
-                    style: TextStyle(color: AppColors.textSecondary),
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: filteredRepairs.length,
-                  itemBuilder: (context, index) {
-                    final repair = filteredRepairs[index];
-                    final categoryColor = _getCategoryColor(repair.categoryId);
-                    return RepairTicketCard(
-                      repairId: repair.id,
-                      onRefresh: _loadRepairs,
-                      title: repair.title,
-                      categoryName: repair.categoryName,
-                      date: repair.createdAt,
-                      statusText: _mapStatusToThaiStr(repair.status),
-                      statusColor: _mapStatusToColor(repair.status),
-                      icon: _getCategoryIcon(repair.categoryId),
-                      iconColor: categoryColor,
-                      iconBgColor: categoryColor.withValues(alpha: 0.15),
+            /// List
+            filteredRepairs.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40),
+                    child: Center(
+                      child: Text(
+                        'ไม่มีรายการแจ้งซ่อม',
+                        style: TextStyle(color: AppColors.textSecondary),
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: filteredRepairs.length,
+                    itemBuilder: (context, index) {
+                      final repair = filteredRepairs[index];
+                      final categoryColor = _getCategoryColor(repair.categoryId);
+                      return RepairTicketCard(
+                        repairId: repair.id,
+                        onRefresh: _loadRepairs,
+                        title: repair.title,
+                        categoryName: repair.categoryName,
+                        date: repair.createdAt,
+                        statusText: _mapStatusToThaiStr(repair.status),
+                        statusColor: _mapStatusToColor(repair.status),
+                        icon: _getCategoryIcon(repair.categoryId),
+                        iconColor: categoryColor,
+                        iconBgColor: categoryColor.withValues(alpha: 0.15),
                       // ส่งข้อมูลเพิ่มเติ่มสำหรับตอนกางการ์ด
-                      description: repair.description,
-                      completedAt: repair.completedAt,
+                        description: repair.description,
+                        completedAt: repair.completedAt,
                       // ข้อมูลสมมติ (Mock) ไว้ชั่วคราวก่อน Backend มีข้อมูลจริงดึงมาให้ประสม
-                      tenantfirstname: repair.tenantfirstname,
-                      tenantlastname: repair.tenantlastname,
-                      tenantPhone: repair.tenantPhone,
-                      mechanicfirstname:
-                          repair.status.toUpperCase() == 'REPORTED'
-                          ? 'ยังไม่ได้มอบหมาย'
-                          : repair.mechanicfirstname,
-                      mechaniclastname: repair.mechaniclastname,
-                      mechanicPhone: repair.mechanicPhone,
-                      imageUrls: repair.imageUrls,
-                    );
-                  },
-                ),
+                        tenantfirstname: repair.tenantfirstname,
+                        tenantlastname: repair.tenantlastname,
+                        tenantPhone: repair.tenantPhone,
+                        mechanicfirstname:
+                            repair.status.toUpperCase() == 'REPORTED'
+                                ? 'ยังไม่ได้มอบหมาย'
+                                : repair.mechanicfirstname,
+                        mechaniclastname: repair.mechaniclastname,
+                        mechanicPhone: repair.mechanicPhone,
+                        imageUrls: repair.imageUrls,
+                      );
+                    },
+                  ),
+          ],
         ),
-      ],
+      ),
     );
   }
 

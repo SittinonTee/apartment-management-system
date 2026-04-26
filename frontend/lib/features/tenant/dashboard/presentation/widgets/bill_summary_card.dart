@@ -11,6 +11,7 @@ class BillSummaryCard extends StatelessWidget {
   final String month; // เดือน
   final BadgeStatus status; // สถานะ
   final String statusText; // ข้อความสถานะ
+  final bool showPayButton; // เพิ่มตัวแปรคุมการโชว์ปุ่ม
   final VoidCallback onPayPressed; // ฟังก์ชันที่จะถูกเรียกเมื่อคลิก
 
   const BillSummaryCard({
@@ -20,6 +21,7 @@ class BillSummaryCard extends StatelessWidget {
     required this.status,
     required this.statusText,
     required this.onPayPressed,
+    this.showPayButton = true,
   });
 
   @override
@@ -68,14 +70,16 @@ class BillSummaryCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onPayPressed,
-              child: const Text('ชำระเงิน'),
+          if (showPayButton) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onPayPressed,
+                child: const Text('ชำระเงิน'),
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

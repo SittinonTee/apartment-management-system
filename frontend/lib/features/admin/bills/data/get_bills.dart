@@ -96,4 +96,21 @@ class BillsService {
       return false;
     }
   }
+
+  Future<bool> rejectBill(int billId) async {
+    try {
+      final token = await AuthService().getToken();
+
+      final response = await _dio.patch(
+        '/bills/reject/$billId',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('RejectBill Error: $e');
+      return false;
+    }
+  }
 }
+

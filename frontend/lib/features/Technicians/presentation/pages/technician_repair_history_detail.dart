@@ -173,7 +173,7 @@ class _TechnicianRepairHistoryDetailPageState
           _buildDetailRow(
             'วันที่แจ้ง :',
             Text(
-              '${widget.repair.date.day}/${widget.repair.date.month}/${widget.repair.date.year + 543}',
+              '${widget.repair.date.day} ${_getMonthThai(widget.repair.date.month)} ${widget.repair.date.year + 543}',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -274,5 +274,22 @@ class _TechnicianRepairHistoryDetailPageState
         Expanded(child: value),
       ],
     );
+  }
+  String _getMonthThai(int month) {
+    const months = [
+      'ม.ค.',
+      'ก.พ.',
+      'มี.ค.',
+      'เม.ย.',
+      'พ.ค.',
+      'มิ.ย.',
+      'ก.ค.',
+      'ส.ค.',
+      'ก.ย.',
+      'ต.ค.',
+      'พ.ย.',
+      'ธ.ค.'
+    ];
+    return months[month - 1];
   }
 }

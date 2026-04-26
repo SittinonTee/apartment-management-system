@@ -214,15 +214,17 @@ class _RepairTicketCardState extends State<RepairTicketCard> {
                         children: [
                           Row(
                             children: [
-                              Text(
-                                widget.title,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
+                              Expanded(
+                                child: Text(
+                                  widget.title,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
                               ),
 
                               const SizedBox(width: 12),
@@ -361,8 +363,8 @@ class _RepairTicketCardState extends State<RepairTicketCard> {
                               width: double.infinity,
                               height: 200,
                               fit: BoxFit.cover,
-                              errorBuilder:
-                                  (context, error, stackTrace) => Container(
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
                                     height: 200,
                                     color: Colors.grey.shade100,
                                     child: const Icon(
@@ -541,27 +543,29 @@ class _RepairTicketCardState extends State<RepairTicketCard> {
                             ),
                           ),
                           const SizedBox(width: 16),
-                          const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'ยังไม่มีผู้รับคำขอนี้',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.error,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  'ยังไม่มีผู้รับคำขอนี้',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.error,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                'กำลังรอช่างเทคนิครับคำขอ',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: AppColors.textSecondary,
+                                Text(
+                                  'กำลังรอช่างเทคนิครับคำขอ',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          const Spacer(),
+                          const SizedBox(width: 8),
 
                           OutlinedButton(
                             onPressed: _handleCancel,

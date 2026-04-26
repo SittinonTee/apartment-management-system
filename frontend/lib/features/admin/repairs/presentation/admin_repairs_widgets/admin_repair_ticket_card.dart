@@ -143,15 +143,17 @@ class _RepairTicketCardState extends State<AdminRepairTicketCard> {
                         children: [
                           Row(
                             children: [
-                              Text(
-                                widget.title,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
+                              Expanded(
+                                child: Text(
+                                  widget.title,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
                               ),
 
                               const SizedBox(width: 12),
@@ -292,14 +294,14 @@ class _RepairTicketCardState extends State<AdminRepairTicketCard> {
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>
                                   Container(
-                                height: 200,
-                                color: Colors.grey.shade100,
-                                child: const Icon(
-                                  Icons.broken_image,
-                                  color: Colors.grey,
-                                  size: 50,
-                                ),
-                              ),
+                                    height: 200,
+                                    color: Colors.grey.shade100,
+                                    child: const Icon(
+                                      Icons.broken_image,
+                                      color: Colors.grey,
+                                      size: 50,
+                                    ),
+                                  ),
                             ),
                           );
                         }
@@ -321,15 +323,15 @@ class _RepairTicketCardState extends State<AdminRepairTicketCard> {
                                     errorBuilder:
                                         (context, error, stackTrace) =>
                                             Container(
-                                      width: 200,
-                                      height: 150,
-                                      color: Colors.grey.shade100,
-                                      child: const Icon(
-                                        Icons.broken_image,
-                                        color: Colors.grey,
-                                        size: 30,
-                                      ),
-                                    ),
+                                              width: 200,
+                                              height: 150,
+                                              color: Colors.grey.shade100,
+                                              child: const Icon(
+                                                Icons.broken_image,
+                                                color: Colors.grey,
+                                                size: 30,
+                                              ),
+                                            ),
                                   ),
                                 ),
                               );

@@ -18,13 +18,15 @@ class BillPayPage extends StatelessWidget {
     final createdDate = AppDateUtils.formatDateThaiPadded(billData['created_at']);
     final dueDate = AppDateUtils.formatDateThaiPadded(billData['due_date']);
     final shortMonth = AppDateUtils.formatMonthYearShort(billData['bill_month']);
-    final roomNumber = billData['room_number']?.toString() ?? '-';
 
     // 2. ข้อมูลตัวเลขราคา และค่าไฟ ค่าน้ำ จาก Database โดยตรง
     double roomPrice = double.tryParse(billData['room_total']?.toString() ?? '0') ?? 0.0;
     double waterPrice = double.tryParse(billData['water_total']?.toString() ?? '0') ?? 0.0;
     double electricPrice = double.tryParse(billData['electric_total']?.toString() ?? '0') ?? 0.0;
     final grandTotal = double.tryParse(billData['grand_total']?.toString() ?? '0') ?? 0.0;
+    
+    final rateWater = billData['rate_water']?.toString() ?? '0';
+    final rateElectric = billData['rate_electric']?.toString() ?? '0';
     
     // ถ้าบางบิลไม่มีข้อมูลการแยกประเภทแต่ให้ grandTotal มา
     if (roomPrice == 0 && waterPrice == 0 && electricPrice == 0 && grandTotal > 0) {
@@ -142,7 +144,7 @@ class BillPayPage extends StatelessWidget {
                                 _buildInvoiceItem(
                                   icon: Icons.keyboard_arrow_down_rounded,
                                   title: 'ค่าเช่าห้อง / Room Charge',
-                                  subtitle: '(inv.)\n$shortMonth | ห้อง $roomNumber',
+                                  subtitle: '(inv.)\n$shortMonth',
                                   price: roomPrice,
                                 ),
 
@@ -150,7 +152,7 @@ class BillPayPage extends StatelessWidget {
                                 _buildInvoiceItem(
                                   icon: Icons.keyboard_arrow_down_rounded,
                                   title: 'ค่าไฟฟ้า / Thunder Charge',
-                                  subtitle: '(inv.)\n$shortMonth | $roomNumber : $eEnd - $eStart = $eDiff',
+                                  subtitle: '(inv.)\n$shortMonth | $eDiff หน่วย x $rateElectric บาท',
                                   price: electricPrice,
                                 ),
 
@@ -158,7 +160,7 @@ class BillPayPage extends StatelessWidget {
                                 _buildInvoiceItem(
                                   icon: Icons.keyboard_arrow_down_rounded,
                                   title: 'ค่าน้ำประปา / Water Charge',
-                                  subtitle: '(inv.)\n$shortMonth | $roomNumber : $wEnd - $wStart = $wDiff',
+                                  subtitle: '(inv.)\n$shortMonth | $wDiff หน่วย x $rateWater บาท',
                                   price: waterPrice,
                                 ),
                               ],

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "193428724207",
+    "project_id": "apartment-management-sys-def0a",
+    "storage_bucket": "apartment-management-sys-def0a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:193428724207:android:8bbf3686be1489d734fe1a",
+        "android_client_info": {
+          "package_name": "com.example.frontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArb70kQPRHJ-VzSwFjGJX8dxiVoB75d-w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

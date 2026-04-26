@@ -25,6 +25,8 @@ services:
     build: 
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - API_URL=http://localhost:3000/api
     container_name: apartment_frontend
     ports:
       - "8080:80"

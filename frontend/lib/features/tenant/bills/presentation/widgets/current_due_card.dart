@@ -7,6 +7,8 @@ class CurrentDueCard extends StatelessWidget {
   final double amount;
   final VoidCallback onPayPressed;
   final bool isOverdue;
+  final bool isVerifying;
+  final bool isRejected;
 
   const CurrentDueCard({
     super.key,
@@ -14,6 +16,8 @@ class CurrentDueCard extends StatelessWidget {
     required this.amount,
     required this.onPayPressed,
     this.isOverdue = false,
+    this.isVerifying = false,
+    this.isRejected = false,
   });
 
   @override
@@ -21,7 +25,7 @@ class CurrentDueCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF2E5), // สีส้มไข่ไก่แบบใน Figma
+        color: const Color(0xFFFFF2E5),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFFFF2E5), width: 2),
         boxShadow: const [
@@ -38,21 +42,31 @@ class CurrentDueCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              // ไอคอนนาฬิกา
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.15),
+                  color: isRejected
+                      ? AppColors.error.withValues(alpha: 0.15)
+                      : isVerifying
+                          ? AppColors.info.withValues(alpha: 0.15)
+                          : Colors.orange.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.access_time,
-                  color: Colors.orange,
+                child: Icon(
+                  isRejected
+                      ? Icons.error_outline
+                      : isVerifying
+                          ? Icons.youtube_searched_for
+                          : Icons.access_time,
+                  color: isRejected
+                      ? AppColors.error
+                      : isVerifying
+                          ? AppColors.info
+                          : Colors.orange,
                   size: 28,
                 ),
               ),
               const SizedBox(width: 16),
-              // ข้อมูลกำหนดชำระ
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,18 +80,35 @@ class CurrentDueCard extends StatelessWidget {
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        if (isOverdue) ...[
+                        if (isRejected) ...[
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.red.shade100,
+                              color: AppColors.error.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'ถูกปฏิเสธ',
+                              style: TextStyle(
+                                color: AppColors.error,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ] else if (isOverdue) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.purple.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: const Text(
                               'เลยกำหนด',
                               style: TextStyle(
-                                color: Colors.red,
+                                color: Colors.purple,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -97,7 +128,6 @@ class CurrentDueCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // จำนวนเงิน
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -124,14 +154,17 @@ class CurrentDueCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          // ปุ่มชำระทันที
           SizedBox(
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: onPayPressed,
+              onPressed: isVerifying ? null : onPayPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryLight,
+                backgroundColor: isRejected
+                    ? AppColors.error
+                    : isVerifying
+                        ? Colors.grey.shade400
+                        : AppColors.primaryLight,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -140,14 +173,22 @@ class CurrentDueCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.account_balance_wallet_outlined,
+                  Icon(
+                    isRejected
+                        ? Icons.replay
+                        : isVerifying
+                            ? Icons.hourglass_bottom
+                            : Icons.account_balance_wallet_outlined,
                     color: Colors.white,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'ชำระทันที',
+                    isRejected
+                        ? 'ส่งสลิปอีกครั้ง'
+                        : isVerifying
+                            ? 'รอยืนยันการตรวจสอบ'
+                            : 'ชำระทันที',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
