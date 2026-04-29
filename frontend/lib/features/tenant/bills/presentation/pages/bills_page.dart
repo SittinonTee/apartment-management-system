@@ -38,7 +38,9 @@ class _BillsPageState extends State<BillsPage> {
   }
 
   int _calculateMonthDifference(DateTime start, DateTime end) {
-    return ((end.year - start.year) * 12) + end.month - start.month + 1;
+    int days = end.difference(start).inDays;
+    int months = (days / 30).round();
+    return months <= 0 ? 1 : months;
   }
 
   @override

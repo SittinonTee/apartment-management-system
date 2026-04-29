@@ -23,6 +23,7 @@ class AdminBillCard extends StatefulWidget {
   final String? approvedBy;
   final VoidCallback? onConfirm;
   final VoidCallback? onReject;
+  final VoidCallback? onEnterUnits;
 
   final bool
   initialExpanded; // กำหนดว่าตอนโหลดมาครั้งแรก จะกางการ์ดนี้ไว้เลยหรือไม่
@@ -42,6 +43,7 @@ class AdminBillCard extends StatefulWidget {
     this.approvedBy,
     this.onConfirm,
     this.onReject,
+    this.onEnterUnits,
 
     this.initialExpanded = false,
   });
@@ -76,6 +78,8 @@ class _AdminBillCardState extends State<AdminBillCard> {
         return Colors.grey.withValues(alpha: 0.15);
       case BadgeStatus.verifying:
         return AppColors.info.withValues(alpha: 0.15);
+      case BadgeStatus.draft:
+        return Colors.grey.withValues(alpha: 0.15);
     }
   }
 
@@ -94,6 +98,8 @@ class _AdminBillCardState extends State<AdminBillCard> {
         return Colors.grey;
       case BadgeStatus.verifying:
         return AppColors.info;
+      case BadgeStatus.draft:
+        return Colors.grey;
     }
   }
 
@@ -112,6 +118,8 @@ class _AdminBillCardState extends State<AdminBillCard> {
         return Icons.cancel_outlined; // รูปกากบาท
       case BadgeStatus.verifying:
         return Icons.youtube_searched_for; // รูปค้นหา/ตรวจสอบ
+      case BadgeStatus.draft:
+        return Icons.edit_note; // รูปแก้ไขหน่วย
     }
   }
 
@@ -384,6 +392,38 @@ class _AdminBillCardState extends State<AdminBillCard> {
                 ),
               ],
 
+              // ส่วนที่เพิ่ม: ปุ่มกรอกหน่วยน้ำ/ไฟ (โชว์เฉพาะเมื่อสถานะเป็น draft)
+              if (widget.status == BadgeStatus.draft) ...[
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: widget.onEnterUnits,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.electric_bolt, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'กรอกหน่วยน้ำ/ไฟ',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ],
           ],
         ),

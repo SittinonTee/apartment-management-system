@@ -160,3 +160,69 @@ export const rejectBill = async (
 		next(error);
 	}
 };
+
+export const updateUnits = async (
+	req: AuthRequest,
+	res: Response,
+	next: NextFunction,
+) => {
+	try {
+		const { billId } = req.params;
+		const { water, electric, waterUnit, electricUnit } = req.body;
+
+		// รองรับทั้ง water และ waterUnit
+		const finalWater = water !== undefined ? water : waterUnit;
+		const finalElectric = electric !== undefined ? electric : electricUnit;
+
+		if (finalWater === undefined || finalElectric === undefined) {
+			throw new AppError(
+				"กรุณาระบุหน่วยน้ำและไฟ (รองรับฟิลด์ water/electric หรือ waterUnit/electricUnit)",
+				400,
+			);
+		}
+
+		const success = await billService.updateUnits(
+			Number(billId),
+			Number(finalWater),
+			Number(finalElectric),
+		);
+
+		if (!success) {
+			throw new AppError("ไม่สามารถอัปเดตข้อมูลได้ หรือบิลไม่ได้อยู่ในสถานะร่าง", 404);
+		}
+
+		res.status(200).json({
+			status: "success",
+			message: "อัปเดตหน่วยน้ำ/ไฟเรียบร้อยแล้ว บิลจะเข้าสู่ระบบคำนวณอัตโนมัติต่อไป",
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const generateDebugDraftBills = async (
+	req: AuthRequest,
+	res: Response,
+	next: NextFunction,
+) => {
+	try {
+		const { billMonth, contractId } = req.body;
+
+		if (!billMonth) {
+			throw new AppError("กรุณาระบุ billMonth เช่น '2024-05'", 400);
+		}
+
+		const count = await billService.generateDraftBills(
+			billMonth,
+			contractId ? Number(contractId) : undefined,
+		);
+
+		res.status(200).json({
+			status: "success",
+			message: `สร้าง Draft Bills สำเร็จจำนวน ${count} บิล`,
+			count,
+		});
+	} catch (error) {
+		next(error);
+	}
+};

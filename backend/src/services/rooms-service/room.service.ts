@@ -1,6 +1,6 @@
 import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { pool } from "../database";
-import type { V_AddRoomForm } from "./room.schema";
+import type { V_AddRoomForm } from "./config/room.schema";
 
 export const addRoom = async (roomData: V_AddRoomForm) => {
 	const { room_number, floor, room_status } = roomData;

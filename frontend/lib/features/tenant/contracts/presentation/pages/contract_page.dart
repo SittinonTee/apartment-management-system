@@ -36,7 +36,7 @@ class _ContractPageState extends State<ContractPage> {
   Future<void> _fetchContracts() async {
     setState(() => _isLoading = true);
     final data = await _contractService.getMyContracts();
-    
+
     // จัดเรียงข้อมูลให้สถานะ 'ACTIVE' (ใช้งานอยู่) ขึ้นกล่องบนสุดเสมอ
     if (data != null) {
       data.sort((a, b) {
@@ -56,12 +56,10 @@ class _ContractPageState extends State<ContractPage> {
     }
   }
 
-
-
   // จัดการฟิลเตอร์หมวดหมู่
   List<dynamic> get _filteredContracts {
     if (_selectedIndex == 0) return _contracts;
-    
+
     final statusFilter = _categories[_selectedIndex];
     return _contracts.where((c) {
       final textStatus = ContractUtils.mapStatusToText(c['status']?.toString());
@@ -84,62 +82,86 @@ class _ContractPageState extends State<ContractPage> {
             const SizedBox(height: 8),
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    )
                   : displayContracts.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'ไม่พบข้อมูลสัญญาเช่า',
-                            style: TextStyle(color: AppColors.textSecondary),
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-                          itemCount: displayContracts.length,
-                          itemBuilder: (context, index) {
-                            final contract = displayContracts[index];
-                            final statusStr = contract['status']?.toString();
-                            
-                            // จัด Format วันที่
-                            final startDate = ContractUtils.formatDateThai(contract['start_date']?.toString());
-                            final endDate = ContractUtils.formatDateThai(contract['end_date']?.toString());
-                            final dateRange = (startDate.isNotEmpty && endDate.isNotEmpty) 
-                                ? '$startDate - $endDate' 
-                                : '-';
+                  ? const Center(
+                      child: Text(
+                        'ไม่พบข้อมูลสัญญาเช่า',
+                        style: TextStyle(color: AppColors.textSecondary),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 8.0,
+                      ),
+                      itemCount: displayContracts.length,
+                      itemBuilder: (context, index) {
+                        final contract = displayContracts[index];
+                        final statusStr = contract['status']?.toString();
 
-                            // ดึงเปอร์เซ็นต์ (แปลงจาก Float String)
-                            double? progress;
-                            if (contract['occupancy_percent'] != null) {
-                              final rawVal = double.tryParse(contract['occupancy_percent'].toString());
-                              if (rawVal != null) {
-                                // ถ้า Backend ส่งมาเป็น Format 0-100 (เช่น 74.93) ให้แปลงกลับเป็น 0.0-1.0 
-                                progress = rawVal > 1.0 ? rawVal / 100.0 : rawVal;
-                              }
-                            }
+                        // จัด Format วันที่
+                        final startDate = ContractUtils.formatDateThai(
+                          contract['start_date']?.toString(),
+                        );
+                        final endDate = ContractUtils.formatDateThai(
+                          contract['end_date']?.toString(),
+                        );
+                        final dateRange =
+                            (startDate.isNotEmpty && endDate.isNotEmpty)
+                            ? '$startDate - $endDate'
+                            : '-';
 
-                            return ContractListCard(
-                              title: contract['contract_title']?.toString() ?? 'สัญญารอการอนุมัติ',
-                              roomInfo: contract['room_display']?.toString() ?? 'รอยืนยันห้องพัก',
-                              dateRange: dateRange,
-                              rentPrice: '${contract['monthly_rent'] ?? 0} บาท/เดือน',
-                              status: ContractUtils.mapStatusToBadge(statusStr),
-                              statusText: ContractUtils.mapStatusToText(statusStr),
-                              progressPercent: (statusStr?.toUpperCase() == 'ACTIVE') ? progress : null, 
-                              onTap: () {
-                                final contractId = contract['contracts_id'];
-                                if (contractId != null) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ContractDetailPage(
-                                        contractId: int.parse(contractId.toString()),
-                                      ),
+                        // ดึงเปอร์เซ็นต์ (แปลงจาก Float String)
+                        double? progress;
+                        if (contract['occupancy_percent'] != null) {
+                          final rawVal = double.tryParse(
+                            contract['occupancy_percent'].toString(),
+                          );
+                          if (rawVal != null) {
+                            // ถ้า Backend ส่งมาเป็น Format 0-100 (เช่น 74.93) ให้แปลงกลับเป็น 0.0-1.0
+                            progress = rawVal > 1.0 ? rawVal / 100.0 : rawVal;
+                          }
+                        }
+
+                        return ContractListCard(
+                          title:
+                              contract['contract_title']?.toString() ??
+                              'สัญญารอการอนุมัติ',
+                          roomInfo:
+                              contract['room_display']?.toString() ??
+                              'รอยืนยันห้องพัก',
+                          dateRange: dateRange,
+                          rentPrice:
+                              '${contract['monthly_rent'] ?? 0} บาท/เดือน',
+                          status: ContractUtils.mapStatusToBadge(statusStr),
+                          statusText: ContractUtils.mapStatusToText(statusStr),
+                          progressPercent:
+                              (statusStr?.toUpperCase() == 'ACTIVE')
+                              ? progress
+                              : null,
+                          onTap: () {
+                            final contractId = contract['contracts_id'];
+                            if (contractId != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ContractDetailPage(
+                                    contractId: int.parse(
+                                      contractId.toString(),
                                     ),
-                                  );
-                                }
-                              },
-                            );
+                                  ),
+                                ),
+                              );
+                            }
                           },
-                        ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),

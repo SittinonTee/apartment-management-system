@@ -30,7 +30,9 @@ class GetAvailableRoom extends ChangeNotifier {
 
       if (response.data['status'] == 'success') {
         final List data = response.data['data'];
-        return List<RoomTemplate>.from(data.map((x) => RoomTemplate.fromJson(x)));
+        return List<RoomTemplate>.from(
+          data.map((x) => RoomTemplate.fromJson(x)),
+        );
       }
       return [];
     } on DioException catch (e) {

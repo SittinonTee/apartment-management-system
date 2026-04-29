@@ -50,6 +50,8 @@ class _RecentBillCardState extends State<RecentBillCard> {
         return Colors.grey;
       case BadgeStatus.verifying:
         return AppColors.info;
+      case BadgeStatus.draft:
+        return Colors.grey;
     }
   }
 

@@ -10,18 +10,27 @@ class UploadService {
   final AuthService _authService = AuthService();
 
   // ตัวใหม่: รองรับ PlatformFile (เลือกผ่าน FilePicker ได้ทั้งรูปและ PDF)
-  Future<String?> uploadFile(PlatformFile file, {String folder = 'others'}) async {
+  Future<String?> uploadFile(
+    PlatformFile file, {
+    String folder = 'others',
+  }) async {
     try {
       final token = await _authService.getToken();
       if (token == null) return null;
 
       String fileName = file.name;
       MultipartFile multipartFile;
-      
+
       if (kIsWeb || file.bytes != null) {
-        multipartFile = MultipartFile.fromBytes(file.bytes!, filename: fileName);
+        multipartFile = MultipartFile.fromBytes(
+          file.bytes!,
+          filename: fileName,
+        );
       } else {
-        multipartFile = await MultipartFile.fromFile(file.path!, filename: fileName);
+        multipartFile = await MultipartFile.fromFile(
+          file.path!,
+          filename: fileName,
+        );
       }
       return await _performUpload(multipartFile, folder, token);
     } catch (e) {
@@ -38,12 +47,15 @@ class UploadService {
 
       String fileName = image.name;
       MultipartFile multipartFile;
-      
+
       if (kIsWeb) {
         final bytes = await image.readAsBytes();
         multipartFile = MultipartFile.fromBytes(bytes, filename: fileName);
       } else {
-        multipartFile = await MultipartFile.fromFile(image.path, filename: fileName);
+        multipartFile = await MultipartFile.fromFile(
+          image.path,
+          filename: fileName,
+        );
       }
       return await _performUpload(multipartFile, folder, token);
     } catch (e) {
@@ -53,20 +65,23 @@ class UploadService {
   }
 
   // ฟังก์ชันกลางที่ใช้ส่งข้อมูลจริงๆ
-  Future<String?> _performUpload(MultipartFile file, String folder, String token) async {
+  Future<String?> _performUpload(
+    MultipartFile file,
+    String folder,
+    String token,
+  ) async {
     try {
-      FormData formData = FormData.fromMap({
-        'file': file,
-        'folder': folder,
-      });
+      FormData formData = FormData.fromMap({'file': file, 'folder': folder});
 
       final response = await _dio.post(
         '/upload',
         data: formData,
-        options: Options(headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'multipart/form-data'
-        }),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
       );
 
       if (response.data['status'] == 'success') {

@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { verifyToken } from "../../middlewares/auth.middleware";
 import { validate } from "../../middlewares/validate.middleware";
+import { addRoomSchema } from "./config/room.schema";
 import * as roomController from "./room.controller";
-import { addRoomSchema } from "./room.schema";
 
 const router = Router();
 
