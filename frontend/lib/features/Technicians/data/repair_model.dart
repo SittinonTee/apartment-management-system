@@ -23,7 +23,7 @@ class RepairRequest {
   final String? tenantName;
   final String? tenantPhone;
   final String? categoryName;
-  final String? repairsImageUrl;
+  final List<String> imageUrls;
   final String? preferredTime;
   final int? technicianId;
   final String? mechanicName;
@@ -40,7 +40,7 @@ class RepairRequest {
     this.tenantName,
     this.tenantPhone,
     this.categoryName,
-    this.repairsImageUrl,
+    this.imageUrls = const [],
     this.preferredTime,
     this.technicianId,
     this.mechanicName,
@@ -62,7 +62,7 @@ class RepairRequest {
           : null,
       tenantPhone: json['phone'],
       categoryName: json['category_name'],
-      repairsImageUrl: _parseImageUrl(json['repairsimage_url']),
+      imageUrls: _parseImageUrls(json['repairsimage_url']),
       preferredTime: json['preferred_time'],
       technicianId: json['technician_by'],
       mechanicName: json['mechanic_firstname'] != null
@@ -73,8 +73,8 @@ class RepairRequest {
   }
 
   // ฟังก์ชันช่วยจัดการ URL รูปภาพ (รองรับทั้ง String ธรรมดา และ JSON Array String)
-  static String? _parseImageUrl(dynamic rawUrl) {
-    if (rawUrl == null || rawUrl.toString().isEmpty) return null;
+  static List<String> _parseImageUrls(dynamic rawUrl) {
+    if (rawUrl == null || rawUrl.toString().isEmpty) return [];
 
     String url = rawUrl.toString().trim();
 
@@ -82,15 +82,17 @@ class RepairRequest {
     if (url.startsWith('[') && url.endsWith(']')) {
       try {
         final List<dynamic> urls = jsonDecode(url);
-        if (urls.isNotEmpty) {
-          return urls.first.toString();
-        }
+        return urls.map((e) => e.toString()).toList();
       } catch (e) {
         debugPrint('Error parsing image URL with jsonDecode: $e');
       }
     }
 
-    return url.isEmpty ? null : url;
+    if (url.contains(',')) {
+      return url.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    }
+
+    return url.isEmpty ? [] : [url];
   }
 
   // แปลงสถานะจาก String เป็น Enum สำหรับ UI

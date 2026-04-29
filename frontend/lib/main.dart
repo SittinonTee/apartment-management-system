@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AdminService()),
       ],
       child: MaterialApp.router(
-        title: 'Tenant Portal',
+        title: 'Au Usabai',
         theme: AppTheme.lightTheme,
         routerConfig: AppRouter.router, // ใช้การตั้งค่าจาก Router
         debugShowCheckedModeBanner: false,

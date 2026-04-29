@@ -157,12 +157,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                   Icons.description_outlined,
                 ),
                 const SizedBox(height: 16),
-                _buildInfoRow(
-                  'อาคาร',
-                  _contractData!['building_name']?.toString() ?? '-',
-                  Icons.business_outlined,
-                ),
-                const SizedBox(height: 16),
+
                 _buildInfoRow(
                   'เลขห้อง',
                   'ห้อง ${_contractData!['room_number'] ?? '-'}',

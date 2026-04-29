@@ -74,6 +74,8 @@ class ContractUtils {
         return Colors.grey.withValues(alpha: 0.1);
       case BadgeStatus.verifying:
         return AppColors.info.withValues(alpha: 0.1);
+      case BadgeStatus.draft:
+        return Colors.grey.withValues(alpha: 0.1);
     }
   }
 }

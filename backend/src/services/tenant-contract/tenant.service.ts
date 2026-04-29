@@ -22,10 +22,14 @@ export const getContractDetails = async (
 ) => {
 	// Fetch specific contract details for the user
 	const [rows] = await pool.query<RowDataPacket[]>(
-		`SELECT c.*, r.room_number, r.floor, u.firstname, u.lastname 
+		`SELECT c.*, r.room_number, r.floor, u.firstname, u.lastname,
+		 rt.rate_water AS water_rate_per_unit, 
+		 rt.rate_electric AS electric_rate_per_unit, 
+		 rt.rate_room AS monthly_rent
 		 FROM Contracts c
 		 LEFT JOIN Room r ON c.room_id = r.room_id
 		 LEFT JOIN Users u ON c.user_id = u.user_id
+		 LEFT JOIN Rate rt ON c.rate_id = rt.rate_id
 		 WHERE c.user_id = ? AND c.contracts_id = ?`,
 		[userId, contractId],
 	);

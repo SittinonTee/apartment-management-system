@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constants/api_constants.dart';
+import 'notification_service.dart';
 
 enum UserRole { guest, tenant, admin, technician }
 
@@ -77,6 +78,14 @@ class AuthService extends ChangeNotifier {
         _firstName = firstName;
         _lastName = lastName;
         notifyListeners();
+        
+        // After successful login, trigger FCM token update and send to backend
+        try {
+          await NotificationService().updateToken();
+        } catch (e) {
+          debugPrint('Error updating token after login: $e');
+        }
+        
         return true;
       }
       return false;

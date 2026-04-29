@@ -50,7 +50,9 @@ class AppRouter {
       if (state.matchedLocation == '/') {
         if (isAuthenticated) {
           if (_authService.currentRole == UserRole.admin) return '/admin';
-          if (_authService.currentRole == UserRole.technician) return '/technician';
+          if (_authService.currentRole == UserRole.technician) {
+            return '/technician';
+          }
           return '/tenant';
         }
         return '/login';

@@ -99,4 +99,32 @@ class RoomManageApi {
       return {'status': 'error'};
     }
   }
+
+  /// อัปเดตข้อมูลห้องพัก
+  Future<Map<String, dynamic>> updateRoom(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      final token = await AuthService().getToken();
+
+      final response = await _dio.patch(
+        '/rooms/$id',
+        data: data,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      return response.data;
+    } on DioException catch (e) {
+      debugPrint('UpdateRoom DioError: ${e.response?.data}');
+      return e.response?.data ??
+          {
+            'status': 'error',
+            'message': 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์',
+          };
+    } catch (e) {
+      debugPrint('UpdateRoom Error: $e');
+      return {'status': 'error', 'message': 'เกิดข้อผิดพลาดที่ไม่รู้จัก'};
+    }
+  }
 }

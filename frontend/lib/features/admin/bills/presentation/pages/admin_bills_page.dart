@@ -23,6 +23,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
 
   final List<String> statusList = [
     'ทั้งหมด',
+    'แบบร่าง',
     'รอยืนยัน',
     'ค้างชำระ',
     'ชำระสำเร็จ',
@@ -73,6 +74,8 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
         return BadgeStatus.cancelled;
       case 'waiting_confirm':
         return BadgeStatus.verifying;
+      case 'draft':
+        return BadgeStatus.draft;
       default:
         return BadgeStatus.pending;
     }
@@ -94,6 +97,8 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
         return 'ถูกปฏิเสธ';
       case 'waiting_confirm':
         return 'รอยืนยัน';
+      case 'draft':
+        return 'แบบร่าง';
       default:
         return 'ค้างชำระ';
     }
@@ -235,6 +240,91 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
     }
   }
 
+  Future<void> _showUnitEntryDialog(int billId) async {
+    final waterController = TextEditingController();
+    final electricController = TextEditingController();
+
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('กรอกหน่วยน้ำ/ไฟ'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: waterController,
+                decoration: const InputDecoration(
+                  labelText: 'หน่วยน้ำปัจจุบัน',
+                  suffixText: 'หน่วย',
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: electricController,
+                decoration: const InputDecoration(
+                  labelText: 'หน่วยไฟปัจจุบัน',
+                  suffixText: 'หน่วย',
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('ยกเลิก'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('บันทึก'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      final int? water = int.tryParse(waterController.text);
+      final int? electric = int.tryParse(electricController.text);
+
+      if (water == null || electric == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('กรุณากรอกตัวเลขให้ถูกต้อง')),
+        );
+        return;
+      }
+
+      final success = await BillsService().updateUnits(billId, water, electric);
+      if (!mounted) return;
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('บันทึกหน่วยน้ำ/ไฟสำเร็จ'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        setState(() {
+          _refreshKey++;
+          _loadBills();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('เกิดข้อผิดพลาดในการบันทึก'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -457,6 +547,8 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
                               approvedBy: bill.approvedBy,
                               onConfirm: () => _confirmBill(bill.billId),
                               onReject: () => _rejectBill(bill.billId),
+                              onEnterUnits: () =>
+                                  _showUnitEntryDialog(bill.billId),
                             ),
                           );
                         }),

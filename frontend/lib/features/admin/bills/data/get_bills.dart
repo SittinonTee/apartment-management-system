@@ -112,5 +112,21 @@ class BillsService {
       return false;
     }
   }
-}
 
+  Future<bool> updateUnits(int billId, int water, int electric) async {
+    try {
+      final token = await AuthService().getToken();
+
+      final response = await _dio.patch(
+        '/bills/update-units/$billId',
+        data: {'water': water, 'electric': electric},
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('UpdateUnits Error: $e');
+      return false;
+    }
+  }
+}

@@ -132,7 +132,10 @@ class _TechnicianRepairHistoryDetailPageState
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: statusBgColor,
                   borderRadius: BorderRadius.circular(12),
@@ -151,7 +154,10 @@ class _TechnicianRepairHistoryDetailPageState
           const SizedBox(height: 16),
           Text(
             widget.repair.description,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 15,
+            ),
           ),
           const Divider(height: 32, color: Color(0xFFF2F2F2)),
           _buildDetailRow(
@@ -184,9 +190,7 @@ class _TechnicianRepairHistoryDetailPageState
 
   // กล่องแสดงรูปภาพ (ถ้ามี)
   Widget _buildImageCard(BuildContext context) {
-    if (widget.repair.repairsImageUrl == null || widget.repair.repairsImageUrl!.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    final hasImage = widget.repair.imageUrls.isNotEmpty;
 
     return Container(
       width: double.infinity,
@@ -201,22 +205,57 @@ class _TechnicianRepairHistoryDetailPageState
         children: [
           const Text(
             'รูปภาพประกอบ :',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-          ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              widget.repair.repairsImageUrl!,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                height: 200,
-                color: Colors.grey[200],
-                child: const Icon(Icons.image_not_supported, color: Colors.grey),
-              ),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
             ),
           ),
+          const SizedBox(height: 16),
+          if (hasImage)
+            SizedBox(
+              height: 120,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: widget.repair.imageUrls.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.network(
+                      widget.repair.imageUrls[index],
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                },
+              ),
+            )
+          else
+            Container(
+              width: double.infinity,
+              height: 120,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE0E0E0)),
+              ),
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.image_not_supported_outlined,
+                    color: Colors.grey,
+                    size: 32,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'ไม่มีรูปภาพประกอบ',
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -275,6 +314,7 @@ class _TechnicianRepairHistoryDetailPageState
       ],
     );
   }
+
   String _getMonthThai(int month) {
     const months = [
       'ม.ค.',
@@ -288,7 +328,7 @@ class _TechnicianRepairHistoryDetailPageState
       'ก.ย.',
       'ต.ค.',
       'พ.ย.',
-      'ธ.ค.'
+      'ธ.ค.',
     ];
     return months[month - 1];
   }

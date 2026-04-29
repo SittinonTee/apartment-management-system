@@ -11,7 +11,8 @@ class NotificationService {
   factory NotificationService() => _instance;
 
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
   final Dio _dio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl));
 
   NotificationService._internal();
@@ -31,11 +32,12 @@ class NotificationService {
     // 2. Setup Local Notifications for Foreground
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: DarwinInitializationSettings(),
-    );
+
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+          android: initializationSettingsAndroid,
+          iOS: DarwinInitializationSettings(),
+        );
 
     await _localNotifications.initialize(initializationSettings);
 
@@ -45,7 +47,9 @@ class NotificationService {
       debugPrint('Message data: ${message.data}');
 
       if (message.notification != null) {
-        debugPrint('Message also contained a notification: ${message.notification}');
+        debugPrint(
+          'Message also contained a notification: ${message.notification}',
+        );
         _showLocalNotification(message);
       }
     });
@@ -57,10 +61,10 @@ class NotificationService {
     });
 
     // 5. Get and Save Token
-    await _updateToken();
+    await updateToken();
   }
 
-  Future<void> _updateToken() async {
+  Future<void> updateToken() async {
     try {
       String? token = await _fcm.getToken();
       if (token != null) {
@@ -80,7 +84,7 @@ class NotificationService {
   Future<void> _sendTokenToBackend(String token) async {
     final authService = AuthService();
     final jwtToken = await authService.getToken();
-    
+
     if (jwtToken == null) {
       debugPrint('Cannot send FCM token: User not logged in');
       return;
@@ -93,9 +97,7 @@ class NotificationService {
           'token': token,
           'device_type': Platform.isIOS ? 'IOS' : 'ANDROID',
         },
-        options: Options(headers: {
-          'Authorization': 'Bearer $jwtToken',
-        }),
+        options: Options(headers: {'Authorization': 'Bearer $jwtToken'}),
       );
       debugPrint('FCM Token sent to backend successfully');
     } catch (e) {
@@ -106,15 +108,16 @@ class NotificationService {
   Future<void> _showLocalNotification(RemoteMessage message) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
-      'high_importance_channel', // id
-      'High Importance Notifications', // title
-      importance: Importance.max,
-      priority: Priority.high,
-      showWhen: true,
-    );
+          'high_importance_channel', // id
+          'High Importance Notifications', // title
+          importance: Importance.max,
+          priority: Priority.high,
+          showWhen: true,
+        );
 
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+    );
 
     await _localNotifications.show(
       message.hashCode,
