@@ -9,28 +9,35 @@ export const getUserData = async () => {
     SELECT * FROM vw_user_contracts
   `);
 
-	return (rows as USERCONTRACT[]).map((u: USERCONTRACT) => ({
-		contract_id: u.contracts_id,
-		id: u.user_id,
-		firstname: u.firstname,
-		lastname: u.lastname,
-		phone: u.phone,
-		emergency_phone: u.emergency_phone,
-		email: u.email,
-		role: u.roles,
-		room_number: u.room_number,
-		floor: u.floor,
-		rate_room: u.rate_room,
-		rate_water: u.rate_water,
-		rate_electric: u.rate_electric,
-		contract_no: u.contract_no,
-		start_date: u.start_date,
-		end_date: u.end_date,
-		deposit: u.deposit,
-		bills_no: u.bills_no,
-		user_status: u.user_status,
-		contract_status: u.contract_status,
-	}));
+	const seen = new Set();
+	return (rows as USERCONTRACT[])
+		.filter((u) => {
+			if (seen.has(u.contracts_id)) return false;
+			seen.add(u.contracts_id);
+			return true;
+		})
+		.map((u: USERCONTRACT) => ({
+			contract_id: u.contracts_id,
+			id: u.user_id,
+			firstname: u.firstname,
+			lastname: u.lastname,
+			phone: u.phone,
+			emergency_phone: u.emergency_phone,
+			email: u.email,
+			role: u.roles,
+			room_number: u.room_number,
+			floor: u.floor,
+			rate_room: u.rate_room,
+			rate_water: u.rate_water,
+			rate_electric: u.rate_electric,
+			contract_no: u.contract_no,
+			start_date: u.start_date,
+			end_date: u.end_date,
+			deposit: u.deposit,
+			bills_no: u.bills_no,
+			user_status: u.user_status,
+			contract_status: u.contract_status,
+		}));
 };
 
 export const getAvailableRooms = async () => {

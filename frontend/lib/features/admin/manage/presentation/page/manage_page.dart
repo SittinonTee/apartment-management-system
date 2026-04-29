@@ -347,6 +347,149 @@ class _ManagePageState extends State<ManagePage>
     );
   }
 
+  void _showEditRoomDialog(Map<String, dynamic> room) {
+    final TextEditingController roomNoController = TextEditingController(
+      text: room['room_number'].toString(),
+    );
+    final TextEditingController floorController = TextEditingController(
+      text: room['floor'].toString(),
+    );
+    String? roomNoError;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text(
+                'แก้ไขรายละเอียดห้อง',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              backgroundColor: AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomTextField(
+                    labelText: 'หมายเลขห้อง',
+                    controller: roomNoController,
+                    onChanged: (value) {
+                      if (roomNoError != null) {
+                        setStateDialog(() => roomNoError = null);
+                      }
+                    },
+                  ),
+                  if (roomNoError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 4),
+                      child: Text(
+                        roomNoError!,
+                        style: const TextStyle(
+                          color: AppColors.error,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 16),
+                  CustomTextField(
+                    labelText: 'ชั้น (Floor)',
+                    controller: floorController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
+                ],
+              ),
+              actionsPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'ยกเลิก',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
+                CustomButton(
+                  text: 'บันทึก',
+                  width: 100,
+                  height: 40,
+                  padding: EdgeInsets.zero,
+                  onPressed: () async {
+                    final roomNo = roomNoController.text.trim();
+                    final floor =
+                        int.tryParse(floorController.text.trim()) ?? 0;
+
+                    setStateDialog(() => roomNoError = null);
+
+                    if (roomNo.isEmpty || floor == 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('กรุณากรอกข้อมูลให้ครบถ้วน'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    // Check for duplicate room (excluding current room)
+                    if (_rooms.any(
+                      (r) =>
+                          r['room_id'] != room['room_id'] &&
+                          r['room_number'].toString().toLowerCase() ==
+                              roomNo.toLowerCase(),
+                    )) {
+                      setStateDialog(() {
+                        roomNoError = 'หมายเลขห้องนี้มีอยู่ในระบบแล้ว';
+                      });
+                      return;
+                    }
+
+                    final roomId = int.tryParse(
+                      room['room_id']?.toString() ??
+                          room['id']?.toString() ??
+                          '',
+                    );
+                    if (roomId == null) return;
+
+                    final result = await RoomManageApi().updateRoom(roomId, {
+                      'room_number': roomNo,
+                      'floor': floor,
+                    });
+
+                    if (context.mounted) {
+                      if (result['status'] == 'success') {
+                        Navigator.pop(context);
+                        _fetchRoomData(); // Refresh list
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('แก้ไขข้อมูลห้องสำเร็จ'),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              result['message'] ?? 'เกิดข้อผิดพลาด',
+                            ),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _confirmDeleteRoom(Map<String, dynamic> room) {
     showDialog(
       context: context,
@@ -684,20 +827,40 @@ class _ManagePageState extends State<ManagePage>
                           ),
                         ],
                       ),
-                      Material(
-                        color: AppColors.error.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(8),
-                        child: IconButton(
-                          onPressed: () => _confirmDeleteRoom(room),
-                          constraints: const BoxConstraints(),
-                          padding: const EdgeInsets.all(8),
-                          icon: const Icon(
-                            Icons.delete_outline_rounded,
-                            color: AppColors.error,
-                            size: 20,
+                      Row(
+                        children: [
+                          Material(
+                            color: AppColors.primary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            child: IconButton(
+                              onPressed: () => _showEditRoomDialog(room),
+                              constraints: const BoxConstraints(),
+                              padding: const EdgeInsets.all(8),
+                              icon: const Icon(
+                                Icons.edit_outlined,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                              tooltip: 'แก้ไขรายละเอียดห้อง',
+                            ),
                           ),
-                          tooltip: 'ลบห้อง',
-                        ),
+                          const SizedBox(width: 8),
+                          Material(
+                            color: AppColors.error.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            child: IconButton(
+                              onPressed: () => _confirmDeleteRoom(room),
+                              constraints: const BoxConstraints(),
+                              padding: const EdgeInsets.all(8),
+                              icon: const Icon(
+                                Icons.delete_outline_rounded,
+                                color: AppColors.error,
+                                size: 20,
+                              ),
+                              tooltip: 'ลบห้อง',
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

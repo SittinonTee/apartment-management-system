@@ -56,6 +56,25 @@ export const updateRoomStatus = async (
 	}
 };
 
+export const updateRoom = async (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+): Promise<void> => {
+	try {
+		const { id } = req.params;
+		const result = await roomService.updateRoom(Number(id), req.body);
+
+		res.status(200).json({
+			status: "success",
+			message: "อัปเดตข้อมูลห้องพักสำเร็จ",
+			data: result,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
 export const deleteRoom = async (
 	req: Request,
 	res: Response,
