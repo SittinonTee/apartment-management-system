@@ -150,15 +150,8 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
           Row(
             children: [
               CustomButton(
-                text: 'ประวัติการซ่อม',
-                width: 120,
-                height: 36,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                textStyle: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-                borderRadius: BorderRadius.circular(100),
+                isPrimary: true,
+                isOutlined: false,
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -167,6 +160,15 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
                     ),
                   );
                 },
+                icon: const Icon(
+                  Icons.history,
+                  size: 18,
+                  color: Colors.white,
+                ),
+                width: 34,
+                height: 34,
+                padding: const EdgeInsets.only(left: 6),
+                borderRadius: BorderRadius.circular(12),
               ),
               const SizedBox(width: 8),
               CustomButton(
