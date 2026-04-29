@@ -44,10 +44,11 @@ class _AcceptJobDialogState extends State<AcceptJobDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: SingleChildScrollView( // เพิ่มส่วนนี้เพื่อให้เลื่อนได้เมื่อคีย์บอร์ดเด้ง
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Header และปุ่มปิด
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -94,7 +95,8 @@ class _AcceptJobDialogState extends State<AcceptJobDialog> {
             _buildActionButtons(context),
           ],
         ),
-      ),
+      ), // ปิด SingleChildScrollView
+      ), // ปิด Padding
     );
   }
 
