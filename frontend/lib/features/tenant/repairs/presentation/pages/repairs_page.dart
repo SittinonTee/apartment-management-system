@@ -149,21 +149,46 @@ class _RepairsPageState extends State<RepairsPage> {
           const NeverScrollableScrollPhysics(), // ปิดการเลื่อน (Scroll) ด้วยตัวเอง เพราะมันจะฝังอยู่ใน Scroll ใหญ่ชั้นนอก
       children: [
         // วาดให้ครบ 4 กล่อง โดยส่งจำนวนที่นับได้, ชื่อภาษาไทย, และโทนสี
-        _buildInfoCard(countProblem, 'ปัญหา', AppColors.error, Icons.report_problem_rounded),
-        _buildInfoCard(countInProgress, 'กำลังดำเนิน...', AppColors.warning, Icons.engineering_rounded),
-        _buildInfoCard(countMaterial, 'จัดซื้อวัสดุ', AppColors.info, Icons.shopping_cart_rounded),
-        _buildInfoCard(countCompleted, 'สำเร็จ', AppColors.success, Icons.check_circle_rounded),
+        _buildInfoCard(
+          countProblem,
+          'ปัญหา',
+          AppColors.error,
+          Icons.report_problem_rounded,
+        ),
+        _buildInfoCard(
+          countInProgress,
+          'กำลังดำเนิน...',
+          AppColors.warning,
+          Icons.engineering_rounded,
+        ),
+        _buildInfoCard(
+          countMaterial,
+          'จัดซื้อวัสดุ',
+          AppColors.info,
+          Icons.shopping_cart_rounded,
+        ),
+        _buildInfoCard(
+          countCompleted,
+          'สำเร็จ',
+          AppColors.success,
+          Icons.check_circle_rounded,
+        ),
       ],
     );
   }
 
   /// ตัวสร้าง Layout กล่องสี่เหลี่ยมด้านบนแบบรับพารามิเตอร์แต่ละสีแยกทีละกล่อง
-  Widget _buildInfoCard(int value, String title, Color mainColor, IconData icon) {
+  Widget _buildInfoCard(
+    int value,
+    String title,
+    Color mainColor,
+    IconData icon,
+  ) {
     return RepairsInfoCard(
       shadow: true,
-      borderSize: 1, 
-      borderColor: AppColors.border.withValues(alpha: 0.5), 
-      color: Colors.white, 
+      borderSize: 1,
+      borderColor: AppColors.border.withValues(alpha: 0.5),
+      color: Colors.white,
       borderRadius: 16,
       padding: const EdgeInsets.all(16),
       child: Stack(
@@ -263,7 +288,7 @@ class _RepairsPageState extends State<RepairsPage> {
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
       child: Padding(
         // ขยับขอบทั้ง ซ้าย-ขวา-บน ออกมาเล็กน้อย เพิ่มความสะอาดตา
-        padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 24.0),
+        padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 30.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -271,7 +296,14 @@ class _RepairsPageState extends State<RepairsPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('ยื่นเรื่องซ่อม', style: textTheme.displayLarge),
+                Text(
+                  'ยื่นเรื่องซ่อม',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
                 Row(
                   children: [
                     CustomButton(
@@ -391,7 +423,9 @@ class _RepairsPageState extends State<RepairsPage> {
                     itemCount: filteredRepairs.length,
                     itemBuilder: (context, index) {
                       final repair = filteredRepairs[index];
-                      final categoryColor = _getCategoryColor(repair.categoryId);
+                      final categoryColor = _getCategoryColor(
+                        repair.categoryId,
+                      );
                       return RepairTicketCard(
                         repairId: repair.id,
                         onRefresh: _loadRepairs,
@@ -403,17 +437,17 @@ class _RepairsPageState extends State<RepairsPage> {
                         icon: _getCategoryIcon(repair.categoryId),
                         iconColor: categoryColor,
                         iconBgColor: categoryColor.withValues(alpha: 0.15),
-                      // ส่งข้อมูลเพิ่มเติ่มสำหรับตอนกางการ์ด
+                        // ส่งข้อมูลเพิ่มเติ่มสำหรับตอนกางการ์ด
                         description: repair.description,
                         completedAt: repair.completedAt,
-                      // ข้อมูลสมมติ (Mock) ไว้ชั่วคราวก่อน Backend มีข้อมูลจริงดึงมาให้ประสม
+                        // ข้อมูลสมมติ (Mock) ไว้ชั่วคราวก่อน Backend มีข้อมูลจริงดึงมาให้ประสม
                         tenantfirstname: repair.tenantfirstname,
                         tenantlastname: repair.tenantlastname,
                         tenantPhone: repair.tenantPhone,
                         mechanicfirstname:
                             repair.status.toUpperCase() == 'REPORTED'
-                                ? 'ยังไม่ได้มอบหมาย'
-                                : repair.mechanicfirstname,
+                            ? 'ยังไม่ได้มอบหมาย'
+                            : repair.mechanicfirstname,
                         mechaniclastname: repair.mechaniclastname,
                         mechanicPhone: repair.mechanicPhone,
                         imageUrls: repair.imageUrls,

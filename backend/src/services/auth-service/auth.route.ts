@@ -29,7 +29,7 @@ router.post("/register", validate(registerSchema), authController.registerUser);
 
 router.post(
 	"/login",
-	loginLimiter,
+	// loginLimiter,
 	validate(loginSchema),
 	authController.login,
 );

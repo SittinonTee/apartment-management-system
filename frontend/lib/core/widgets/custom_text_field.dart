@@ -21,6 +21,8 @@ class CustomTextField extends StatelessWidget {
   final bool readOnly;
   final List<TextInputFormatter>? inputFormatters;
   final bool isRequired;
+  final int? maxLength;
+  final InputCounterWidgetBuilder? buildCounter;
 
   const CustomTextField({
     super.key,
@@ -43,6 +45,8 @@ class CustomTextField extends StatelessWidget {
     this.readOnly = false,
     this.inputFormatters,
     this.isRequired = false,
+    this.maxLength,
+    this.buildCounter,
   });
 
   @override
@@ -52,11 +56,25 @@ class CustomTextField extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (labelText != null) ...[
-          Text(
-            labelText!,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.secondary,
+          RichText(
+            text: TextSpan(
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2C3E50), // AppColors.textPrimary
+                fontFamily: 'Prompt',
+              ),
+              children: [
+                TextSpan(text: labelText),
+                if (isRequired)
+                  const TextSpan(
+                    text: ' *',
+                    style: TextStyle(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(height: 8),
@@ -83,6 +101,8 @@ class CustomTextField extends StatelessWidget {
           onTap: onTap,
           readOnly: readOnly,
           inputFormatters: inputFormatters,
+          maxLength: maxLength,
+          buildCounter: buildCounter,
           decoration: InputDecoration(
             hintText: hintText,
             prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,

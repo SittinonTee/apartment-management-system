@@ -128,7 +128,7 @@ export const updateUnits = async (
 ): Promise<boolean> => {
 	const query = `
         UPDATE Bills 
-        SET water_unit = ?, electric_unit = ?, status = 'WAITING_CONFIRM'
+        SET water_unit = ?, electric_unit = ?, status = 'PENDING'
         WHERE bills_id = ? AND status = 'DRAFT'
     `;
 	const [result] = (await pool.query(query, [water, electric, billId])) as [
