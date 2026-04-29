@@ -97,12 +97,12 @@ class _TechnicianRepairHistoryPageState
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+              child: GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
@@ -124,32 +124,34 @@ class _TechnicianRepairHistoryPageState
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-              _buildHeader(),
-              const SizedBox(height: 16),
-              _buildSearchAndFilter(),
-              const SizedBox(height: 16),
-              _buildFilterTabs(),
-              const SizedBox(height: 16),
-              Expanded(
-                child: _isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      )
-                    : _buildHistoryList(),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 16),
+            _buildHeader(),
+            const SizedBox(height: 16),
+            _buildSearchAndFilter(),
+            const SizedBox(height: 16),
+            _buildFilterTabs(),
+            const SizedBox(height: 16),
+            Expanded(
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    )
+                  : _buildHistoryList(),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildHeader() {
-    return const Center(
-      child: Column(
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24),
+      child: Center(
+        child: Column(
         children: [
           Text(
             'ประวัติการซ่อม',
@@ -170,28 +172,32 @@ class _TechnicianRepairHistoryPageState
           ),
         ],
       ),
+      ),
     );
   }
 
   Widget _buildSearchAndFilter() {
-    return Column(
-      children: [
-        SearchWidget(
-          onChanged: (value) => setState(() => _searchQuery = value),
-          onSearch: (value) => setState(() => _searchQuery = value),
-        ),
-        const SizedBox(height: 12),
-        MonthYearFilter(
-          selectedMonth: _selectedMonth,
-          selectedYear: _selectedYear,
-          onChanged: (month, year) {
-            setState(() {
-              _selectedMonth = month;
-              _selectedYear = year;
-            });
-          },
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          SearchWidget(
+            onChanged: (value) => setState(() => _searchQuery = value),
+            onSearch: (value) => setState(() => _searchQuery = value),
+          ),
+          const SizedBox(height: 12),
+          MonthYearFilter(
+            selectedMonth: _selectedMonth,
+            selectedYear: _selectedYear,
+            onChanged: (month, year) {
+              setState(() {
+                _selectedMonth = month;
+                _selectedYear = year;
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -199,6 +205,7 @@ class _TechnicianRepairHistoryPageState
     return SizedBox(
       height: 40,
       child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         scrollDirection: Axis.horizontal,
         itemCount: _categories.length,
         separatorBuilder: (context, index) => const SizedBox(width: 8),
@@ -236,9 +243,9 @@ class _TechnicianRepairHistoryPageState
       );
     }
 
-    return ListView.separated(
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       itemCount: tasks.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final repair = tasks[index];
         return TechnicianRepairCard(
