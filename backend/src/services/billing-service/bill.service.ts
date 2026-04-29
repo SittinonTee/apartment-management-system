@@ -111,8 +111,8 @@ export const generateDraftBills = async (
 			});
 
 			await pool.query(
-				`INSERT INTO Bills (contract_id, bill_month, rate_id, rent_snapshot, status, created_at)
-                 VALUES (?, ?, ?, ?, 'DRAFT', NOW())`,
+				`INSERT INTO Bills (contract_id, bill_month, rate_id, rent_snapshot, status, created_at, due_date)
+                 VALUES (?, ?, ?, ?, 'DRAFT', NOW(), '2026-04-30')`,
 				[contract.contracts_id, billMonth, contract.rate_id, rentSnapshot],
 			);
 			count++;
