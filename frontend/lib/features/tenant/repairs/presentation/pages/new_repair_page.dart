@@ -241,7 +241,7 @@ class _NewRepairPageState extends State<NewRepairPage> {
               ),
             if (isRequired)
               const TextSpan(
-                text: '*',
+                text: ' *',
                 style: TextStyle(
                   color: Colors.orange,
                   fontWeight: FontWeight.bold,
@@ -400,7 +400,7 @@ class _NewRepairPageState extends State<NewRepairPage> {
           behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 20.0),
             child: Form(
               key: _formKey,
               child: Column(
@@ -428,7 +428,7 @@ class _NewRepairPageState extends State<NewRepairPage> {
                           child: Text(
                             category.categoryName,
                             style: const TextStyle(
-                              fontSize: 15,
+                              fontSize: 13,
                               color: AppColors.textPrimary,
                             ),
                           ),
@@ -445,35 +445,39 @@ class _NewRepairPageState extends State<NewRepairPage> {
                         hintText: 'เลือกประเภทงานซ่อม',
                         hintStyle: const TextStyle(
                           color: AppColors.textHint,
-                          fontSize: 15,
+                          fontSize: 13,
                         ),
                         filled: true,
                         fillColor: Colors.white,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
-                          vertical: 12,
+                          vertical: 8,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(16),
                           borderSide: const BorderSide(
                             color: AppColors.primary,
+                            width: 2,
                           ),
                         ),
                       ),
                       icon: const Icon(
                         Icons.keyboard_arrow_down,
                         color: AppColors.textSecondary,
+                        size: 20,
                       ),
                       dropdownColor: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
                       isExpanded: true,
+                      isDense: true,
                       validator: (value) {
                         if (value == null) {
                           return 'กรุณาเลือกประเภทงานซ่อม';
@@ -483,48 +487,21 @@ class _NewRepairPageState extends State<NewRepairPage> {
                     ),
                   const SizedBox(height: 16),
 
-                  _buildLabel('หัวข้อการแจ้งซ่อม', isRequired: true),
-                  TextFormField(
+                  CustomTextField(
+                    labelText: 'หัวข้อการแจ้งซ่อม',
                     controller: _titleController,
+                    hintText: 'พิมพ์หัวข้อการแจ้งซ่อม',
+                    isRequired: true,
                     maxLength: 100,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'กรุณาระบุหัวข้อปัญหา';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'พิมพ์หัวข้อการแจ้งซ่อม',
-                      hintStyle: const TextStyle(
-                        color: AppColors.textHint,
-                        fontSize: 15,
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: AppColors.primary),
-                      ),
-                    ),
                   ),
-
                   const SizedBox(height: 16),
 
-                  _buildLabel('รายละเอียด', isRequired: true),
-                  TextFormField(
+                  CustomTextField(
+                    labelText: 'รายละเอียด',
                     controller: _descriptionController,
+                    hintText: 'พิมพ์รายละเอียดการแจ้งซ่อม',
+                    isRequired: true,
+                    maxLines: 4,
                     buildCounter:
                         (
                           context, {
@@ -532,38 +509,6 @@ class _NewRepairPageState extends State<NewRepairPage> {
                           required isFocused,
                           required maxLength,
                         }) => null,
-                    maxLines: 4,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'กรุณาระบุรายละเอียดปัญหา';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'พิมพ์รายละเอียดการแจ้งซ่อม',
-                      hintStyle: const TextStyle(
-                        color: AppColors.textHint,
-                        fontSize: 15,
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: AppColors.primary),
-                      ),
-                    ),
                   ),
                   const SizedBox(height: 16),
 
