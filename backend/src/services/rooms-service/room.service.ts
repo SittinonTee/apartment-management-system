@@ -1,6 +1,6 @@
 import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { pool } from "../database";
-import type { V_AddRoomForm } from "./room.schema";
+import type { V_AddRoomForm } from "./config/room.schema";
 
 export const addRoom = async (roomData: V_AddRoomForm) => {
 	const { room_number, floor, room_status } = roomData;
@@ -29,6 +29,36 @@ export const updateRoomStatus = async (room_id: number, status: string) => {
 		room_id,
 	]);
 	return { room_id, status };
+};
+
+export const updateRoom = async (
+	room_id: number,
+	roomData: Partial<V_AddRoomForm>,
+) => {
+	const fields = [];
+	const values = [];
+
+	if (roomData.room_number !== undefined) {
+		fields.push("room_number = ?");
+		values.push(roomData.room_number);
+	}
+	if (roomData.floor !== undefined) {
+		fields.push("floor = ?");
+		values.push(roomData.floor);
+	}
+	if (roomData.room_status !== undefined) {
+		fields.push("room_status = ?");
+		values.push(roomData.room_status);
+	}
+
+	if (fields.length === 0) return { room_id };
+
+	values.push(room_id);
+	await pool.query(
+		`UPDATE Room SET ${fields.join(", ")} WHERE room_id = ?`,
+		values,
+	);
+	return { room_id, ...roomData };
 };
 
 export const deleteRoom = async (room_id: number) => {

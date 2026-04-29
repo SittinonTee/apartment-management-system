@@ -31,8 +31,6 @@ class BillService {
     }
   }
 
-
-
   Future<bool> processPayment(int billId, String slipUrl) async {
     try {
       final token = await _authService.getToken();

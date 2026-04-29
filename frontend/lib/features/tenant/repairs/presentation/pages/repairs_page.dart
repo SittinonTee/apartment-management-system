@@ -149,41 +149,72 @@ class _RepairsPageState extends State<RepairsPage> {
           const NeverScrollableScrollPhysics(), // ปิดการเลื่อน (Scroll) ด้วยตัวเอง เพราะมันจะฝังอยู่ใน Scroll ใหญ่ชั้นนอก
       children: [
         // วาดให้ครบ 4 กล่อง โดยส่งจำนวนที่นับได้, ชื่อภาษาไทย, และโทนสี
-        _buildInfoCard(countProblem, 'ปัญหา', AppColors.error),
-        _buildInfoCard(countInProgress, 'กำลังดำเนิน...', AppColors.warning),
-        _buildInfoCard(countMaterial, 'จัดซื้อวัสดุ', AppColors.info),
-        _buildInfoCard(countCompleted, 'สำเร็จ', AppColors.success),
+        _buildInfoCard(countProblem, 'ปัญหา', AppColors.error, Icons.report_problem_rounded),
+        _buildInfoCard(countInProgress, 'กำลังดำเนิน...', AppColors.warning, Icons.engineering_rounded),
+        _buildInfoCard(countMaterial, 'จัดซื้อวัสดุ', AppColors.info, Icons.shopping_cart_rounded),
+        _buildInfoCard(countCompleted, 'สำเร็จ', AppColors.success, Icons.check_circle_rounded),
       ],
     );
   }
 
   /// ตัวสร้าง Layout กล่องสี่เหลี่ยมด้านบนแบบรับพารามิเตอร์แต่ละสีแยกทีละกล่อง
-  Widget _buildInfoCard(int value, String title, Color mainColor) {
+  Widget _buildInfoCard(int value, String title, Color mainColor, IconData icon) {
     return RepairsInfoCard(
       shadow: true,
-      borderSize: 2, // ความหนาเส้นของกรอบสี่เหลี่ยมรอบนอก
-      borderColor: mainColor, // สีตีกรอบ
-      color: mainColor.withValues(
-        alpha: 0.15,
-      ), // สีพื้นด้านในจางๆ ให้ไม่ทึบด้วย alpha 0.15
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      borderSize: 1, 
+      borderColor: AppColors.border.withValues(alpha: 0.5), 
+      color: Colors.white, 
+      borderRadius: 16,
+      padding: const EdgeInsets.all(16),
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          Text(
-            value.toString(), // ตัวเลขเอามาโชว์
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: mainColor, // ให้สีอักษรเป็นสีหลัก
+          // ไอคอนพื้นหลังจางๆ ตกแต่ง
+          Positioned(
+            right: -10,
+            bottom: -10,
+            child: Icon(
+              icon,
+              size: 60,
+              color: mainColor.withValues(alpha: 0.05),
             ),
           ),
-          Text(
-            title, // หัวข้อ เช่น "ปัญหา"
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: mainColor,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: mainColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(icon, size: 20, color: mainColor),
+                  ),
+                  Text(
+                    value.toString(),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                      height: 1.0,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -309,80 +340,89 @@ class _RepairsPageState extends State<RepairsPage> {
       return r.status.toUpperCase() == statusMap[_selectedFilterIndex];
     }).toList();
 
-    return Column(
-      children: [
-        _buildSummaryGrid(allRepairs),
-        const SizedBox(height: 24),
+    return RefreshIndicator(
+      onRefresh: _loadRepairs,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            _buildSummaryGrid(allRepairs),
+            const SizedBox(height: 24),
 
-        /// Filter Chips
-        SizedBox(
-          height: 40,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: _filters.length,
-            itemBuilder: (context, i) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChipFilter(
-                  label: _filters[i],
-                  selected: _selectedFilterIndex == i,
-                  onSelected: (_) {
-                    setState(() {
-                      _selectedFilterIndex = i;
-                    });
-                  },
-                ),
-              );
-            },
-          ),
-        ),
+            /// Filter Chips
+            SizedBox(
+              height: 40,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _filters.length,
+                itemBuilder: (context, i) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChipFilter(
+                      label: _filters[i],
+                      selected: _selectedFilterIndex == i,
+                      onSelected: (_) {
+                        setState(() {
+                          _selectedFilterIndex = i;
+                        });
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
 
-        const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-        /// List
-        Expanded(
-          child: filteredRepairs.isEmpty
-              ? const Center(
-                  child: Text(
-                    'ไม่มีรายการแจ้งซ่อม',
-                    style: TextStyle(color: AppColors.textSecondary),
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: filteredRepairs.length,
-                  itemBuilder: (context, index) {
-                    final repair = filteredRepairs[index];
-                    final categoryColor = _getCategoryColor(repair.categoryId);
-                    return RepairTicketCard(
-                      repairId: repair.id,
-                      onRefresh: _loadRepairs,
-                      title: repair.title,
-                      categoryName: repair.categoryName,
-                      date: repair.createdAt,
-                      statusText: _mapStatusToThaiStr(repair.status),
-                      statusColor: _mapStatusToColor(repair.status),
-                      icon: _getCategoryIcon(repair.categoryId),
-                      iconColor: categoryColor,
-                      iconBgColor: categoryColor.withValues(alpha: 0.15),
+            /// List
+            filteredRepairs.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40),
+                    child: Center(
+                      child: Text(
+                        'ไม่มีรายการแจ้งซ่อม',
+                        style: TextStyle(color: AppColors.textSecondary),
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: filteredRepairs.length,
+                    itemBuilder: (context, index) {
+                      final repair = filteredRepairs[index];
+                      final categoryColor = _getCategoryColor(repair.categoryId);
+                      return RepairTicketCard(
+                        repairId: repair.id,
+                        onRefresh: _loadRepairs,
+                        title: repair.title,
+                        categoryName: repair.categoryName,
+                        date: repair.createdAt,
+                        statusText: _mapStatusToThaiStr(repair.status),
+                        statusColor: _mapStatusToColor(repair.status),
+                        icon: _getCategoryIcon(repair.categoryId),
+                        iconColor: categoryColor,
+                        iconBgColor: categoryColor.withValues(alpha: 0.15),
                       // ส่งข้อมูลเพิ่มเติ่มสำหรับตอนกางการ์ด
-                      description: repair.description,
-                      completedAt: repair.completedAt,
+                        description: repair.description,
+                        completedAt: repair.completedAt,
                       // ข้อมูลสมมติ (Mock) ไว้ชั่วคราวก่อน Backend มีข้อมูลจริงดึงมาให้ประสม
-                      tenantfirstname: repair.tenantfirstname,
-                      tenantlastname: repair.tenantlastname,
-                      tenantPhone: repair.tenantPhone,
-                      mechanicfirstname:
-                          repair.status.toUpperCase() == 'REPORTED'
-                          ? 'ยังไม่ได้มอบหมาย'
-                          : repair.mechanicfirstname,
-                      mechaniclastname: repair.mechaniclastname,
-                      mechanicPhone: repair.mechanicPhone,
-                      imageUrls: repair.imageUrls,
-                    );
-                  },
-                ),
+                        tenantfirstname: repair.tenantfirstname,
+                        tenantlastname: repair.tenantlastname,
+                        tenantPhone: repair.tenantPhone,
+                        mechanicfirstname:
+                            repair.status.toUpperCase() == 'REPORTED'
+                                ? 'ยังไม่ได้มอบหมาย'
+                                : repair.mechanicfirstname,
+                        mechaniclastname: repair.mechaniclastname,
+                        mechanicPhone: repair.mechanicPhone,
+                        imageUrls: repair.imageUrls,
+                      );
+                    },
+                  ),
+          ],
         ),
-      ],
+      ),
     );
   }
 

@@ -245,9 +245,7 @@ class _TechnicianRepairDetailPageState
 
   // --- กล่องรูปภาพประกอบ ---
   Widget _buildImageSection() {
-    final hasImage =
-        widget.repair.repairsImageUrl != null &&
-        widget.repair.repairsImageUrl!.isNotEmpty;
+    final hasImage = widget.repair.imageUrls.isNotEmpty;
 
     return SectionCard(
       padding: const EdgeInsets.all(20),
@@ -263,13 +261,23 @@ class _TechnicianRepairDetailPageState
           ),
           const SizedBox(height: 16),
           if (hasImage)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                widget.repair.repairsImageUrl!,
-                width: 120,
-                height: 120,
-                fit: BoxFit.cover,
+            SizedBox(
+              height: 120,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: widget.repair.imageUrls.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.network(
+                      widget.repair.imageUrls[index],
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                },
               ),
             )
           else

@@ -3,7 +3,15 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_typography.dart';
 
-enum BadgeStatus { pending, completed, urgent, info, cancelled, verifying }
+enum BadgeStatus {
+  pending,
+  completed,
+  urgent,
+  info,
+  cancelled,
+  verifying,
+  draft,
+}
 
 class StatusBadge extends StatelessWidget {
   final String text; // ข้อความที่จะแสดงบนปุ่ม (จำเป็นต้องใส่)
@@ -17,14 +25,18 @@ class StatusBadge extends StatelessWidget {
         return AppColors.warning.withValues(alpha: 0.15);
       case BadgeStatus.completed: // สถานะ "เสร็จสิ้น"
         return AppColors.success.withValues(alpha: 0.15);
-      case BadgeStatus.urgent: // สถานะ "ด่วน/เลยกำหนด" (เปลี่ยนเป็นสีม่วงพรีเมียม)
+      case BadgeStatus
+          .urgent: // สถานะ "ด่วน/เลยกำหนด" (เปลี่ยนเป็นสีม่วงพรีเมียม)
         return Colors.purple.withValues(alpha: 0.15);
       case BadgeStatus.info: // สถานะ "ข้อมูล"
         return AppColors.info.withValues(alpha: 0.15);
-      case BadgeStatus.cancelled: // สถานะ "ยกเลิก/ถูกปฏิเสธ" (เปลี่ยนเป็นสีแดงด่วน)
+      case BadgeStatus
+          .cancelled: // สถานะ "ยกเลิก/ถูกปฏิเสธ" (เปลี่ยนเป็นสีแดงด่วน)
         return AppColors.error.withValues(alpha: 0.15);
       case BadgeStatus.verifying: // สถานะ "รอยืนยัน"
         return AppColors.info.withValues(alpha: 0.15);
+      case BadgeStatus.draft: // สถานะ "แบบร่าง"
+        return Colors.grey.withValues(alpha: 0.15);
     }
   }
 
@@ -42,6 +54,8 @@ class StatusBadge extends StatelessWidget {
         return AppColors.error;
       case BadgeStatus.verifying:
         return AppColors.info;
+      case BadgeStatus.draft:
+        return Colors.grey;
     }
   }
 

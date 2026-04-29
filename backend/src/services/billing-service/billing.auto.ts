@@ -132,8 +132,9 @@ async function checkAndPublishBills() {
 			INNER JOIN Contracts c ON b.contract_id = c.contracts_id
 			WHERE b.status = 'DRAFT' 
 			AND b.bill_month < ?
-			AND b.water_unit_end IS NOT NULL 
-			AND b.electric_unit_end IS NOT NULL
+			AND b.water_unit IS NOT NULL 
+			AND b.electric_unit IS NOT NULL
+
 		`;
 		const [draftBills] = (await pool.query(queryDrafts, [currentMonthStr])) as [
 			(BillRow & { user_id: number })[],
