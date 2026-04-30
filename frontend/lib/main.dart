@@ -6,6 +6,7 @@ import 'core/constants/app_theme.dart';
 import 'core/services/auth_service.dart';
 // import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/services/notification_service.dart';
 import 'features/admin/dashboard/data/get_users.dart';
 
@@ -16,6 +17,10 @@ void main() async {
   try {
     await Firebase.initializeApp();
     final notificationService = NotificationService();
+    
+    // Register background handler
+    FirebaseMessaging.onBackgroundMessage(NotificationService.firebaseMessagingBackgroundHandler);
+    
     await notificationService.initialize();
   } catch (e) {
     debugPrint('Firebase initialization failed: $e');

@@ -37,12 +37,13 @@ export const getUserData = async () => {
 			bills_no: u.bills_no,
 			user_status: u.user_status,
 			contract_status: u.contract_status,
+			invite_code: u.invite_code,
 		}));
 };
 
 export const getTechnicians = async () => {
 	const [rows] = await pool.query<RowDataPacket[]>(`
-    SELECT user_id as id, firstname, lastname, phone, roles as role, status as user_status
+    SELECT user_id as id, firstname, lastname, phone, roles as role, status as user_status, invite_code
     FROM Users 
     WHERE UPPER(roles) = 'TECHNICIAN'
   `);

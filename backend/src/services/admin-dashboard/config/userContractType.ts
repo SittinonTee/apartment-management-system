@@ -19,4 +19,5 @@ export interface USERCONTRACT {
 	bills_no: number;
 	user_status: string;
 	contract_status: string;
+	invite_code: string;
 }
