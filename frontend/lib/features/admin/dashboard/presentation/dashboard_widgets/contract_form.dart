@@ -249,13 +249,23 @@ class ContractFormState extends State<ContractForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // --- ส่วนที่ 1: ข้อมูลห้องและระยะเวลา ---
+            Text(
+              'ข้อมูลเบื้องต้น',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            const SizedBox(height: 12),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  flex: 2,
+                  flex: 3,
                   child: CustomDropdownMenu<String>(
-                    label: 'เลขห้อง',
+                    label: 'พิกัดห้องพัก',
                     hintText: 'เลือกเลขห้อง',
                     controller: _roomController,
                     enableFilter: true,
@@ -296,11 +306,11 @@ class ContractFormState extends State<ContractForm> {
                     },
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
-                  flex: 1,
+                  flex: 2,
                   child: CustomTextField(
-                    labelText: 'ระยะเวลาเช่า',
+                    labelText: 'ระยะสัญญา',
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     controller: _rentalDurationController,
                     keyboardType: TextInputType.number,
@@ -311,32 +321,47 @@ class ContractFormState extends State<ContractForm> {
               ],
             ),
             const SizedBox(height: 16),
+
+            // --- ส่วนที่ 2: วันที่สำคัญ ---
             Row(
               children: [
                 Expanded(
                   child: CustomTextField(
-                    labelText: 'วันเริ่มเข้าพัก',
+                    labelText: 'เริ่มวันที่',
                     readOnly: true,
                     controller: _startDateController,
-                    hintText: 'วว/ดด/ปปปป',
+                    hintText: 'วันที่เข้าพัก',
+                    prefixIcon: Icons.calendar_today,
                     onTap: _pickStartDate,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: CustomTextField(
-                    labelText: 'วันสิ้นสุดสัญญา',
+                    labelText: 'สิ้นสุดวันที่',
                     readOnly: true,
                     controller: _endDateController,
-                    hintText: 'วว/ดด/ปปปป',
+                    hintText: 'ครบกำหนด',
+                    prefixIcon: Icons.event_available,
                     onTap: _pickEndDate,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const Divider(height: 32, thickness: 0.5),
+
+            // --- ส่วนที่ 3: อัตราค่าเช่า ---
+            Text(
+              'ข้อมูลราคาและค่าใช้จ่าย',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            const SizedBox(height: 12),
             CustomDropdownMenu<RateTemplate>(
-              label: 'ค่าเช่าห้องพักรายเดือน',
+              label: 'เลือกเรทราคามาตรฐาน',
               hintText: 'เลือกเรทราคาห้องพัก',
               controller: _ratelPriceController,
               validator: (value) {
@@ -365,19 +390,17 @@ class ContractFormState extends State<ContractForm> {
                 Expanded(
                   child: CustomTextField(
                     readOnly: true,
-                    labelText: 'ค่าน้ำประปาหน่วยละ',
+                    labelText: 'ค่าน้ำ (หน่วยละ)',
                     controller: _waterPriceController,
-                    keyboardType: TextInputType.number,
                     suffixText: 'บาท',
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: CustomTextField(
                     readOnly: true,
-                    labelText: 'ค่าไฟฟ้าหน่วยละ',
+                    labelText: 'ค่าไฟ (หน่วยละ)',
                     controller: _electricPriceController,
-                    keyboardType: TextInputType.number,
                     suffixText: 'บาท',
                   ),
                 ),
@@ -386,9 +409,9 @@ class ContractFormState extends State<ContractForm> {
             const SizedBox(height: 16),
             CustomTextField(
               readOnly: true,
-              labelText: 'เงินประกันความเสียหาย',
+              labelText: 'เงินประกันความเสียหาย (ทั้งหมด)',
               controller: _depositController,
-              keyboardType: TextInputType.number,
+              prefixIcon: Icons.gpp_good_outlined,
               suffixText: 'บาท',
             ),
           ],

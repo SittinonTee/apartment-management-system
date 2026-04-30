@@ -40,6 +40,15 @@ export const getUserData = async () => {
 		}));
 };
 
+export const getTechnicians = async () => {
+	const [rows] = await pool.query<RowDataPacket[]>(`
+    SELECT user_id as id, firstname, lastname, phone, roles as role, status as user_status
+    FROM Users 
+    WHERE UPPER(roles) = 'TECHNICIAN'
+  `);
+	return rows;
+};
+
 export const getAvailableRooms = async () => {
 	const [rows] = await pool.query<RowDataPacket[]>(`
     SELECT room_id, room_number, floor

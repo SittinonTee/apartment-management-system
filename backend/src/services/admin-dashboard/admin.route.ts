@@ -8,6 +8,7 @@ import { addTenantSchema } from "./config/addUser.schema";
 const router = Router();
 
 router.get("/getUserData", adminController.getUserData);
+router.get("/getTechnicians", adminController.getTechnicians);
 router.get("/getAvailableRooms", adminController.getAvailableRooms);
 router.get("/getRates", adminController.getRates);
 

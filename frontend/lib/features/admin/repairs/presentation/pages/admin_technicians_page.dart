@@ -22,11 +22,10 @@ class _AdminTechniciansPageState extends State<AdminTechniciansPage> {
   }
 
   void _loadTechnicians() {
-    _techniciansFuture = Provider.of<AdminService>(context, listen: false)
-        .getUserData()
-        .then((users) {
-          return users.where((u) => u.role == 'TECHNICIAN').toList();
-        });
+    _techniciansFuture = Provider.of<AdminService>(
+      context,
+      listen: false,
+    ).getTechnicianData();
   }
 
   @override

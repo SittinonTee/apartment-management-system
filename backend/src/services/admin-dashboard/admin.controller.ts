@@ -20,6 +20,23 @@ export const getUserData = async (
 	}
 };
 
+export const getTechnicians = async (
+	req: Request,
+	res: Response,
+	next: NextFunction,
+): Promise<void> => {
+	try {
+		const result = await adminService.getTechnicians();
+		res.status(200).json({
+			status: "success",
+			message: "ดึงข้อมูลช่างซ่อมสำเร็จ",
+			data: result,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
 export const getAvailableRooms = async (
 	req: Request,
 	res: Response,

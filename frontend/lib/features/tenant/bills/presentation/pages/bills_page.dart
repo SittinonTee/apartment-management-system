@@ -49,7 +49,9 @@ class _BillsPageState extends State<BillsPage> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: FutureBuilder<Map<String, dynamic>>(
-          key: ValueKey(_refreshKey), // ใช้ Key เพื่อบังคับให้สร้าง FutureBuilder ใหม่เมื่อค่าเปลี่ยน
+          key: ValueKey(
+            _refreshKey,
+          ), // ใช้ Key เพื่อบังคับให้สร้าง FutureBuilder ใหม่เมื่อค่าเปลี่ยน
           future: _dataFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -74,7 +76,10 @@ class _BillsPageState extends State<BillsPage> {
               if (b['status'] == 'DRAFT') return false;
 
               // ถ้าเป็นสถานะ รอยืนยัน หรือ ถูกปฏิเสธ (CANCELLED) ให้แสดงในการ์ด
-              if (b['status'] == 'WAITING_CONFIRM' || b['status'] == 'CANCELLED') return true;
+              if (b['status'] == 'WAITING_CONFIRM' ||
+                  b['status'] == 'CANCELLED') {
+                return true;
+              }
 
               final billMonthStr = b['bill_month'] as String?;
               if (billMonthStr == null) return false;
@@ -150,134 +155,139 @@ class _BillsPageState extends State<BillsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Header
-                  const Text(
-                    'ค่าเช่า',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'ตรวจสอบรายการจ่ายที่นี่',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // 1. Total Paid Card
-                  TotalPaidCard(
-                    totalPaid: totalPaid,
-                    currentMonth: paidMonthsCount,
-                    totalMonths: totalMonths,
-                    progressPercent: progressPercent,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 2. Current Due Cards (แสดงบิลค้างชำระทั้งหมด โดยเรียงจากเก่าไปใหม่)
-                  if (pendingBills.isNotEmpty) ...[
-                    ...pendingBills.map((bill) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: CurrentDueCard(
-                          dueDate: AppDateUtils.formatDateThai(
-                            bill['due_date'],
-                          ),
-                          amount:
-                              (double.tryParse(
-                                bill['grand_total']?.toString() ?? '0',
-                              ) ??
-                              0.0),
-                          isOverdue: bill['status'] == 'OVERDUE',
-                          isVerifying: bill['status'] == 'WAITING_CONFIRM',
-                          isRejected: bill['status'] == 'CANCELLED',
-                          onPayPressed: () async {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    BillPayPage(billData: bill),
-                              ),
-                            );
-
-                            // ถ้ามีการจ่ายเงินสำเร็จ (ส่งค่า true กลับมา) ให้รีโหลดข้อมูลใหม่
-                            if (result == true) {
-                              // หน่วงเวลาเพื่อให้ DB บันทึกเสร็จชัวร์
-                              await Future.delayed(const Duration(milliseconds: 800));
-                              if (mounted) {
-                                setState(() {
-                                  _refreshKey++; // เปลี่ยน Key เพื่อบังคับ FutureBuilder สร้างใหม่
-                                  _dataFuture = _fetchData();
-                                });
-                              }
-                            }
-                          },
-                        ),
-                      );
-                    }),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // 3. History List Area (เฉพาะบิล PAID)
-                  const Text(
-                    'ประวัติย้อนหลัง',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  if (paidBills.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 24),
-                      child: Center(
-                        child: Text(
-                          'ไม่มีประวัติการชำระเงิน',
-                          style: TextStyle(color: AppColors.textSecondary),
-                        ),
+                    const Text(
+                      'ค่าเช่า',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'ตรวจสอบรายการจ่ายที่นี่',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
 
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: paidBills.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final data = paidBills[index];
-                      final grandTotal =
-                          double.tryParse(
-                            data['grand_total']?.toString() ?? '0',
-                          ) ??
-                          0.0;
+                    // 1. Total Paid Card
+                    TotalPaidCard(
+                      totalPaid: totalPaid,
+                      currentMonth: paidMonthsCount,
+                      totalMonths: totalMonths,
+                      progressPercent: progressPercent,
+                    ),
+                    const SizedBox(height: 16),
 
-                      return RecentBillCard(
-                        month: AppDateUtils.formatMonthFull(data['bill_month']),
-                        amount: grandTotal,
-                        statusText: 'ชำระแล้ว',
-                        status: BadgeStatus.completed,
-                        roomNumber: data['room_number']?.toString() ?? '-',
-                        tenantName: 'ID: ${data['user_id'] ?? ''}',
-                        dueDate: AppDateUtils.formatDateThai(data['due_date']),
-                        paymentDate: AppDateUtils.formatDateThai(
-                          data['payment_date'],
+                    // 2. Current Due Cards (แสดงบิลค้างชำระทั้งหมด โดยเรียงจากเก่าไปใหม่)
+                    if (pendingBills.isNotEmpty) ...[
+                      ...pendingBills.map((bill) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: CurrentDueCard(
+                            dueDate: AppDateUtils.formatDateThai(
+                              bill['due_date'],
+                            ),
+                            amount:
+                                (double.tryParse(
+                                  bill['grand_total']?.toString() ?? '0',
+                                ) ??
+                                0.0),
+                            isOverdue: bill['status'] == 'OVERDUE',
+                            isVerifying: bill['status'] == 'WAITING_CONFIRM',
+                            isRejected: bill['status'] == 'CANCELLED',
+                            onPayPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      BillPayPage(billData: bill),
+                                ),
+                              );
+
+                              // ถ้ามีการจ่ายเงินสำเร็จ (ส่งค่า true กลับมา) ให้รีโหลดข้อมูลใหม่
+                              if (result == true) {
+                                // หน่วงเวลาเพื่อให้ DB บันทึกเสร็จชัวร์
+                                await Future.delayed(
+                                  const Duration(milliseconds: 800),
+                                );
+                                if (mounted) {
+                                  setState(() {
+                                    _refreshKey++; // เปลี่ยน Key เพื่อบังคับ FutureBuilder สร้างใหม่
+                                    _dataFuture = _fetchData();
+                                  });
+                                }
+                              }
+                            },
+                          ),
+                        );
+                      }),
+                      const SizedBox(height: 16),
+                    ],
+
+                    // 3. History List Area (เฉพาะบิล PAID)
+                    const Text(
+                      'ประวัติย้อนหลัง',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    if (paidBills.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 24),
+                        child: Center(
+                          child: Text(
+                            'ไม่มีประวัติการชำระเงิน',
+                            style: TextStyle(color: AppColors.textSecondary),
+                          ),
                         ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 80),
-                ],
-              ),
-            ),
-          );
-        },
+                      ),
 
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: paidBills.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final data = paidBills[index];
+                        final grandTotal =
+                            double.tryParse(
+                              data['grand_total']?.toString() ?? '0',
+                            ) ??
+                            0.0;
+
+                        return RecentBillCard(
+                          month: AppDateUtils.formatMonthFull(
+                            data['bill_month'],
+                          ),
+                          amount: grandTotal,
+                          statusText: 'ชำระแล้ว',
+                          status: BadgeStatus.completed,
+                          roomNumber: data['room_number']?.toString() ?? '-',
+                          tenantName: 'ID: ${data['user_id'] ?? ''}',
+                          dueDate: AppDateUtils.formatDateThai(
+                            data['due_date'],
+                          ),
+                          paymentDate: AppDateUtils.formatDateThai(
+                            data['payment_date'],
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 80),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

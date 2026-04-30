@@ -107,4 +107,24 @@ class AdminService extends ChangeNotifier {
       return [];
     }
   }
+
+  Future<List<UserTemplate>> getTechnicianData() async {
+    try {
+      final response = await _dio.get('/admin/getTechnicians');
+
+      if (response.data['status'] == 'success') {
+        final List data = response.data['data'];
+        return List<UserTemplate>.from(
+          data.map((x) => UserTemplate.fromJson(x)),
+        );
+      }
+      return [];
+    } on DioException catch (e) {
+      debugPrint('เกิดข้อผิดพลาดในการดึงข้อมูลช่าง (Dio): ${e.response?.data}');
+      return [];
+    } catch (e) {
+      debugPrint('เกิดข้อผิดพลาดในการดึงข้อมูลช่าง: $e');
+      return [];
+    }
+  }
 }

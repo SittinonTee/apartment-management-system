@@ -34,9 +34,11 @@ class CustomDropdownMenu<T> extends StatelessWidget {
         if (label != null) ...[
           Text(
             label!,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            style: const TextStyle(
+              fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.secondary,
+              color: Color(0xFF2C3E50),
+              fontFamily: 'Prompt',
             ),
           ),
           const SizedBox(height: 8),
