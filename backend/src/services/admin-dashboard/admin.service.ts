@@ -1,6 +1,6 @@
 import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
-import { uploadToFirebase } from "../../utils/firebase_upload";
 import { pool } from "../database";
+import { uploadToFirebase } from "../upload-service/utils/firebase_upload";
 import type { V_AddTenantForm } from "./config/addUser.schema";
 import type { USERCONTRACT } from "./config/userContractType";
 

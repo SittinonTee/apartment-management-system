@@ -25,7 +25,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
     'ทั้งหมด',
     'แบบร่าง',
     'รอยืนยัน',
-    'ค้างชำระ',
+    'รอชำระ',
     'ชำระสำเร็จ',
     'เลยกำหนด',
     'ยกเลิก',
@@ -92,7 +92,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
       case 'overdue':
         return 'เลยกำหนด';
       case 'pending':
-        return 'ค้างชำระ';
+        return 'รอชำระ';
       case 'cancelled':
         return 'ถูกปฏิเสธ';
       case 'waiting_confirm':
@@ -100,7 +100,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
       case 'draft':
         return 'แบบร่าง';
       default:
-        return 'ค้างชำระ';
+        return 'รอชำระ';
     }
   }
 
@@ -183,7 +183,7 @@ class _AdminBillsPageState extends State<AdminBillsPage> {
         return AlertDialog(
           title: const Text('ปฏิเสธการชำระเงิน'),
           content: const Text(
-            'คุณแน่ใจหรือไม่ว่าต้องการปฏิเสธการชำระเงินนี้? ข้อมูลสลิปจะถูกลบทิ้งและบิลจะกลับเป็นสถานะค้างชำระ',
+            'คุณแน่ใจหรือไม่ว่าต้องการปฏิเสธการชำระเงินนี้? ข้อมูลสลิปจะถูกลบทิ้งและบิลจะกลับเป็นสถานะรอชำระ',
           ),
           actions: <Widget>[
             TextButton(

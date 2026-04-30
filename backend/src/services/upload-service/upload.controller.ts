@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { uploadToFirebase } from "../../utils/firebase_upload";
+import { uploadToFirebase } from "./utils/firebase_upload";
 
 export const uploadFile = async (
 	req: Request,
