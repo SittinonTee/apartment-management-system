@@ -1,4 +1,4 @@
-import { getFirebaseBucket } from "../services/config/firebase.config";
+import { getFirebaseBucket } from "../config/firebase.config";
 
 /**
  * Uploads a file (from multer memoryStorage) to Firebase Storage

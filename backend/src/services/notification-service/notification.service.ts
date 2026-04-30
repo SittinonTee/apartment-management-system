@@ -1,5 +1,5 @@
 import type { FieldPacket, RowDataPacket } from "mysql2/promise";
-import { getFirebaseMessaging } from "../config/firebase.config";
+import { getFirebaseMessaging } from "../upload-service/config/firebase.config";
 import pool from "../database";
 
 interface FCMTokenRow extends RowDataPacket {
