@@ -98,15 +98,21 @@ async function checkAndCreateDraftBills() {
 					const rentSnapshotStr = JSON.stringify(rentSnapshotObj);
 
 					const queryInsert = `
-						INSERT INTO Bills (contract_id, bill_month, rate_id, rent_snapshot, status, created_at)
-						VALUES (?, ?, ?, ?, 'DRAFT', ?)
+						INSERT INTO Bills (contract_id, bill_month, rate_id, rent_snapshot, status, created_at, due_date)
+						VALUES (?, ?, ?, ?, 'DRAFT', ?, ?)
 					`;
+					// คำนวณวันกำหนดชำระ (สิ้นเดือนถัดไป)
+					const [yyyy, mm] = billMonthStr.split("-").map(Number);
+					const dueDateObj = new Date(yyyy, mm + 1, 0);
+					const dueDateStr = formatLocalYYYYMMDD(dueDateObj);
+
 					await pool.query(queryInsert, [
 						contract.contracts_id,
 						billMonthStr,
 						contract.rate_id,
 						rentSnapshotStr,
-						new Date(), // ใช้เวลาจาก Node.js ที่เป็น Asia/Bangkok
+						new Date(),
+						dueDateStr,
 					]);
 					console.log(
 						`[Auto-Billing] Created DRAFT bill for contract ${contract.contracts_id} (${billMonthStr})`,

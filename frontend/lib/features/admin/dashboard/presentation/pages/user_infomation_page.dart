@@ -371,6 +371,15 @@ class _UserInfomationPageState extends State<UserInfomationPage> {
             _buildStatusBadge(widget.user.userStatus, true),
           ],
         ),
+        if (widget.user.inviteCode != null &&
+            widget.user.inviteCode!.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildInfoRow(
+            'รหัสเชิญใช้งาน',
+            widget.user.inviteCode!,
+            Icons.vpn_key_outlined,
+          ),
+        ],
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 16),
           child: Divider(color: AppColors.divider, height: 1),

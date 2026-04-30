@@ -110,10 +110,21 @@ export const generateDraftBills = async (
 				electric: contract.rate_electric || 0,
 			});
 
+			// คำนวณวันกำหนดชำระ (สิ้นเดือนถัดไป)
+			const [yyyy, mm] = billMonth.split("-").map(Number);
+			const dueDateObj = new Date(yyyy, mm + 1, 0);
+			const dueDate = dueDateObj.toISOString().split("T")[0];
+
 			await pool.query(
 				`INSERT INTO Bills (contract_id, bill_month, rate_id, rent_snapshot, status, created_at, due_date)
-                 VALUES (?, ?, ?, ?, 'DRAFT', NOW(), '2026-04-30')`,
-				[contract.contracts_id, billMonth, contract.rate_id, rentSnapshot],
+                 VALUES (?, ?, ?, ?, 'DRAFT', NOW(), ?)`,
+				[
+					contract.contracts_id,
+					billMonth,
+					contract.rate_id,
+					rentSnapshot,
+					dueDate,
+				],
 			);
 			count++;
 		}

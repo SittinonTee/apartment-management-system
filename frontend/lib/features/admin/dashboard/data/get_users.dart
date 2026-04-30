@@ -24,6 +24,7 @@ class UserTemplate {
   final String userStatus;
   final String contractStatus;
   final int? contractId;
+  final String? inviteCode;
 
   UserTemplate({
     required this.userId,
@@ -46,6 +47,7 @@ class UserTemplate {
     required this.userStatus,
     required this.contractStatus,
     this.contractId,
+    this.inviteCode,
   });
 
   factory UserTemplate.fromJson(Map<String, dynamic> json) {
@@ -72,6 +74,7 @@ class UserTemplate {
       userStatus: json['user_status'] ?? '',
       contractStatus: json['contract_status'] ?? '',
       contractId: json['contract_id'],
+      inviteCode: json['invite_code']?.toString(),
     );
   }
 }
