@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -16,17 +17,29 @@ class NotificationService {
   final Dio _dio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl));
 
   NotificationService._internal();
+  
+  // Top-level background handler
+  @pragma('vm:entry-point')
+  static Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+    await Firebase.initializeApp();
+    debugPrint("Handling a background message: ${message.messageId}");
+  }
 
   Future<void> initialize() async {
-    // 1. Request permissions (especially for iOS)
+    // 1. Request permissions (especially for iOS and Android 13+)
     NotificationSettings settings = await _fcm.requestPermission(
       alert: true,
       badge: true,
       sound: true,
+      provisional: false,
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       debugPrint('User granted notification permission');
+    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+      debugPrint('User granted provisional notification permission');
+    } else {
+      debugPrint('User declined or has not accepted notification permission');
     }
 
     // 2. Setup Local Notifications for Foreground
@@ -40,6 +53,24 @@ class NotificationService {
         );
 
     await _localNotifications.initialize(initializationSettings);
+
+    // Create Notification Channel for Android
+    if (Platform.isAndroid) {
+      const AndroidNotificationChannel channel = AndroidNotificationChannel(
+        'high_importance_channel', // id
+        'High Importance Notifications', // title
+        description: 'This channel is used for important notifications.', // description
+        importance: Importance.max,
+      );
+
+      final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+          FlutterLocalNotificationsPlugin();
+
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
+    }
 
     // 3. Handle Foreground Messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
