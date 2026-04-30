@@ -61,10 +61,10 @@ class NotificationService {
     });
 
     // 5. Get and Save Token
-    await _updateToken();
+    await updateToken();
   }
 
-  Future<void> _updateToken() async {
+  Future<void> updateToken() async {
     try {
       String? token = await _fcm.getToken();
       if (token != null) {

@@ -250,15 +250,7 @@ class _AdminBillCardState extends State<AdminBillCard> {
                 false,
                 textTheme,
               ),
-              const SizedBox(height: 8),
-              // ส่งค่า isMethod = true เข้าไป เพื่อให้มันวาดไอคอนบัตรเครดิตให้ (ถ้ามีข้อมูล)
-              _buildDetailRow(
-                'วิธีชำระ',
-                widget.payMethod ?? '-',
-                false,
-                textTheme,
-                isMethod: true,
-              ),
+
               if (widget.approvedBy != null && widget.approvedBy != '-') ...[
                 const SizedBox(height: 8),
                 _buildDetailRow(

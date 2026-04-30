@@ -395,6 +395,11 @@ class _TechnicianRepairDetailPageState
     }
 
     // กรณีสถานะ ASSIGNED, PENDING
+    final currentUserId = context.read<AuthService>().userId;
+    if (widget.repair.technicianId != currentUserId) {
+      return const SizedBox.shrink(); // ซ่อนปุ่มเปลี่ยนสถานะถ้าไม่ใช่เจ้าของงาน
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       child: Column(

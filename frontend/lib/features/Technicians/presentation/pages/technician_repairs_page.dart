@@ -150,15 +150,8 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
           Row(
             children: [
               CustomButton(
-                text: 'ประวัติการซ่อม',
-                width: 120,
-                height: 36,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                textStyle: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-                borderRadius: BorderRadius.circular(100),
+                isPrimary: true,
+                isOutlined: false,
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -167,6 +160,15 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
                     ),
                   );
                 },
+                icon: const Icon(
+                  Icons.history,
+                  size: 18,
+                  color: Colors.white,
+                ),
+                width: 34,
+                height: 34,
+                padding: const EdgeInsets.only(left: 6),
+                borderRadius: BorderRadius.circular(12),
               ),
               const SizedBox(width: 8),
               CustomButton(
@@ -218,31 +220,27 @@ class _TechnicianRepairsPageState extends State<TechnicianRepairsPage> {
   }
 
   Widget _buildFilterTabs() {
-    return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        scrollDirection: Axis.horizontal,
-        itemCount: _categories.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final isSelected = _selectedIndex == index;
-          return ChoiceChipFilter(
-            label: _categories[index],
-            selected: isSelected,
-            onSelected: (selected) {
-              if (selected) setState(() => _selectedIndex = index);
-            },
-            selectedColor: AppColors.primary,
-            bgColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(100),
-              side: BorderSide(
-                color: isSelected ? Colors.transparent : AppColors.border,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: SizedBox(
+        height: 40,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(), // บังคับให้มีเอฟเฟกต์เด้งดึ๋งเมื่อเลื่อนสุด
+          itemCount: _categories.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChipFilter(
+                label: _categories[index],
+                selected: _selectedIndex == index,
+                onSelected: (selected) {
+                  if (selected) setState(() => _selectedIndex = index);
+                },
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

@@ -141,6 +141,10 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 0,
       backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 24,
+      ), // ให้กว้างขึ้นบนมือถือ
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
         decoration: BoxDecoration(
@@ -162,7 +166,7 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
               Container(
                 padding: const EdgeInsets.symmetric(
                   vertical: 20,
-                  horizontal: 24,
+                  horizontal: 20, // ลดจาก 24
                 ),
                 decoration: const BoxDecoration(
                   color: AppColors.primary,
@@ -192,7 +196,10 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
               ),
 
               Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 24,
+                  horizontal: 20,
+                ), // ลด horizontal จาก 24
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -238,7 +245,7 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12), // ลดจาก 16
                         Expanded(
                           child: CustomButton(
                             text: 'ยืนยันข้อมูล',
@@ -293,7 +300,10 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
   Widget _buildInfoTable(Map<String, String> info) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(
+        vertical: 12,
+        horizontal: 16,
+      ), // ปรับ padding
       decoration: BoxDecoration(
         color: AppColors.background.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
@@ -307,7 +317,7 @@ class _ConfirmDialogState extends State<ConfirmDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  width: 120,
+                  width: 110, // ลดจาก 120
                   child: Text(
                     entry.key,
                     style: const TextStyle(
