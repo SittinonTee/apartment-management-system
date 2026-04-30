@@ -62,6 +62,20 @@ export const updateRoom = async (
 };
 
 export const deleteRoom = async (room_id: number) => {
+	// เช็คสถานะห้องก่อนว่ามีคนอยู่หรือไม่
+	const [rows] = await pool.query<RowDataPacket[]>(
+		"SELECT room_status FROM Room WHERE room_id = ?",
+		[room_id],
+	);
+
+	if (rows.length === 0) {
+		throw new Error("ไม่พบห้องที่ต้องการลบ");
+	}
+
+	if (rows[0].room_status === "OCCUPIED") {
+		throw new Error("ไม่สามารถลบห้องพักนี้ได้ เนื่องจากมีผู้เช่าพักอาศัยอยู่");
+	}
+
 	await pool.query("DELETE FROM Room WHERE room_id = ?", [room_id]);
 	return { room_id };
 };
