@@ -3,7 +3,7 @@ import 'package:frontend/features/admin/dashboard/presentation/pages/admin_dashb
 import 'package:frontend/features/admin/bills/presentation/pages/admin_bills_page.dart';
 import 'package:frontend/features/admin/packages/presentation/page/admin_packages_page.dart';
 import 'package:frontend/features/admin/repairs/presentation/pages/admin_repairs_page.dart';
-import 'package:frontend/features/admin/manage/presentation/page/manage_page.dart';
+import 'package:frontend/features/admin/manage/page/manage_page.dart';
 
 class AdminMainScreen extends StatefulWidget {
   const AdminMainScreen({super.key});

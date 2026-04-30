@@ -30,7 +30,7 @@ export const verifyToken = (
 
 		// 3. หั่นเอาเฉพาะรหัส Token ออกมา (ตัดคำว่า "Bearer " ทิ้ง)
 
-		console.log(authHeader);
+		// console.log(authHeader);
 		const token = authHeader.split(" ")[1];
 		// console.log(token);
 
