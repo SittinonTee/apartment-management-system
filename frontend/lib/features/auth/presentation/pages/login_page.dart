@@ -89,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Tenant Portal',
+                  'Au Usabai',
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
                     color: AppColors.surface,
                     fontWeight: FontWeight.bold,

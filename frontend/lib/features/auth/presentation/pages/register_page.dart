@@ -87,7 +87,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 const Icon(Icons.apartment, size: 80, color: AppColors.surface),
                 const SizedBox(height: 16),
                 Text(
-                  'สมัครสมาชิก',
+                  'Au Usabai',
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
                     color: AppColors.surface,
                     fontWeight: FontWeight.bold,
